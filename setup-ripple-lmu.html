@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup Ripple LMU — Hypercar / LMP / GT3 cause &amp; effect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#141414;
+    --panel:#1a1a1a;
+    --panel-2:#222222;
+    --line:#303030;
+    --text:#f4f6f5;
+    --muted:#8a8a8a;
+    --tight:#3d7fd6;   /* understeer / "tight" */
+    --loose:#e8a13d;   /* oversteer / "loose" - warm, kept distinct from the red accent */
+    --amber:#e8112d;   /* LM red - the brand accent (var name kept for minimal-diff from Setup Ripple) */
+    --navy:#003374;
+    --green:#7fd98a;
+    --disp:'Barlow Condensed',sans-serif;
+    --body:'Barlow',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--body);
+    font-size:15px;line-height:1.5;
+  }
+  .app{display:flex;min-height:100vh;max-width:1200px;margin:0 auto}
+
+  /* ---------- sidebar ---------- */
+  nav{
+    width:264px;flex:0 0 264px;border-right:1px solid var(--line);
+    padding:20px 0 32px;background:var(--panel);
+  }
+  .brand{padding:0 18px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+  .brand h1{font-family:var(--disp);font-weight:700;font-size:26px;letter-spacing:.04em;text-transform:uppercase}
+  .brand h1 span{color:var(--amber);display:block}
+  .brand p{font-size:12px;color:var(--muted);margin-top:2px}
+  .group{margin-top:14px}
+  .group h2{
+    font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--muted);padding:0 18px 6px;
+  }
+  .group button{
+    display:block;width:100%;text-align:left;padding:7px 18px;border:0;
+    background:none;color:var(--text);font-family:var(--body);font-size:14px;
+    cursor:pointer;border-left:3px solid transparent;
+  }
+  .group button:hover{background:var(--panel-2)}
+  .group button.active{background:var(--panel-2);border-left-color:var(--amber);font-weight:600}
+  .group button.linked{color:var(--amber)}
+  .group button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+  .toggle-wrap{padding:8px 12px 4px}
+  .hyper-toggle{
+    display:inline-flex;width:auto;align-items:center;gap:6px;padding:4px 11px;
+    border:1px solid var(--line);border-radius:99px;background:none;color:var(--muted);
+    font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+    text-align:center;
+  }
+  .hyper-toggle:hover{border-color:var(--amber);color:var(--text)}
+  .hyper-toggle::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--amber);flex:0 0 auto}
+  .hyper-toggle.off::before{background:var(--muted)}
+
+  /* ---------- main ---------- */
+  main{flex:1;padding:26px 30px 60px;min-width:0}
+  .crumb{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .title-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin:4px 0 4px}
+  .title-row h2{font-family:var(--disp);font-size:38px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+  .does{color:var(--muted);max-width:62ch;margin-bottom:18px}
+
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:18px}
+  .toggle button{
+    border:0;background:var(--panel);color:var(--muted);padding:9px 18px;
+    font-family:var(--disp);font-size:17px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.05em;cursor:pointer;
+  }
+  .toggle button.on{background:var(--panel-2);color:var(--text);box-shadow:inset 0 -3px 0 var(--amber)}
+  .toggle button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+
+  /* ---------- mode tabs & diagnose ---------- */
+  .mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:12px 12px 0;background:var(--line)}
+  .mobile-nav .mode-tabs{margin:0 0 10px}
+  .mode-tabs button{
+    min-width:0;border:0;background:var(--panel);color:var(--muted);padding:9px 4px;
+    font-family:var(--disp);font-size:14px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.03em;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .mode-tabs button.on{background:var(--panel-2);color:var(--text);box-shadow:inset 0 -3px 0 var(--amber)}
+  .mode-tabs button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+  .quick{
+    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);
+    border-radius:8px;padding:12px 14px;margin-bottom:20px;font-size:14px;
+  }
+  .quick b{
+    display:block;color:var(--amber);font-family:var(--mono);font-size:11px;
+    font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px;
+  }
+  .cause{
+    display:flex;gap:12px;align-items:flex-start;background:var(--panel);
+    border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:8px;
+  }
+  .cause .rank{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:3px}
+  .cause .body{flex:1;min-width:0}
+  .cause .body strong{display:block}
+  .cause .body p{font-size:14px;color:var(--muted)}
+  .cause > button{
+    flex:0 0 auto;border:1px solid var(--line);background:var(--panel-2);color:var(--amber);
+    font-family:var(--mono);font-size:12px;padding:4px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;
+  }
+  .cause > button:hover{border-color:var(--amber)}
+
+  /* ---------- engineer ---------- */
+  .eng-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+  .btn{
+    border:1px solid var(--line);background:var(--panel-2);color:var(--text);
+    font-family:var(--disp);font-size:15px;font-weight:600;letter-spacing:.05em;
+    text-transform:uppercase;padding:9px 16px;border-radius:8px;cursor:pointer;
+  }
+  .btn:hover{border-color:var(--amber)}
+  .btn.primary{background:var(--amber);color:#fff;border-color:var(--amber)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  .eng-status{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:18px}
+  .eng-status b{color:var(--green)}
+  .selrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+  .selrow label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .selrow select{
+    flex:1;min-width:200px;background:var(--panel);color:var(--text);
+    border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-family:var(--body);font-size:14px;
+  }
+  table.diff{width:100%;border-collapse:collapse;margin:14px 0 6px;font-size:14px}
+  table.diff th{
+    text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);
+  }
+  table.diff td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.diff td.num{font-family:var(--mono);font-size:13px;white-space:nowrap}
+  .chip{
+    display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+    text-transform:uppercase;padding:2px 7px;border-radius:99px;border:1px solid var(--line);
+  }
+  .chip.tight{color:var(--tight);border-color:var(--tight)}
+  .chip.loose{color:var(--loose);border-color:var(--loose)}
+  .chip.min{color:var(--amber);border-color:var(--amber)}
+  .fix-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:18px}
+  .fix-card{
+    text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px;cursor:pointer;color:var(--text);font-family:var(--body);
+  }
+  .fix-card:hover{border-color:var(--green)}
+  .fix-card.on{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+  .fix-card h4{font-family:var(--disp);font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .fix-card p{font-size:13px;color:var(--muted);margin-top:4px}
+  .warn{color:var(--amber);font-size:13px;margin:8px 0}
+  .eng-empty{color:var(--muted);font-size:14px;padding:14px;border:1px dashed var(--line);border-radius:8px}
+  .eng-note{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5}
+  .eng-nudge{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;white-space:nowrap}
+  .nbtn{
+    background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+    width:22px;height:22px;border-radius:5px;cursor:pointer;font-size:11px;line-height:1;
+    display:inline-flex;align-items:center;justify-content:center;padding:0;flex:0 0 auto;
+  }
+  .nbtn:hover{border-color:var(--amber);color:var(--amber)}
+  .nbtn:active{background:var(--amber);color:#fff}
+  /* badge sits in a fixed-width slot so showing/hiding it never shifts the buttons */
+  .eng-pend{font-family:var(--mono);font-size:11px;color:var(--amber);text-align:right;flex:0 0 22px;min-width:22px}
+  .fix-sub{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+  td input[type=checkbox]{accent-color:var(--green)}
+
+  /* ---------- six-page engineer (LMU) ---------- */
+  .eng-meta{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--amber);margin:2px 0 14px}
+  .eng-ptabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:0}
+  .eng-ptab{
+    background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);
+    font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    padding:8px 12px;cursor:pointer;margin-bottom:-1px;
+  }
+  .eng-ptab:hover{color:var(--text)}
+  .eng-ptab.on{color:var(--text);border-bottom-color:var(--amber)}
+  .eng-ptab:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+  .eng-page{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:18px}
+  .eng-group{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:hidden}
+  .eng-group h4{
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px;
+  }
+  .eng-lr{font-size:9px;letter-spacing:.08em;color:var(--amber);border:1px solid var(--amber);border-radius:99px;padding:1px 6px}
+  /* row: label flexes, everything else sits in a no-shrink control cluster that wraps as a unit */
+  .eng-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .eng-row:last-child{border-bottom:none}
+  .eng-row.na{opacity:.4}
+  .eng-k{font-size:13.5px;color:var(--text);flex:1 1 auto;min-width:80px}
+  .eng-row.na .eng-k{color:var(--muted)}
+  .eng-v{font-family:var(--mono);font-size:13px;color:var(--text);text-align:right;white-space:nowrap;flex:0 0 auto}
+  .eng-v3{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;flex:0 0 auto}
+  /* a value glued to its nudge buttons — wraps as one unit, never splits or clips */
+  .eng-cell{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}
+  .eng-3rd{padding-left:8px;border-left:1px solid var(--line)}
+  .cmp-table{width:100%;border-collapse:collapse;margin:14px 0 6px;font-size:13.5px}
+  .cmp-table th{
+    text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);
+  }
+  .cmp-table td{padding:7px 8px;border-bottom:1px solid var(--line)}
+  .cmp-a{font-family:var(--mono);color:var(--muted);white-space:nowrap}
+  .cmp-b{font-family:var(--mono);color:var(--text);white-space:nowrap}
+  .cmp-arrow{color:var(--amber);text-align:center}
+
+  /* ---------- fuel calculator (engineer sidebar) ---------- */
+  .fuel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:8px}
+  .fuel h3{font-family:var(--disp);font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--amber);margin-bottom:4px}
+  .fuel .sub{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .fuel-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .fuel-row label{font-size:13.5px;color:var(--text)}
+  .fuel-row input{width:84px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:var(--mono);font-size:13px;text-align:right}
+  .fuel-row input:focus{outline:none;border-color:var(--amber)}
+  .fuel-out{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+  .fuel-out .big{font-family:var(--disp);font-size:34px;font-weight:700;color:var(--green);line-height:1}
+  .fuel-out .big span{font-size:16px;color:var(--muted);font-weight:600}
+  .fuel-out .line{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px}
+  .fuel-out .line b{color:var(--text);font-family:var(--mono)}
+  .fuel-warn{color:var(--amber);font-size:12.5px;margin-top:8px}
+
+  /* ---------- Bono AI chat ---------- */
+  .chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:420px}
+  .chat-log{flex:1;overflow-y:auto;padding:4px 2px 12px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:88%;padding:11px 14px;border-radius:12px;font-size:14.5px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+  .msg.user{align-self:flex-end;background:var(--panel-2);border:1px solid var(--line)}
+  .msg.ai{align-self:flex-start;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber)}
+  .msg.ai .who{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .msg.err{align-self:flex-start;background:rgba(255,92,92,.08);border:1px solid var(--loose);color:var(--loose)}
+  .chat-input{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+  .chat-input textarea{flex:1;resize:none;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:var(--body);font-size:14.5px;line-height:1.4;max-height:140px}
+  .chat-input textarea:focus{outline:none;border-color:var(--amber)}
+  .chat-tools{display:flex;align-items:center;gap:14px;margin-bottom:10px;font-size:13px;color:var(--muted)}
+  .chat-tools label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  .chat-tools input[type=checkbox]{accent-color:var(--amber)}
+  .setup-picker{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .setup-picker .sp-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .setup-picker select{flex:1;min-width:120px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 9px;font-family:var(--body);font-size:13.5px}
+  .setup-picker select:disabled{opacity:.4}
+  .setup-picker button{flex:0 0 auto;border:1px solid var(--line);background:var(--panel-2);color:var(--amber);font-family:var(--mono);font-size:12px;padding:7px 11px;border-radius:8px;cursor:pointer}
+  .setup-picker button:hover:not(:disabled){border-color:var(--amber)}
+  .setup-picker button:disabled{opacity:.4;cursor:not-allowed}
+  .setup-picker .sp-hint{flex-basis:100%;font-size:12px;color:var(--muted)}
+  .setup-picker .sp-hint a{color:var(--amber);cursor:pointer;text-decoration:underline}
+  .setup-picker .sp-hint b{color:var(--text)}
+  #spReload{flex:0 0 auto;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px}
+  #spReload:hover{border-color:var(--amber);color:var(--amber)}
+  .chat-empty{align-self:center;text-align:center;color:var(--muted);font-size:14px;margin:auto;max-width:46ch}
+  .chat-empty .ex{display:block;margin-top:14px;font-size:13px}
+  .chat-empty .ex button{display:block;width:100%;margin:6px 0;text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:9px 12px;cursor:pointer;font-family:var(--body);font-size:13.5px}
+  .chat-empty .ex button:hover{border-color:var(--amber)}
+  .fallback{max-width:54ch;margin:40px auto;text-align:center}
+  .fallback .icon{font-size:40px;margin-bottom:14px}
+  .fallback h3{font-family:var(--disp);font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px}
+  .fallback p{color:var(--muted);font-size:14.5px;margin-bottom:10px}
+  .fallback ol{text-align:left;color:var(--text);font-size:14px;margin:14px auto;padding-left:22px;max-width:40ch;line-height:1.7}
+  .fallback code{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:12.5px}
+  .fallback a{color:var(--amber)}
+  .fallback-wide{max-width:60ch}
+  .tut{text-align:left;margin:18px auto;max-width:52ch;display:flex;flex-direction:column;gap:14px}
+  .tut-step{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.6;color:var(--text)}
+  .tut-n{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--amber);color:#fff;font-family:var(--mono);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .tut-cmd{margin-top:7px}
+  .tut-cmd code{display:block;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:12.5px;color:var(--amber);word-break:break-all}
+  .tut-status{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;display:inline-block}
+  .tut-foot{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6}
+  .typing{display:inline-flex;gap:4px;align-items:center}
+  .typing span{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:tp 1s infinite}
+  .typing span:nth-child(2){animation-delay:.15s} .typing span:nth-child(3){animation-delay:.3s}
+  @keyframes tp{0%,60%,100%{opacity:.3}30%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.typing span{animation:none;opacity:.7}}
+
+  /* ---------- balance bar (signature) ---------- */
+  .bal{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px 20px;margin-bottom:22px}
+  .bal-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+  .bal-labels .t{color:var(--tight)} .bal-labels .n{color:var(--muted)} .bal-labels .l{color:var(--loose)}
+  .bal-track{position:relative;height:10px;border-radius:5px;margin-top:10px;
+    background:linear-gradient(90deg,var(--tight) 0%,#3b4a5c 38%,#3b4a5c 62%,var(--loose) 100%)}
+  .bal-mark{
+    position:absolute;top:-7px;width:4px;height:24px;border-radius:2px;background:#fff;
+    left:50%;transform:translateX(-50%);transition:left .45s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 0 8px rgba(255,255,255,.55);
+  }
+  .bal-tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.25);left:50%}
+  .bal-note{font-size:13px;color:var(--muted);margin-top:12px}
+  .bal-note strong{color:var(--text)}
+  @media (prefers-reduced-motion:reduce){.bal-mark{transition:none}}
+
+  /* ---------- sections ---------- */
+  section{margin-bottom:24px}
+  section h3{
+    font-family:var(--disp);font-size:19px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--amber);margin-bottom:8px;
+  }
+  section h3.kn{color:var(--tight)}
+  section h3.cp{color:var(--green)}
+  ul.fx{list-style:none}
+  ul.fx li{padding:7px 0 7px 16px;border-bottom:1px solid var(--line);position:relative}
+  ul.fx li::before{content:"";position:absolute;left:0;top:15px;width:6px;height:6px;border-radius:50%;background:var(--amber)}
+  .knock{display:flex;flex-direction:column;gap:8px}
+  .knock-item{
+    display:flex;gap:12px;align-items:flex-start;background:var(--panel);
+    border:1px solid var(--line);border-radius:8px;padding:10px 12px;
+  }
+  .knock-item button{
+    flex:0 0 auto;border:1px solid var(--line);background:var(--panel-2);color:var(--amber);
+    font-family:var(--mono);font-size:12px;padding:4px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;
+  }
+  .knock-item button:hover{border-color:var(--amber)}
+  .knock-item p{font-size:14px;color:var(--text)}
+  .comp li::before{background:var(--green)}
+  .footnote{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;max-width:70ch}
+
+  /* ---------- mobile ---------- */
+  .mobile-nav{display:none}
+  @media (max-width:760px){
+    .app{flex-direction:column}
+    nav{display:none}
+    .mobile-nav{display:block;position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 14px;border-bottom:1px solid var(--line)}
+    .mobile-nav .brand{padding:0 0 10px;border:0;margin:0}
+    .mobile-nav select{
+      width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);
+      border-radius:8px;padding:10px 12px;font-family:var(--body);font-size:15px;
+    }
+    main{padding:18px 16px 50px}
+    .title-row h2{font-size:30px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav id="nav"></nav>
+  <div style="flex:1;min-width:0">
+    <div class="mobile-nav">
+      <div class="brand"><h1>Setup Ripple <span>LMU</span></h1><p>Hypercar · LMP · GT3 cause &amp; effect — Le Mans Ultimate · v1.0</p></div>
+      <div id="mTabs"></div>
+      <select id="mobileSel" aria-label="Choose a setup parameter or symptom"></select>
+    </div>
+    <main id="main"></main>
+  </div>
+</div>
+
+<script>
+const P = [
+/* ───────────────────────── TYRES ───────────────────────── */
+{id:'pressure',group:'Tyres',name:'Tyre pressures',
+ upLabel:'Raise',downLabel:'Lower',
+ does:'Set the size and shape of the contact patch — the single biggest grip factor. LMU works in kPa, and you are chasing a hot-pressure window (broadly the low-to-mid 130s kPa front and rear on most LMU slicks, but it varies by car and compound — watch the tyre temps and the feel, not just the number). Pressures climb as the tyre heats, so set them cold and judge them hot.',
+ up:{bal:0,fx:[
+  'Smaller contact patch once over the window — less grip at that end of the car',
+  'Centre of the tread overheats first; slides get snappier, less progressive',
+  'Slightly sharper initial steering response and lower rolling resistance',
+  'Per axle: high rears only = looser car; high fronts only = tighter car'],
+  comp:[
+   {id:'brakeDucts',a:'Open the brake ducts a step — brake heat soaks into the rim and is often why pressures creep high'},
+   {id:'camber',a:'Check camber: too much inner-edge temperature drags the whole pressure up'}]},
+ down:{bal:0,fx:[
+  'Below the window the carcass flexes — vague, mushy response and the shoulders overheat',
+  'Takes longer to switch the tyre on at the start of a stint',
+  'Per axle: low rears = sluggish but planted rear; low fronts = lazy turn-in'],
+  comp:[
+   {id:'brakeDucts',a:'Close the ducts a step to push more heat into the rims and lift pressures'}]},
+ knock:[
+  {id:'brakeDucts',why:'Duct openings are your main in-race pressure control — heat from the discs feeds straight into the rims'},
+  {id:'camber',why:'Camber decides how temperature spreads across the tread, which feeds back into pressure'},
+  {id:'rideHeightF',why:'Pressure changes alter tyre radius slightly, nudging ride height and rake'}],
+ note:'Track temp and fuel burn both move pressures across a stint — a setup that is perfect on lap 2 may be over the window by lap 15.'},
+
+{id:'camber',group:'Tyres',name:'Camber',
+ upLabel:'More negative',downLabel:'Less negative',
+ does:'Tilts the top of the tyre inwards so the tread sits flat when the car rolls in a corner. You are trading mid-corner grip against straight-line braking and traction.',
+ up:{bal:0,fx:[
+  'More mid-corner grip at that axle as the tread loads evenly under roll',
+  'Inner-edge temperature climbs — watch the I/M/O spread (aim for roughly even, inner slightly warmer)',
+  'Less braking and traction grip in a straight line (smaller upright contact patch)',
+  'Per axle: more front camber = sharper, slightly looser mid-corner; more rear = more planted, tighter'],
+  comp:[
+   {id:'pressure',a:'Re-check hot pressures — the inner edge will be doing more work'},
+   {id:'toe',a:'A touch less front toe-out offsets the extra scrub heat'}]},
+ down:{bal:0,fx:[
+  'Better braking and corner-exit traction, weaker mid-corner',
+  'Outer shoulder takes more punishment in long corners',
+  'More even wear on tracks with few fast corners'],
+  comp:[
+   {id:'arbF',a:'If mid-corner grip drops too far, soften the ARB at that end instead of adding camber back'}]},
+ knock:[
+  {id:'pressure',why:'Camber redistributes heat across the tread, which moves hot pressures'},
+  {id:'caster',why:'Caster adds dynamic camber when steered — more caster lets you run less static camber'}],
+ note:'LMU prototypes and GT3s generally like a little more negative camber at the front than the rear — set it by the inner/mid/outer temp spread rather than chasing a fixed number, since it varies by car and track.'},
+
+{id:'toe',group:'Tyres',name:'Toe',
+ upLabel:'More toe',downLabel:'Less toe',
+ does:'Angles the wheels relative to straight ahead. Convention: front toe-out for response, rear toe-in for stability. "More toe" here means more toe-out at the front or more toe-in at the rear.',
+ up:{bal:1,fx:[
+  'Front toe-out: sharper, more eager turn-in — the inside wheel is already pointing into the corner',
+  'Rear toe-in: calmer, more planted corner exits and better stability over kerbs',
+  'Both add scrub — more tyre temperature, more wear, a touch more drag',
+  'Too much front toe-out makes the car nervous and darty in a straight line'],
+  comp:[
+   {id:'pressure',a:'Watch hot pressures rise from the extra scrub'},
+   {id:'electronics',a:'With added rear toe-in you can often run one click less TC'}]},
+ down:{bal:-1,fx:[
+  'Straighter-running, lower drag, cooler tyres — good for long straights and tyre life',
+  'Lazier turn-in at the front; livelier (less damped) rear on exit',
+  'Front toe near zero suits flowing tracks; tight tracks miss the response'],
+  comp:[
+   {id:'caster',a:'Add caster to recover some turn-in feel without the scrub penalty'},
+   {id:'arbF',a:'A softer front ARB can also wake up turn-in'}]},
+ knock:[
+  {id:'pressure',why:'Toe scrub is a steady heat source — it shifts where your pressures settle'},
+  {id:'caster',why:'Caster and front toe both shape turn-in; tune them together'}],
+ note:'Balance shift shown is for the usual case (front response / rear stability traded together). Tune one axle at a time.'},
+
+{id:'caster',group:'Tyres',name:'Caster',
+ upLabel:'More',downLabel:'Less',
+ does:'Tilts the steering axis backwards. More caster gains camber as you steer — grip arrives exactly when you wind on lock — and strengthens self-centring.',
+ up:{bal:1,fx:[
+  'More dynamic camber mid-corner: front grip improves the more lock you carry',
+  'Heavier, more communicative steering with stronger self-centring',
+  'Slightly more stable under braking',
+  'Usually low downside — many setups run plenty of caster for the front grip'],
+  comp:[
+   {id:'camber',a:'You may be able to take out a little static camber and gain braking grip for free'}]},
+ down:{bal:-1,fx:[
+  'Lighter steering, weaker feedback',
+  'Less camber gain — the front washes out earlier in long corners'],
+  comp:[
+   {id:'camber',a:'Add static camber back to recover mid-corner front grip'}]},
+ knock:[
+  {id:'camber',why:'Caster is camber-on-demand: the two budgets add together when steered'}],
+ note:'Caster is close to a free upgrade for front grip on cars that expose it — lower it mainly if steering weight bothers you. Note many LMU cars list caster as non-adjustable.'},
+
+/* ───────────────────────── AERO ───────────────────────── */
+{id:'rearWing',group:'Aero',name:'Rear wing',
+ upLabel:'More wing',downLabel:'Less wing',
+ does:'The big lever for rear downforce. Every step changes three things at once: rear grip at speed, drag, and the front-to-rear aero balance. Its effects grow with speed — it does almost nothing in a hairpin.',
+ up:{bal:-2,fx:[
+  'Rear planted in fast corners and under braking from high speed',
+  'More drag — top speed drops, fuel use rises slightly',
+  'Aero balance moves rearwards: understeer builds the faster the corner',
+  'Car becomes less pitch-sensitive — more forgiving over crests and kerbs at speed'],
+  comp:[
+   {id:'rideHeightF',a:'Lower the front (or raise the rear) — more rake pulls aero balance forward again'},
+   {id:'frontSplitter',a:'Add a splitter step if the car has one, to match the front to the new rear'},
+   {id:'brakeBias',a:'Move bias rearwards ~0.5% — the rear can now take more braking load'},
+   {id:'arbF',a:'Soften the front ARB a click to claw back grip in the slow corners the wing can’t help'}]},
+ down:{bal:2,fx:[
+  'Top speed up — strong on long straights and for defending',
+  'Rear gets light in fast corners and under braking from speed',
+  'Oversteer grows with speed; the car rewards smooth hands',
+  'More pitch-sensitive: kerbs and bumps at speed unsettle it more'],
+  comp:[
+   {id:'brakeBias',a:'Move bias forward to protect the now-lighter rear under braking'},
+   {id:'rideHeightR',a:'Drop the rear a touch (less rake) to push aero balance back'},
+   {id:'arbR',a:'Soften the rear ARB so mechanical grip covers some of what the aero gave up'}]},
+ knock:[
+  {id:'rideHeightF',why:'Rake and wing together set the aero balance — change one, re-check the other'},
+  {id:'brakeBias',why:'Rear downforce decides how much braking the rear axle can take at speed'},
+  {id:'springR',why:'More wing means more load crushing the rear at speed — the springs must hold the platform'},
+  {id:'frontSplitter',why:'Front and rear aero are a matched pair; moving one strands the other'}],
+ note:'Rule of thumb: if the balance problem appears only in fast corners, it’s aero. If it’s everywhere, look at mechanical grip first.'},
+
+{id:'frontSplitter',group:'Aero',name:'Front splitter',
+ upLabel:'More splitter',downLabel:'Less splitter',
+ does:'Adds front downforce on cars that expose a front-aero adjustment (front wing position, splitter, or front diffuser, depending on the car). The front-end counterpart to the rear wing, and like the wing, it only works at speed.',
+ up:{bal:2,fx:[
+  'Front bites harder in fast corners — turn-in at speed sharpens',
+  'Aero balance moves forward: the rear becomes comparatively lighter',
+  'Small drag increase',
+  'Works harder the closer the front runs to the ground'],
+  comp:[
+   {id:'rearWing',a:'Add wing to keep the rear matched'},
+   {id:'rideHeightF',a:'Raise the front slightly if high-speed oversteer appears'}]},
+ down:{bal:-2,fx:[
+  'High-speed understeer; the rear feels relatively more secure',
+  'A touch less drag'],
+  comp:[
+   {id:'rearWing',a:'Trim a step of wing to re-centre the aero balance'}]},
+ knock:[
+  {id:'rearWing',why:'Splitter and wing set the two ends of the aero see-saw'},
+  {id:'rideHeightF',why:'Splitter performance is very sensitive to front ride height'}],
+ note:'If your car has no splitter setting, rake (ride heights) is your front-downforce tool instead.'},
+
+{id:'rideHeightF',group:'Aero',name:'Front ride height',
+ upLabel:'Raise',downLabel:'Lower',
+ does:'With the rear height, this sets rake — the nose-down angle of the floor. More rake (lower front) means more front downforce. Lower also drops the centre of gravity. The catch: run too low and the car sits on its bumpstops.',
+ up:{bal:-1,fx:[
+  'Less rake — aero balance shifts rearwards, high-speed understeer',
+  'More suspension travel: friendlier over kerbs and bumps',
+  'Slightly higher centre of gravity'],
+  comp:[
+   {id:'rearWing',a:'Trim a step of wing so the rear doesn’t over-dominate the new balance'},
+   {id:'rideHeightR',a:'Raise the rear by the same amount if you only wanted clearance, not a rake change'}]},
+ down:{bal:2,fx:[
+  'More rake — front downforce up, sharper at speed',
+  'Lower centre of gravity: a little less weight transfer everywhere',
+  'Risk: bottoming onto the bumpstops mid-corner causes sudden, ugly understeer over bumps and kerbs'],
+  comp:[
+   {id:'bumpstops',a:'Stiffen or shorten bumpstop range so the platform stays controlled when it touches down'},
+   {id:'springF',a:'Stiffer front springs help hold the car off the stops'},
+   {id:'rearWing',a:'If it’s now loose at speed, a step of wing rebalances it'}]},
+ knock:[
+  {id:'bumpstops',why:'The lower you run, the more the bumpstops become part of the active suspension'},
+  {id:'frontSplitter',why:'Splitter downforce rises sharply as the front nears the ground'},
+  {id:'springF',why:'Springs and ride height together decide whether the floor stays where you put it'},
+  {id:'rearWing',why:'Rake and wing are the two halves of aero balance'}],
+ note:'Low-and-stiff setups lean on this: maximum rake with the bumpstops doing real work to hold the aero platform.'},
+
+{id:'rideHeightR',group:'Aero',name:'Rear ride height',
+ upLabel:'Raise',downLabel:'Lower',
+ does:'The other half of rake. Raising the rear tips the floor nose-down (more rake, more front aero) but lifts the centre of gravity at the driven axle.',
+ up:{bal:1,fx:[
+  'More rake — aero balance forward, livelier at speed',
+  'Higher rear CoG: a bit more weight transfer, slightly more squat and dive',
+  'Diffuser/floor generally works the rake harder (car-dependent)'],
+  comp:[
+   {id:'rearWing',a:'A step of wing covers the rear if high-speed confidence drops'},
+   {id:'springR',a:'Check rear springs — more transfer may want a touch more support'}]},
+ down:{bal:-1,fx:[
+  'Less rake — high-speed understeer tendency',
+  'Lower CoG at the rear: traction off slow corners often improves',
+  'Less travel before the rear bumpstops'],
+  comp:[
+   {id:'rideHeightF',a:'Lower the front too if you want the rake back with a lower car overall'}]},
+ knock:[
+  {id:'rideHeightF',why:'Rake is the difference between the two heights — they only mean something together'},
+  {id:'rearWing',why:'Rake and wing trade against each other for the same aero balance'},
+  {id:'springR',why:'Height changes shift how soon the rear reaches its bumpstops'}],
+ note:'Tune rake in small steps — a few millimetres of rake change is clearly felt at 200 km/h.'},
+
+/* ─────────────────── SUSPENSION & DAMPERS ─────────────────── */
+{id:'springF',group:'Suspension & dampers',name:'Front springs',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'Wheel rate at the front. Stiffness trades slow-corner mechanical grip against response and aero platform stability.',
+ up:{bal:-1,fx:[
+  'Sharper, more immediate turn-in response',
+  'Less mechanical front grip — understeer in slow corners',
+  'Steadier front platform: splitter and rake work more consistently at speed (can make it *looser* in fast corners)',
+  'Harsher over kerbs and bumps'],
+  comp:[
+   {id:'arbF',a:'Soften the front ARB to win back slow-corner grip while keeping the response'},
+   {id:'dampers',a:'Re-match damper rates to the new spring — stiffer springs want more damping'},
+   {id:'rideHeightF',a:'You can often run a little lower now the spring holds the platform'}]},
+ down:{bal:1,fx:[
+  'More slow-corner front grip as the tyre stays loaded over bumps',
+  'Lazier response; more dive under braking',
+  'Front aero platform moves around more — less consistent at speed'],
+  comp:[
+   {id:'dampers',a:'Soften front damping to match, or the spring can’t do its job'},
+   {id:'rideHeightF',a:'May need a touch more ride height to avoid the bumpstops'}]},
+ knock:[
+  {id:'dampers',why:'Dampers are tuned to the spring — change one without the other and the wheel loses contact'},
+  {id:'bumpstops',why:'Softer springs reach the stops sooner; stiffer springs may never use them'},
+  {id:'rideHeightF',why:'Spring rate decides how far the car settles and how low you can safely run'}],
+ note:'Mechanical grip rules below ~120 km/h; aero rules above. Decide which corners matter at this track before touching springs.'},
+
+{id:'springR',group:'Suspension & dampers',name:'Rear springs',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'Wheel rate at the rear — the traction axle. The classic trade: softer rear hooks up out of slow corners, stiffer rear holds the aero platform at speed.',
+ up:{bal:1,fx:[
+  'Less traction out of slow corners — power oversteer appears earlier',
+  'Steadier rear platform: more consistent downforce in fast corners',
+  'Sharper response to throttle balance changes'],
+  comp:[
+   {id:'arbR',a:'Soften the rear ARB to recover some slow-corner traction'},
+   {id:'electronics',a:'A click more TC papers over exit wheelspin while you test'},
+   {id:'dampers',a:'Re-match rear damping'}]},
+ down:{bal:-1,fx:[
+  'Better drive off slow corners — the rear squats and grips',
+  'More squat means more dynamic rake change: aero balance moves around on throttle',
+  'Slightly tighter feel overall'],
+  comp:[
+   {id:'dampers',a:'Soften rear damping to suit'},
+   {id:'rideHeightR',a:'Check the rear isn’t now sitting on its bumpstops under load'}]},
+ knock:[
+  {id:'diffPreload',why:'Spring rate and diff locking both shape how the rear puts power down'},
+  {id:'dampers',why:'Springs and dampers are one system'},
+  {id:'rideHeightR',why:'Softer rear = more squat = the static height number means something different'}],
+ note:''},
+
+{id:'arbF',group:'Suspension & dampers',name:'Front anti-roll bar',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'Resists body roll by tying the front wheels together. The cleanest mid-corner balance tool there is — it changes roll stiffness distribution without touching ride or aero.',
+ up:{bal:-2,fx:[
+  'Crisper, flatter turn-in',
+  'More load forced through the outside front — mid-corner understeer',
+  'Inside front stays more planted under braking'],
+  comp:[
+   {id:'arbR',a:'Stiffen the rear bar too if you wanted response, not a balance change'},
+   {id:'camber',a:'The loaded outside front may want a touch more camber'}]},
+ down:{bal:2,fx:[
+  'More mid-corner front grip — the car rotates better',
+  'Slower, softer initial response; more body roll',
+  'Can feel lazy on quick direction changes (chicanes)'],
+  comp:[
+   {id:'dampers',a:'Slightly firmer front slow bump keeps transitions tidy despite the softer bar'}]},
+ knock:[
+  {id:'arbR',why:'Balance lives in the front/rear bar *ratio* — one bar alone is half the story'},
+  {id:'springF',why:'Bars and springs both add roll stiffness; they overlap'}],
+ note:'ARBs are the first thing to reach for when the balance problem is mid-corner, at all speeds.'},
+
+{id:'arbR',group:'Suspension & dampers',name:'Rear anti-roll bar',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'The rear half of the roll-stiffness ratio. Strongly shapes on-throttle behaviour from mid-corner to exit.',
+ up:{bal:2,fx:[
+  'Car rotates more — oversteer, especially on throttle from mid-corner',
+  'Flatter, more responsive rear in direction changes',
+  'Inside rear unloads more: worse traction out of slow corners'],
+  comp:[
+   {id:'diffPreload',a:'A little more preload can steady the rear on throttle pickup'},
+   {id:'electronics',a:'One more click of TC while you learn the new balance'}]},
+ down:{bal:-2,fx:[
+  'More traction and a calmer rear on exit',
+  'More roll; slightly lazier in chicanes',
+  'Mild understeer tendency mid-corner'],
+  comp:[
+   {id:'arbF',a:'Soften the front bar too if you only wanted traction, not push'}]},
+ knock:[
+  {id:'arbF',why:'It’s the ratio between bars that sets balance'},
+  {id:'diffPreload',why:'Both control how the rear behaves under power'}],
+ note:''},
+
+{id:'dampers',group:'Suspension & dampers',name:'Dampers (bump / rebound)',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'Dampers don’t change how much weight transfers — only how fast. Slow bump/rebound shape braking, turn-in and throttle transitions; fast bump/rebound handle kerbs and bumps. They are your transient balance tool.',
+ up:{bal:0,fx:[
+  'Weight transfer slows down: calmer, more deliberate transitions',
+  'Stiffer front bump = less dive, lazier turn-in (entry understeer)',
+  'Stiffer rear rebound = rear held down on throttle, steadier exits',
+  'Stiffer fast damping = harsh over kerbs; the wheel can skip and lose contact'],
+  comp:[
+   {id:'springF',a:'Damping should track spring rate — if you’re maxing dampers, the spring is wrong'},
+   {id:'bumpstops',a:'On kerb-heavy tracks, let fast damping stay soft and use bumpstops for the platform'}]},
+ down:{bal:0,fx:[
+  'Faster weight transfer: livelier turn-in, more dive and squat',
+  'Better kerb absorption and bumpy-track compliance',
+  'Too soft and the car floats — balance becomes vague and delayed'],
+  comp:[
+   {id:'arbF',a:'If the car got too eager on entry, a stiffer front bar steadies it without slowing the dampers again'}]},
+ knock:[
+  {id:'springF',why:'Each spring rate has a damping range that suits it'},
+  {id:'bumpstops',why:'Fast damping and bumpstops share the job of kerbs and bottoming'}],
+ note:'Diagnose dampers by *when* the problem happens: entry/exit transitions = slow damping; kerbs and bumps = fast damping; steady mid-corner = not the dampers.'},
+
+{id:'bumpstops',group:'Suspension & dampers',name:'Bumpstops (rate / range)',
+ upLabel:'Stiffer / less range',downLabel:'Softer / more range',
+ does:'Secondary springs that catch the suspension at the end of its travel. In a low-and-stiff setup they’re not just a safety net — they become an aero-platform tool the car deliberately rides on.',
+ up:{bal:0,fx:[
+  'Car rides the stops sooner/harder: very consistent aero platform at speed',
+  'Sudden balance change the instant one end hits — can feel like a wall of understeer (front) or a snap (rear)',
+  'Harsh over kerbs'],
+  comp:[
+   {id:'rideHeightF',a:'Tune ride height so the stops engage where you want them to, not by accident'},
+   {id:'springF',a:'Main spring and stop share the load — set them as a pair'}]},
+ down:{bal:0,fx:[
+  'More usable travel, friendlier kerbs',
+  'Aero platform floats more at speed — less consistent downforce',
+  'Risk of harsh bottoming if you’re running very low'],
+  comp:[
+   {id:'rideHeightF',a:'Raise slightly if the floor is slamming down on compressions'}]},
+ knock:[
+  {id:'rideHeightF',why:'Ride height decides when the stops engage'},
+  {id:'springF',why:'Total wheel rate = spring + engaged bumpstop'},
+  {id:'dampers',why:'Fast damping and stops both manage big hits'}],
+ note:'If the balance changes *suddenly* at one speed or one compression, suspect a bumpstop engaging.'},
+
+/* ───────────────────────── BRAKES ───────────────────────── */
+{id:'brakeBias',group:'Brakes',name:'Brake bias',
+ upLabel:'Forward',downLabel:'Rearward',
+ does:'Splits braking force front/rear. The fastest balance change in the car — and the one you can adjust from the wheel mid-stint. Its effect is speed-sensitive, because at high speed the wing is pressing the rear down.',
+ up:{bal:-1,fx:[
+  'Stable, predictable braking; the rear stays in line',
+  'Front lockup risk rises, especially as the fronts wear',
+  'Understeer on corner entry under trail-braking — the car resists rotation'],
+  comp:[
+   {id:'electronics',a:'A click less ABS can recover some front bite if lockups aren’t the issue'},
+   {id:'arbF',a:'Softer front bar restores some entry rotation'}]},
+ down:{bal:1,fx:[
+  'Car rotates into the corner under trail-braking — great for hairpins',
+  'Rear lockup / snap risk under hard braking, worst at low speed where the wing isn’t helping',
+  'Less margin in panic stops and on cold tyres'],
+  comp:[
+   {id:'rearWing',a:'More wing makes rearward bias safer at speed (but not in slow corners)'},
+   {id:'electronics',a:'A click more ABS adds a safety net while you adapt'}]},
+ knock:[
+  {id:'rearWing',why:'Rear downforce sets how much braking the rear can take — bias and wing move together'},
+  {id:'electronics',why:'ABS decides how forgiving each bias setting is'},
+  {id:'diffPreload',why:'Off-throttle diff locking also shapes entry rotation — they stack'}],
+ note:'Typical GT3 window is roughly 55–62% forward. Move it in 0.5% steps and re-judge after a few laps, not one corner.'},
+
+{id:'brakeDucts',group:'Brakes',name:'Brake ducts',
+ upLabel:'More open',downLabel:'More closed',
+ does:'Cooling for discs and pads — but their stealth role is tyre pressure control, because brake heat soaks through the rim into the air in the tyre.',
+ up:{bal:0,fx:[
+  'Cooler brakes: consistent pedal, less pad wear over a stint',
+  'Tyre pressures settle lower as the rims run cooler (the exact kPa per step varies by car)',
+  'A little more drag; brakes and tyres take longer to warm up'],
+  comp:[
+   {id:'pressure',a:'Raise cold pressures to land in the same hot window'}]},
+ down:{bal:0,fx:[
+  'Faster warm-up — good for short stints, qualifying and cold tracks',
+  'Pressures settle higher; fade and pad wear risk in long stints',
+  'Slightly less drag'],
+  comp:[
+   {id:'pressure',a:'Drop cold pressures to compensate for the extra rim heat'}]},
+ knock:[
+  {id:'pressure',why:'Duct steps are effectively a pressure adjustment you can plan a stint around'},
+  {id:'brakeBias',why:'Brake temperature changes pedal feel and bite, which changes how a given bias behaves'}],
+ note:'Duct (and radiator) openings are one of the few “free” tools for managing temperatures and pressures without touching the rest of the setup. LMU also exposes brake duct blanking front and rear.'},
+
+/* ─────────────── DRIVETRAIN & ELECTRONICS ─────────────── */
+{id:'diffPreload',group:'Drivetrain & electronics',name:'Differential preload',
+ upLabel:'More',downLabel:'Less',
+ does:'How strongly the diff resists a speed difference between the rear wheels before torque is even applied. It shapes the car in the *transitions* — off-throttle into the corner, and the moment you pick the throttle back up.',
+ up:{bal:-1,fx:[
+  'More locked off-throttle: stable, planted entry that resists rotation (entry understeer)',
+  'Stronger, more connected drive on throttle pickup',
+  'On tight exits the locked axle can push wide — or snap if grip runs out',
+  'Smoother across throttle transitions overall'],
+  comp:[
+   {id:'brakeBias',a:'A touch rearward bias restores entry rotation the preload took away'},
+   {id:'arbF',a:'Softer front bar also brings back rotation, mid-corner instead of entry'}]},
+ down:{bal:1,fx:[
+  'Car rotates freely off-throttle — agile, eager entries',
+  'Throttle pickup feels looser; inside wheel spins up easier out of slow corners',
+  'Can feel nervous in fast lift-off moments'],
+  comp:[
+   {id:'electronics',a:'A click more TC covers the looser throttle pickup'},
+   {id:'springR',a:'Slightly softer rear springs add traction to compensate'}]},
+ knock:[
+  {id:'brakeBias',why:'Both shape entry rotation — set them as a pair'},
+  {id:'electronics',why:'TC and the diff fight over the same wheelspin'},
+  {id:'arbR',why:'Rear roll stiffness changes how loaded each rear wheel is, which changes what the diff sees'}],
+ note:'Test preload in the slowest corner on the track — that’s where its character is loudest.'},
+
+{id:'electronics',group:'Drivetrain & electronics',name:'TC & ABS',
+ upLabel:'More assist',downLabel:'Less assist',
+ does:'Traction control limits wheelspin; ABS limits lockup. Crucial honesty check: they mask balance problems rather than fix them. If you need lots of TC, the setup (or your right foot) has an exit problem.',
+ up:{bal:0,fx:[
+  'Safer, more repeatable exits and braking zones; less tyre wear over a stint',
+  'Over-set TC cuts power and costs real exit speed',
+  'Over-set ABS lengthens braking distances slightly',
+  'Hides what the chassis is actually doing — bad for learning'],
+  comp:[
+   {id:'diffPreload',a:'If you keep needing more TC, the real fix is often diff/springs at the rear'}]},
+ down:{bal:0,fx:[
+  'Faster exits and shorter stops *if* the chassis and your inputs are clean',
+  'Wheelspin and lockup punish mistakes immediately',
+  'More tyre wear when you get it wrong'],
+  comp:[
+   {id:'springR',a:'Softer rear springs / ARB make low TC liveable'},
+   {id:'toe',a:'A touch more rear toe-in steadies exits without electronic help'}]},
+ knock:[
+  {id:'diffPreload',why:'Diff locking and TC manage the same exit wheelspin from opposite ends'},
+  {id:'brakeBias',why:'ABS level changes how aggressive a bias setting you can run'},
+  {id:'pressure',why:'Less assist = more sliding = more tyre temperature'}],
+ note:'When learning setups, run TC one click lower than comfortable for a session — you’ll *feel* what every change does instead of having it filtered.'}
+,
+
+/* ─────────────── LMU-SPECIFIC: HYBRID, ENERGY & PROTOTYPE DIFF ─────────────── */
+{id:'virtualEnergy',group:'Energy & hybrid',name:'Virtual Energy',
+ upLabel:'More energy',downLabel:'Less energy',
+ does:'WEC/LMU run to an energy allocation, not just a fuel tank. Virtual Energy is the percentage of your stint allocation loaded — it ties together fuel and hybrid deployment into one "how far can I go" number. Set it to 100% and let Fuel Ratio do the fine work; the game shows the lap count it buys.',
+ up:{bal:0,fx:[
+  'More laps before you must refuel/recharge — fewer stops over a race',
+  'More weight on board early in the stint: slightly slower, more tyre load',
+  'Gives you margin if a safety car or mistake changes the fuel maths'],
+  comp:[
+   {id:'fuelRatio',a:'Trim Fuel Ratio if the extra energy makes the car heavier than the stint needs'}]},
+ down:{bal:0,fx:[
+  'Lighter car, quicker lap — good for qualifying or a short sprint',
+  'Less margin: run the number too low and you won’t reach the flag or the next stop',
+  'Forces more lift-and-coast or a higher deployment map to stretch it'],
+  comp:[
+   {id:'fuelRatio',a:'Match Fuel Ratio to the energy you actually carry so the two agree'}]},
+ knock:[
+  {id:'fuelRatio',why:'Energy and fuel are two views of the same stint plan — set them together'},
+  {id:'regen',why:'How aggressively you harvest changes how far a given energy load lasts'}],
+ note:'Non-hybrid classes (LMP2, LMP3) have no Virtual Energy — they just carry litres, set via the fuel control.'},
+
+{id:'fuelRatio',group:'Energy & hybrid',name:'Fuel Ratio',
+ upLabel:'Richer / more',downLabel:'Leaner / less',
+ does:'On hybrids, Fuel Ratio meters how much fuel goes in to match your energy plan — the game shows the litres carried beside it. On LMP2/LMP3 the same control simply sets litres directly. It is your fine fuel adjustment once Virtual Energy is at 100%.',
+ up:{bal:0,fx:[
+  'More litres on board: longer stint, more early-stint weight',
+  'Heavier car blunts traction and braking slightly until it burns down',
+  'Useful to cover an extra lap if strategy is marginal'],
+  comp:[
+   {id:'virtualEnergy',a:'Keep Virtual Energy at 100% and use this as the litres fine-tune'}]},
+ down:{bal:0,fx:[
+  'Lighter, faster car — qualifying trim',
+  'Shorter stint; risk of running dry if you misjudge consumption',
+  'The car comes alive as fuel burns off regardless — plan for the lap-1 weight'],
+  comp:[
+   {id:'brakeBias',a:'A heavy fuel load shifts weight rearward slightly — you may want a touch more front bias early'}]},
+ knock:[
+  {id:'virtualEnergy',why:'Litres and energy allocation describe the same stint — they must agree'}],
+ note:'Always plan fuel from a real consumption figure (the MFD or a test stint), not a guess — the fuel calculator on the Engineer tab helps.'},
+
+{id:'regen',hyperOnly:true,group:'Energy & hybrid',name:'Regen level',
+ upLabel:'More harvest',downLabel:'Less harvest',
+ does:'Hypercar only. Sets how hard the car harvests energy under braking to refill the hybrid system. More harvest stretches your energy but adds a braking drag at the driven axle that changes the car’s feel on the way into a corner. Per-car: the kW step size differs between cars, so judge it by feel and energy, not the number.',
+ up:{bal:0,fx:[
+  'Refills hybrid energy faster — supports a more aggressive deploy map or a longer stint',
+  'Adds engine/MGU braking at the harvest axle: can tug the balance under braking',
+  'On front-axle-harvest cars, strong regen can nudge the nose into the corner',
+  'Heat and wear into the harvest-axle tyres rise slightly'],
+  comp:[
+   {id:'brakeBias',a:'Re-check brake bias — regen braking stacks on top of the friction brakes at that axle'},
+   {id:'motorMap',a:'A stronger deploy map spends what the harvest brings in — balance the two'}]},
+ down:{bal:0,fx:[
+  'Cleaner, more neutral braking feel — fewer hybrid effects on entry',
+  'Less energy recovered: you must lift-and-coast more or deploy less to reach the flag',
+  'Easier to drive consistently if the harvest braking was unsettling you'],
+  comp:[
+   {id:'virtualEnergy',a:'If you harvest less, you may need to carry more energy to cover the stint'}]},
+ knock:[
+  {id:'motorMap',why:'Harvest fills the battery, the deploy map empties it — set them as a pair'},
+  {id:'brakeBias',why:'Regen braking changes the effective bias at the harvest axle'},
+  {id:'virtualEnergy',why:'Harvest rate decides how far a given energy allocation stretches'}],
+ note:'Step sizes for regen vary by car (e.g. 20 kW per click on one car, 17 on another) — never assume; step it and read the displayed value.'},
+
+{id:'motorMap',hyperOnly:true,group:'Energy & hybrid',name:'Electric motor map',
+ upLabel:'More deploy',downLabel:'Less deploy',
+ does:'Hypercar only. Chooses how much electric power the hybrid deploys — the spending side of the energy budget that Regen fills. More deploy means stronger acceleration where the car is allowed to use it, at the cost of draining energy faster.',
+ up:{bal:0,fx:[
+  'Stronger acceleration / corner exit where deployment is allowed',
+  'Drains hybrid energy faster — needs more harvest or more allocation to last',
+  'On front-axle-deploy cars, power deployment can add corner-exit stability or push',
+  'More demand on rear traction at exit if the deploy goes to the rear'],
+  comp:[
+   {id:'regen',a:'Lift harvest to keep up with the faster drain'},
+   {id:'electronics',a:'A click more TC if the extra deploy lights up the rear on exit'}]},
+ down:{bal:0,fx:[
+  'Gentler power delivery — energy lasts longer, easier on rear traction',
+  'Slower out of corners where you could have used the boost',
+  'Simpler to drive while you learn the car'],
+  comp:[
+   {id:'regen',a:'You can harvest a little less too, keeping the energy balance even'}]},
+ knock:[
+  {id:'regen',why:'Deploy and harvest are the two halves of the energy loop'},
+  {id:'virtualEnergy',why:'A hotter deploy map empties your allocation sooner'}],
+ note:'Step sizes vary per car here too (e.g. 20 kW vs 10 kW per click). Read the displayed value rather than assuming.'},
+
+{id:'frontDiff',hyperOnly:true,group:'Drivetrain & electronics',name:'Front differential (Hypercar)',
+ upLabel:'More lock',downLabel:'Less lock',
+ does:'Front-drive-axle Hypercars expose a front diff (power, coast and preload) on top of the rear. It shapes how the front axle puts down hybrid/engine torque and how it behaves trailing off the throttle — a handling tool the GT3s and LMPs don’t have.',
+ up:{bal:-1,fx:[
+  'More front-axle locking: steadier front under power on deploy, but more understeer as both front wheels tie together',
+  'Coast side: more locking calms the front entering a corked off-throttle',
+  'Can mask front mechanical grip problems rather than fix them'],
+  comp:[
+   {id:'arbF',a:'Soften the front ARB to recover the mid-corner rotation the lock takes away'},
+   {id:'motorMap',a:'Front deploy and front diff interact — re-check exit feel after changing either'}]},
+ down:{bal:1,fx:[
+  'Freer front axle: more rotation, livelier turn-in, but more torque-steer/instability under front deploy',
+  'Less predictable on bumpy front-axle exits',
+  'Rewards smooth throttle on the way out'],
+  comp:[
+   {id:'electronics',a:'A click more TC steadies things while you test a freer front diff'}]},
+ knock:[
+  {id:'diffPreload',why:'Front and rear diff behaviour combine into the overall on/off-throttle balance'},
+  {id:'motorMap',why:'On front-deploy cars, the diff decides how that power axle behaves'}],
+ note:'Only some Hypercars drive/deploy through the front axle — on others these read as Non-adjustable and the Engineer tab greys them out.'},
+
+{id:'brakeMigration',group:'Brakes',name:'Brake migration',
+ upLabel:'More migration',downLabel:'Less migration',
+ does:'Shifts brake bias forward as you bleed off the pedal through a braking zone — more front bias on initial hard braking, migrating rearward as you trail off. Lets you run a stable-on-initial, rotational-on-release brake feel that a single fixed bias can’t.',
+ up:{bal:1,fx:[
+  'More forward bias at the top of the brake zone: stable, lock-resistant initial braking',
+  'As you trail off, bias moves rearward — helps the car rotate towards the apex',
+  'Too much can make the rear feel like it wakes up unexpectedly mid-release'],
+  comp:[
+   {id:'brakeBias',a:'Set your base bias first, then add migration for the trail-braking phase'}]},
+ down:{bal:-1,fx:[
+  'Bias stays closer to fixed through the zone — simpler, more predictable',
+  'Less help rotating the car on brake release',
+  'Better if migration was making the rear nervous'],
+  comp:[
+   {id:'brakeBias',a:'Without migration you may want a touch less base front bias for entry rotation'}]},
+ knock:[
+  {id:'brakeBias',why:'Migration moves *around* your base bias — they’re set together'},
+  {id:'electronics',why:'ABS changes how much migration you can run before the rear locks'}],
+ note:'A little migration goes a long way — add it in single clicks and feel the brake-release phase specifically.'},
+
+{id:'thirdSpring',group:'Suspension & dampers',name:'3rd spring / heave (Hypercar/LMP)',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'A central heave element that resists both wheels compressing together (pure vertical / aero load) without affecting roll. Prototypes use it to hold the aero platform under high downforce while keeping the corner springs soft for mechanical grip. The corner springs and the 3rd spring are set independently — the 3rd is not L/R linked.',
+ up:{bal:0,fx:[
+  'Holds ride height better under aero load at speed — more consistent downforce',
+  'Less dive/squat from pure vertical loads (braking, crests) without stiffening roll',
+  'Too stiff and the platform stops absorbing big vertical hits — skittish over crests'],
+  comp:[
+   {id:'springF',a:'You can often keep the corner springs softer for mechanical grip, letting the 3rd hold the platform'},
+   {id:'bumpstops',a:'3rd spring and packers both manage end-of-travel — set them together'}]},
+ down:{bal:0,fx:[
+  'More compliant over big vertical inputs — better mechanical grip on bumps and crests',
+  'Platform moves more at speed: aero height varies more through a fast corner',
+  'May reach the packers/bumpstops sooner under heavy aero load'],
+  comp:[
+   {id:'rideHeightF',a:'Check the car isn’t dropping onto its bumpstops at speed with a softer heave'}]},
+ knock:[
+  {id:'springF',why:'Corner springs handle roll + heave together; the 3rd spring handles heave only — they overlap on vertical loads'},
+  {id:'bumpstops',why:'Both manage how the platform behaves at the end of vertical travel'},
+  {id:'rideHeightF',why:'Heave stiffness changes how low the car runs dynamically at speed'}],
+ note:'GT3s generally have no active 3rd spring (it reads N/A); it’s primarily a prototype tool. The Engineer tab shows it only when the car has one.'}
+];
+
+/* ──────────────────────── symptoms ──────────────────────── */
+const S = [
+/* Corner entry */
+{id:'entryUnder',group:'Corner entry',name:'Won’t turn in (entry understeer)',
+ desc:'You brake, turn, and the nose washes wide before the apex — worst while you’re still on the brakes.',
+ quick:'Cheapest test first: move brake bias 0.5% rearward from the wheel. If it improves, the problem is your entry tools, not outright front grip.',
+ causes:[
+  {id:'brakeBias',label:'Bias too far forward',fix:'Move rearward in 0.5% steps — frees the car to rotate under trail-braking'},
+  {id:'diffPreload',label:'Diff preload too high',fix:'Lower it — a locked diff resists rotation off-throttle'},
+  {id:'dampers',label:'Front slow bump too stiff',fix:'Soften so the nose can dive and load the fronts on turn-in'},
+  {id:'arbF',label:'Front bar too stiff',fix:'Soften a click — this helps mid-corner too'},
+  {id:'pressure',label:'Fronts out of the window',fix:'Check hot pressures before touching anything mechanical'}]},
+
+{id:'entrySnap',group:'Corner entry',name:'Rear snaps under trail-braking',
+ desc:'The rear steps out as you brake and turn in together — the classic spin-at-corner-entry.',
+ quick:'Note where it happens. Fast corners point to aero; slow corners point to bias, diff or cold rears.',
+ causes:[
+  {id:'brakeBias',label:'Bias too far rearward',fix:'Move forward 0.5–1% for instant stability'},
+  {id:'diffPreload',label:'Preload too low',fix:'More preload steadies the rear off-throttle'},
+  {id:'rearWing',label:'Not enough rear downforce (fast corners only)',fix:'Add a step of wing if it only happens at speed'},
+  {id:'pressure',label:'Cold or low rear pressures',fix:'Rears below the window can’t take braking and turning at once'},
+  {id:'dampers',label:'Rear rebound too stiff',fix:'Soften so the rear stays planted as weight moves forward'}]},
+
+/* Mid-corner */
+{id:'midUnder',group:'Mid-corner',name:'Understeer mid-corner, all speeds',
+ desc:'The front washes out at steady throttle, slow and fast corners alike — a mechanical front grip shortage.',
+ quick:'“All speeds” is the key clue. If it were only fast corners, it would be aero — see the high-speed symptoms instead.',
+ causes:[
+  {id:'arbF',label:'Front bar too stiff',fix:'Soften — the cleanest mid-corner balance tool there is'},
+  {id:'camber',label:'Not enough front camber',fix:'More negative camber; check inner temps afterwards'},
+  {id:'springF',label:'Front springs too stiff',fix:'Soften for slow-corner grip (costs a little response)'},
+  {id:'pressure',label:'Fronts over the window',fix:'High pressures shrink the contact patch'}]},
+
+{id:'midOver',group:'Mid-corner',name:'Loose mid-corner, all speeds',
+ desc:'The rear edges wide at steady state and you’re constantly making small corrections.',
+ quick:'Same logic in reverse: everywhere = mechanical, fast corners only = aero.',
+ causes:[
+  {id:'arbR',label:'Rear bar too stiff',fix:'Soften a click'},
+  {id:'camber',label:'Not enough rear camber',fix:'More negative rear camber plants the rear mid-corner'},
+  {id:'toe',label:'Not enough rear toe-in',fix:'A touch more calms the rear everywhere'},
+  {id:'pressure',label:'Rears over the window',fix:'Check hot rears'}]},
+
+/* High speed */
+{id:'fastUnder',group:'High-speed corners',name:'Understeer only in fast corners',
+ desc:'Fine in the slow stuff, but the nose pushes in quick corners — an aero balance problem.',
+ quick:'Confirm it really is speed-dependent before touching aero. One slow corner with push disqualifies this diagnosis.',
+ causes:[
+  {id:'rideHeightF',label:'Not enough rake',fix:'Lower the front (or raise the rear) to pull aero balance forward'},
+  {id:'frontSplitter',label:'Splitter setting too low',fix:'Add a step if your car has one'},
+  {id:'rearWing',label:'Too much wing',fix:'Trim a step — you gain top speed as a bonus'}]},
+
+{id:'fastOver',group:'High-speed corners',name:'Nervous or loose at high speed',
+ desc:'No confidence in fast corners; the rear feels light over crests and quick direction changes.',
+ quick:'If the balance changes suddenly at one specific compression, suspect a bumpstop engaging rather than pure aero.',
+ causes:[
+  {id:'rearWing',label:'Not enough wing',fix:'Add a step — the single biggest fix for this'},
+  {id:'rideHeightR',label:'Too much rake',fix:'Lower the rear a touch'},
+  {id:'bumpstops',label:'Rear riding its stops',fix:'More range or softer rate at the rear'},
+  {id:'dampers',label:'Fast damping too stiff over crests',fix:'Soften fast bump/rebound'}]},
+
+/* Exit */
+{id:'exitSpin',group:'Corner exit',name:'Wheelspin / loose on throttle',
+ desc:'The rear breaks away as you feed in power out of slow and medium corners.',
+ quick:'Watch the replay: inside wheel spinning alone points at the diff; both wheels points at rear grip.',
+ causes:[
+  {id:'springR',label:'Rear too stiff',fix:'Soften the springs for traction'},
+  {id:'arbR',label:'Rear bar too stiff',fix:'Soften — keeps the inside rear planted'},
+  {id:'diffPreload',label:'Inside wheel lighting up',fix:'More preload locks the axle and stops single-wheel spin'},
+  {id:'toe',label:'Not enough rear toe-in',fix:'Add a little for calmer exits'},
+  {id:'electronics',label:'TC too low for the setup',fix:'One click more while you fix the mechanical cause'}]},
+
+{id:'exitPush',group:'Corner exit',name:'Pushes wide on throttle (power understeer)',
+ desc:'The front gives up the moment you accelerate — you run out of road on exit.',
+ quick:'Common on tight exits with high preload: the locked diff simply wants to drive straight.',
+ causes:[
+  {id:'diffPreload',label:'Preload too high',fix:'Lower it — frees the car to keep rotating under power'},
+  {id:'springR',label:'Rear too soft (squat lifts the nose)',fix:'Slightly stiffer rear keeps the front loaded on throttle'},
+  {id:'electronics',label:'TC over-set',fix:'Heavy TC can feel like push — try a click less'}]},
+
+/* Braking */
+{id:'frontLock',group:'Braking zones',name:'Front lockups',
+ desc:'One or both fronts lock under hard braking, flat-spotting tyres and lengthening stops.',
+ quick:'Lockups that only appear late in a stint are usually tyre wear, not setup — check before changing anything.',
+ causes:[
+  {id:'brakeBias',label:'Bias too far forward',fix:'Move rearward 0.5–1%'},
+  {id:'electronics',label:'ABS too low',fix:'One click up usually costs very little, where the car has ABS'},
+  {id:'brakeDucts',label:'Discs out of their temp window',fix:'Adjust ducts — cold and overheated brakes both bite unevenly'},
+  {id:'camber',label:'Too much front camber',fix:'Less camber enlarges the upright, straight-line contact patch'}]},
+
+/* Kerbs & bumps */
+{id:'kerbLaunch',group:'Kerbs & bumps',name:'Launched or unsettled by kerbs',
+ desc:'The car skips, hops or gets thrown off line when you take kerbs you ought to be able to use.',
+ quick:'Kerb behaviour is almost entirely fast damping + bumpstops + ride height. Springs and bars are rarely the culprit.',
+ causes:[
+  {id:'dampers',label:'Fast damping too stiff',fix:'Soften fast bump/rebound so the wheel can swallow the kerb'},
+  {id:'bumpstops',label:'Stops too stiff or too short',fix:'Softer rate or more range'},
+  {id:'rideHeightF',label:'Running too low',fix:'A couple of millimetres higher buys real compliance'}]},
+
+{id:'bumpUnder',group:'Kerbs & bumps',name:'Sudden understeer over bumps at speed',
+ desc:'Fine on smooth tarmac, but the front washes out the instant it hits a compression or bump mid-corner.',
+ quick:'This is the signature of the front bumpstops engaging — the platform hits a wall and the tyre unloads.',
+ causes:[
+  {id:'bumpstops',label:'Front stops engaging harshly',fix:'Softer rate or more range at the front'},
+  {id:'rideHeightF',label:'Front too low',fix:'Raise 1–2 mm so compressions don’t bottom it'},
+  {id:'springF',label:'Springs too soft for the ride height',fix:'Stiffer fronts hold the car off the stops'}]},
+
+/* Tyres */
+{id:'hotPressures',group:'Tyres over a stint',name:'Pressures climb out of the window',
+ desc:'Perfect on lap 3, over the window by lap 12 — grip fades and the car gets snappy as the stint goes on.',
+ quick:'Set up for mid-stint, not lap 1: start slightly under the window and let the stint bring them in.',
+ causes:[
+  {id:'pressure',label:'Cold pressures set too high',fix:'Drop cold pressures a few kPa and re-test the hot window'},
+  {id:'brakeDucts',label:'Ducts too closed',fix:'One step more open bleeds heat out of the rims'},
+  {id:'toe',label:'Too much scrub',fix:'Excess toe is a constant heat source'},
+  {id:'electronics',label:'Sliding generating heat',fix:'If you’re fighting the car, fix the balance — sliding cooks tyres'}]},
+
+{id:'coldTyres',group:'Tyres over a stint',name:'Can’t get heat in (quali / cold track)',
+ desc:'Tyres take too long to switch on — the first laps are skating and the window never quite arrives.',
+ quick:'Mostly a qualifying and cold-conditions problem; don’t compromise a race setup for it.',
+ causes:[
+  {id:'brakeDucts',label:'Ducts too open',fix:'Close a step — brake heat is your tyre warmer'},
+  {id:'pressure',label:'Colds set too low for conditions',fix:'Raise colds so the window arrives sooner'},
+  {id:'camber',label:'Tyre not working hard enough',fix:'A touch more camber and toe puts energy into the tread'}]},
+
+/* LMU-specific: hybrid, energy & prototype */
+{id:'hybridBrake',hyperOnly:true,group:'Braking zones',name:'Unsettled braking on a hybrid (regen feel)',
+ desc:'Hypercar only — the car tugs or feels inconsistent under braking in a way friction brakes alone wouldn’t explain, especially as you trail off.',
+ quick:'Regen braking stacks on the friction brakes at the harvest axle. Lower regen a step and see if the braking feel cleans up — then decide if you can afford the lost energy.',
+ causes:[
+  {id:'regen',label:'Harvest too aggressive',fix:'Lower regen a step for a cleaner, more neutral brake feel'},
+  {id:'brakeBias',label:'Bias not accounting for regen',fix:'Re-set bias with regen at race level — the harvest axle is effectively braking harder'},
+  {id:'brakeMigration',label:'Migration stacking with regen',fix:'Ease migration if the rear wakes up oddly as you release the pedal'}]},
+
+{id:'energyShort',hyperOnly:true,group:'Tyres over a stint',name:'Running out of energy / fuel before the stop',
+ desc:'You don’t reach the planned lap or the next stop — the energy or fuel allocation is short for how you’re driving.',
+ quick:'Plan from a real consumption figure (MFD or a test stint), not a guess — the Engineer tab’s fuel calculator helps. Then decide between carrying more or deploying less.',
+ causes:[
+  {id:'virtualEnergy',label:'Allocation set too low',fix:'Carry more Virtual Energy (hybrids) for the margin you need'},
+  {id:'fuelRatio',label:'Not enough fuel for the stint',fix:'Raise Fuel Ratio / litres to cover the laps'},
+  {id:'motorMap',label:'Deploy map too hungry',fix:'A gentler electric motor map makes the energy last'},
+  {id:'regen',label:'Not harvesting enough',fix:'More regen refills the system — at some cost to braking feel'}]},
+
+{id:'frontDiffEntry',hyperOnly:true,group:'Corner entry',name:'Front-deploy car unstable on entry/exit',
+ desc:'Hypercar with a driven front axle — the front feels nervous or torque-steers as power deploys, or won’t settle on a bumpy entry.',
+ quick:'Front-axle Hypercars have their own front diff. If only some cars do this, it’s likely the front diff/deploy interaction, not the rear.',
+ causes:[
+  {id:'frontDiff',label:'Front diff too free',fix:'More front locking steadies the front under deploy'},
+  {id:'frontDiff',label:'Front diff too locked',fix:'Less locking frees rotation if it’s pushing wide'},
+  {id:'motorMap',label:'Front deploy too aggressive',fix:'A gentler map calms front-axle power delivery'}]}
+];
+
+/* ──────────────── engineer: LMU .svm parser (verified stage 1) ──────────────── */
+// Setup Ripple LMU — .svm parser (stage 1)
+// Parses rFactor2/LMU setup files: INI-style, sections with KeySetting=int//display
+
+function parseSVM(text){
+  const lines = text.split(/\r?\n/);
+  const result = {
+    raw: text,
+    eol: text.includes('\r\n') ? '\r\n' : '\n',
+    vehicleClass: null,
+    className: null,      // normalised: Hypercar / LMP2 / LMP3 / GT3
+    car: null,
+    sections: {},         // section -> [ {key, value(int), display, adjustable, lineIndex} ]
+    lineMap: lines,
+    settingIndex: {}      // "SECTION.Key" -> lineIndex for fast lookup
+  };
+  let cur = '__top__';
+  result.sections[cur] = [];
+  const NON_ADJ = /^(Non-adjustable|Fixed|N\/A|Detached|Standard)$/i;
+
+  lines.forEach((line, i) => {
+    const sec = line.match(/^\[([A-Z0-9]+)\]/);
+    if(sec){ cur = sec[1]; result.sections[cur] = result.sections[cur]||[]; return; }
+    // VehicleClassSetting="ELMS2025 GT3 Porsche_911_GT3_R_LMGT3"
+    const vc = line.match(/^VehicleClassSetting="([^"]*)"/);
+    if(vc){
+      result.vehicleClass = vc[1];
+      const s = vc[1];
+      if(/Hypercar/i.test(s)) result.className='Hypercar';
+      else if(/LMP2/i.test(s)) result.className='LMP2';
+      else if(/LMP3/i.test(s)) result.className='LMP3';
+      else if(/GT3/i.test(s)) result.className='GT3';
+      // car name = last underscore-token chunk, best-effort
+      const parts = s.split(' ');
+      result.car = parts.slice(2).join(' ') || parts[parts.length-1];
+      return;
+    }
+    // KeySetting=intValue//display    (display optional)
+    const m = line.match(/^([A-Za-z0-9_]+Setting)=([-0-9]+)(\/\/(.*))?$/);
+    if(m){
+      const key = m[1], val = parseInt(m[2],10);
+      const display = m[4] !== undefined ? m[4].trim() : '';
+      const adjustable = !NON_ADJ.test(display) && display !== '';
+      result.sections[cur].push({key, value:val, display, adjustable, lineIndex:i, section:cur});
+      result.settingIndex[cur+'.'+key] = i;
+    }
+  });
+  return result;
+}
+
+// Write back: step a setting's integer by delta, return new text (lossless except changed line)
+function setSettingValue(parsed, section, key, newInt){
+  const idx = parsed.settingIndex[section+'.'+key];
+  if(idx===undefined) throw new Error('No such setting: '+section+'.'+key);
+  const line = parsed.lineMap[idx];
+  // replace only the integer, keep the //comment as-is (game recomputes display on load)
+  const newLine = line.replace(/^([A-Za-z0-9_]+Setting=)([-0-9]+)/, '$1'+newInt);
+  const out = parsed.lineMap.slice();
+  out[idx] = newLine;
+  return out.join(parsed.eol);
+}
+
+// Diff two parsed setups: return changed settings (by section.key)
+function diffSetups(a, b){
+  const changes = [];
+  for(const key in a.settingIndex){
+    const ia = a.settingIndex[key], ib = b.settingIndex[key];
+    if(ib===undefined) continue;
+    const la = a.lineMap[ia], lb = b.lineMap[ib];
+    const va = la.match(/=([-0-9]+)/), vb = lb.match(/=([-0-9]+)/);
+    if(va && vb && va[1]!==vb[1]){
+      const da = (la.match(/\/\/(.*)$/)||[])[1]||'';
+      const db = (lb.match(/\/\/(.*)$/)||[])[1]||'';
+      changes.push({key, fromInt:+va[1], toInt:+vb[1], fromDisplay:da.trim(), toDisplay:db.trim()});
+    }
+  }
+  return changes;
+}
+
+/* ──────────────── engineer: in-game six-page field map ──────────────── */
+// Maps the in-game six setup pages to the .svm sections/keys, grouped as the game groups them.
+// Each field: svm section + key, display label, and which page/group it belongs to.
+// This is the mirror of the in-game setup screen.
+
+const LMU_PAGES = [
+  { id:'basic', name:'Basic', groups:[
+    { title:'Virtual Energy', fields:[
+      ['GENERAL','VirtualEnergySetting','Virtual Energy'],
+      ['GENERAL','FuelSetting','Fuel Ratio'],
+      ['GENERAL','FuelCapacitySetting','Fuel Carried'],
+    ]},
+    { title:'Electronics', fields:[
+      ['CONTROLS','RearBrakeSetting','Brake bias'],
+      ['CONTROLS','AntilockBrakeSystemMapSetting','ABS'],
+      ['CONTROLS','TractionControlMapSetting','Onboard TC'],
+      ['CONTROLS','TCPowerCutMapSetting','TC Power Cut'],
+      ['CONTROLS','TCSlipAngleMapSetting','TC Slip Angle'],
+    ]},
+    { title:'Aero', fields:[
+      ['REARWING','RWSetting','Rear wing'],
+    ]},
+  ]},
+  { id:'powertrain', name:'Powertrain', groups:[
+    { title:'Engine', fields:[
+      ['GENERAL','VirtualEnergySetting','Virtual Energy'],
+      ['GENERAL','FuelSetting','Fuel Ratio'],
+      ['ENGINE','RevLimitSetting','Rev Limiter'],
+      ['ENGINE','EngineMixtureSetting','Engine Mixture'],
+      ['BODYAERO','WaterRadiatorSetting','Water radiator cover'],
+      ['BODYAERO','OilRadiatorSetting','Oil radiator cover'],
+    ]},
+    { title:'Electronics', fields:[
+      ['CONTROLS','TractionControlMapSetting','Onboard TC'],
+      ['CONTROLS','TCPowerCutMapSetting','TC Power Cut'],
+      ['CONTROLS','TCSlipAngleMapSetting','TC Slip Angle'],
+      ['ENGINE','RegenerationMapSetting','Regen level'],
+      ['ENGINE','ElectricMotorMapSetting','Electric motor map'],
+    ]},
+    { title:'Differential', fields:[
+      ['DRIVELINE','DiffPowerSetting','Power'],
+      ['DRIVELINE','DiffCoastSetting','Coast'],
+      ['DRIVELINE','DiffPreloadSetting','Preload'],
+      ['DRIVELINE','FrontDiffPowerSetting','Front Power'],
+      ['DRIVELINE','FrontDiffCoastSetting','Front Coast'],
+      ['DRIVELINE','FrontDiffPreloadSetting','Front Preload'],
+    ]},
+    { title:'Gearing', fields:[
+      ['DRIVELINE','RatioSetSetting','Ratio Set'],
+    ]},
+  ]},
+  { id:'wheels', name:'Wheels & Brakes', groups:[
+    { title:'Front Wheels', lr:true, fields:[
+      ['FRONTLEFT','CompoundSetting','Compound'],
+      ['FRONTLEFT','PressureSetting','Tyre pressure'],
+      ['FRONTLEFT','CamberSetting','Camber'],
+    ]},
+    { title:'Rear Wheels', lr:true, fields:[
+      ['REARLEFT','CompoundSetting','Compound'],
+      ['REARLEFT','PressureSetting','Tyre pressure'],
+      ['REARLEFT','CamberSetting','Camber'],
+    ]},
+    { title:'Brakes', fields:[
+      ['CONTROLS','RearBrakeSetting','Brake bias'],
+      ['CONTROLS','BrakeMigrationSetting','Brake Migration'],
+      ['CONTROLS','BrakePressureSetting','Max pedal force'],
+      ['BODYAERO','BrakeDuctSetting','Front brake duct blanking'],
+      ['BODYAERO','BrakeDuctRearSetting','Rear brake duct blanking'],
+    ]},
+  ]},
+  { id:'suspension', name:'Suspension', groups:[
+    { title:'Front Suspension', lr:true, third:true, fields:[
+      ['FRONTLEFT','SpringSetting','Spring rate'],
+      ['FRONTLEFT','PackerSetting','Packers'],
+      ['FRONTLEFT','RideHeightSetting','Ride height'],
+    ]},
+    { title:'Rear Suspension', lr:true, third:true, fields:[
+      ['REARLEFT','SpringSetting','Spring rate'],
+      ['REARLEFT','PackerSetting','Packers'],
+      ['REARLEFT','RideHeightSetting','Ride height'],
+    ]},
+  ]},
+  { id:'dampers', name:'Dampers', groups:[
+    { title:'Front Suspension', lr:true, third:true, fields:[
+      ['FRONTLEFT','SlowBumpSetting','Slow bump'],
+      ['FRONTLEFT','SlowReboundSetting','Slow rebound'],
+      ['FRONTLEFT','FastBumpSetting','Fast bump'],
+      ['FRONTLEFT','FastReboundSetting','Fast rebound'],
+    ]},
+    { title:'Rear Suspension', lr:true, third:true, fields:[
+      ['REARLEFT','SlowBumpSetting','Slow bump'],
+      ['REARLEFT','SlowReboundSetting','Slow rebound'],
+      ['REARLEFT','FastBumpSetting','Fast bump'],
+      ['REARLEFT','FastReboundSetting','Fast rebound'],
+    ]},
+  ]},
+  { id:'chassis', name:'Chassis & Aero', groups:[
+    { title:'Front Chassis', fields:[
+      ['SUSPENSION','FrontToeInSetting','Toe-in'],
+      ['SUSPENSION','FrontAntiSwaySetting','Anti-roll bar'],
+      ['CONTROLS','SteerLockSetting','Wheel Range (Lock)'],
+      ['FRONTWING','FWSetting','Front wing'],
+    ]},
+    { title:'Rear Chassis', fields:[
+      ['SUSPENSION','RearToeInSetting','Toe-in'],
+      ['SUSPENSION','RearAntiSwaySetting','Anti-roll bar'],
+      ['REARWING','RWSetting','Rear wing'],
+    ]},
+  ]},
+];
+
+
+/* ───────────────────────── app ───────────────────────── */
+const groups = [...new Set(P.map(p=>p.group))];
+const byId = Object.fromEntries(P.map(p=>[p.id,p]));
+const sGroups = [...new Set(S.map(s=>s.group))];
+const sById = Object.fromEntries(S.map(s=>[s.id,s]));
+let mode='params', cur='rearWing', dir='up', curS=S[0].id;
+let hideHyper=false;   // Parameters/Diagnose: hide Hypercar-only content when true
+
+/* engineer state */
+let setups=[];
+let selA=-1, selB=-1;
+
+/* fuel calculator state */
+let fuel={perLap:2.9, lapTime:'1:45', length:20, unit:'laps', formation:true, margin:1};
+
+/* bono ai state */
+let aiStatus=null;      // null = not yet probed; {ok:true} or {ok:false,reason}
+let aiMessages=[];      // {role:'user'|'ai'|'err', text}
+let aiSetups=[];        // Bono's own loaded setup list (independent of Engineer tab)
+let spCar='', spTrack='', spSetup='';   // Bono setup-picker selections
+let aiBusy=false;
+let aiAllowWrite=false;
+
+const nav = document.getElementById('nav');
+const main = document.getElementById('main');
+const mobileSel = document.getElementById('mobileSel');
+const mTabs = document.getElementById('mTabs');
+
+function tabsHTML(){
+  return `<div class="mode-tabs" role="tablist" aria-label="Mode">
+    <button class="${mode==='params'?'on':''}" data-m="params">Parameters</button>
+    <button class="${mode==='diagnose'?'on':''}" data-m="diagnose">Diagnose</button>
+    <button class="${mode==='engineer'?'on':''}" data-m="engineer">Engineer</button>
+    <button class="${mode==='ai'?'on':''}" data-m="ai">Bono AI</button>
+  </div>`;
+}
+
+function buildNav(){
+  let items='';
+  if(mode==='params'){
+    const visP = P.filter(p=>!(hideHyper && p.hyperOnly));
+    const visGroups = groups.filter(g=>visP.some(p=>p.group===g));
+    items = `<div class="toggle-wrap"><button class="hyper-toggle ${hideHyper?'off':'on'}" data-hyper="1">${hideHyper?'Show all':'Hide Hypercar'}</button></div>` +
+      visGroups.map(g=>`<div class="group"><h2>${g}</h2>` +
+      visP.filter(p=>p.group===g).map(p=>
+        `<button data-id="${p.id}" class="${p.id===cur?'active':''} ${isLinked(p.id)?'linked':''}">${p.name}</button>`
+      ).join('') + `</div>`).join('');
+  }else if(mode==='diagnose'){
+    const visS = S.filter(s=>!(hideHyper && s.hyperOnly));
+    const visGroups = sGroups.filter(g=>visS.some(s=>s.group===g));
+    items = `<div class="toggle-wrap"><button class="hyper-toggle ${hideHyper?'off':'on'}" data-hyper="1">${hideHyper?'Show all':'Hide Hypercar'}</button></div>` +
+      visGroups.map(g=>`<div class="group"><h2>${g}</h2>` +
+      visS.filter(s=>s.group===g).map(s=>
+        `<button data-id="${s.id}" class="${s.id===curS?'active':''}">${s.name}</button>`
+      ).join('') + `</div>`).join('');
+  }else if(mode==='engineer'){
+    items = `<div class="group"><h2>Workflow</h2>
+      <button data-go="engSource">1 · Load setups</button>
+      <button data-go="engView">2 · View setup</button>
+      <button data-go="engCompare">3 · Compare</button>
+      <button data-go="engFix">4 · Driver requests</button>
+      <button data-go="fuelCalc">Fuel calculator</button></div>
+      <div class="group"><h2>Loaded</h2>
+      <button disabled style="cursor:default;color:var(--muted)">${setups.length} setup file${setups.length===1?'':'s'}</button></div>`;
+  }else{
+    items = `<div class="group"><h2>Bono AI</h2>
+      <button disabled style="cursor:default;color:var(--muted)">Your local race engineer</button></div>
+      <div class="group"><h2>About</h2>
+      <button disabled style="cursor:default;color:var(--muted);white-space:normal;line-height:1.5">Asks questions in plain English about your setups. Runs locally via Claude Code.</button></div>`;
+  }
+  nav.innerHTML = `<div class="brand"><h1>Setup Ripple <span>LMU</span></h1><p>Hypercar · LMP · GT3 cause &amp; effect — Le Mans Ultimate · v1.0</p></div>` + tabsHTML() + items;
+  nav.querySelectorAll('.mode-tabs button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+  nav.querySelectorAll('.group button[data-id]').forEach(b=>b.onclick=()=>mode==='params'?select(b.dataset.id):selectSym(b.dataset.id));
+  const ht=nav.querySelector('.hyper-toggle'); if(ht) ht.onclick=()=>{
+    hideHyper=!hideHyper;
+    if(hideHyper){
+      // if the current selection is now hidden, jump to the first visible one
+      if(mode==='params'){ const p=P.find(x=>x.id===cur); if(p&&p.hyperOnly){ const v=P.find(x=>!x.hyperOnly); if(v){cur=v.id; renderParam();} } }
+      else{ const s=S.find(x=>x.id===curS); if(s&&s.hyperOnly){ const v=S.find(x=>!x.hyperOnly); if(v){curS=v.id; renderSym();} } }
+    }
+    buildNav();
+  };
+  nav.querySelectorAll('.group button[data-go]').forEach(b=>b.onclick=()=>{
+    const el=document.getElementById(b.dataset.go); if(el) el.scrollIntoView({behavior:'smooth'});
+  });
+
+  mTabs.innerHTML = tabsHTML();
+  mTabs.querySelectorAll('button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+  if(mode==='engineer'||mode==='ai'){ mobileSel.style.display='none'; }
+  else{
+    mobileSel.style.display='';
+    if(mode==='params'){
+      const visP=P.filter(p=>!(hideHyper && p.hyperOnly));
+      mobileSel.innerHTML = groups.filter(g=>visP.some(p=>p.group===g)).map(g=>
+        `<optgroup label="${g}">` + visP.filter(p=>p.group===g).map(p=>
+          `<option value="${p.id}" ${p.id===cur?'selected':''}>${p.name}</option>`).join('') + `</optgroup>`).join('');
+    }else{
+      const visS=S.filter(s=>!(hideHyper && s.hyperOnly));
+      mobileSel.innerHTML = sGroups.filter(g=>visS.some(s=>s.group===g)).map(g=>
+        `<optgroup label="${g}">` + visS.filter(s=>s.group===g).map(s=>
+          `<option value="${s.id}" ${s.id===curS?'selected':''}>${s.name}</option>`).join('') + `</optgroup>`).join('');
+    }
+  }
+}
+mobileSel.onchange = e=>mode==='params'?select(e.target.value):selectSym(e.target.value);
+
+function isLinked(id){
+  const p = byId[cur];
+  return id!==cur && p.knock.some(k=>k.id===id);
+}
+
+function balText(b){
+  if(b<=-2) return 'Shifts the balance clearly towards <strong>tight / understeer</strong>.';
+  if(b===-1) return 'Nudges the balance towards <strong>tight / understeer</strong>.';
+  if(b===0)  return 'Roughly <strong>balance-neutral</strong> overall — its effects depend on which end you change, or it alters character rather than balance.';
+  if(b===1)  return 'Nudges the balance towards <strong>loose / oversteer</strong>.';
+  return 'Shifts the balance clearly towards <strong>loose / oversteer</strong>.';
+}
+
+function render(){
+  if(mode==='params') renderParam();
+  else if(mode==='diagnose') renderSym();
+  else if(mode==='engineer') renderEng();
+  else renderAI();
+}
+
+function renderParam(){
+  const p = byId[cur], d = p[dir];
+  const pos = 50 + d.bal*15;
+  main.innerHTML = `
+    <div class="crumb">${p.group}</div>
+    <div class="title-row"><h2>${p.name}</h2></div>
+    <p class="does">${p.does}</p>
+
+    <div class="toggle" role="tablist" aria-label="Direction of change">
+      <button class="${dir==='up'?'on':''}" data-d="up">▲ ${p.upLabel}</button>
+      <button class="${dir==='down'?'on':''}" data-d="down">▼ ${p.downLabel}</button>
+    </div>
+
+    <div class="bal">
+      <div class="bal-labels"><span class="t">◀ Tight · understeer</span><span class="n">neutral</span><span class="l">Loose · oversteer ▶</span></div>
+      <div class="bal-track"><div class="bal-tick"></div><div class="bal-mark" id="mark" style="left:50%"></div></div>
+      <p class="bal-note">${balText(d.bal)}</p>
+    </div>
+
+    <section>
+      <h3>What happens</h3>
+      <ul class="fx">${d.fx.map(f=>`<li>${f}</li>`).join('')}</ul>
+    </section>
+
+    <section>
+      <h3 class="kn">Knock-on effects — what else this touches</h3>
+      <div class="knock">${p.knock.map(k=>`
+        <div class="knock-item">
+          <button data-id="${k.id}">${byId[k.id].name} →</button>
+          <p>${k.why}</p>
+        </div>`).join('')}
+      </div>
+    </section>
+
+    <section>
+      <h3 class="cp">How to compensate</h3>
+      <ul class="fx comp">${d.comp.map(c=>`<li><strong style="color:var(--green)">${byId[c.id].name}:</strong> ${c.a}</li>`).join('')}</ul>
+    </section>
+
+    ${p.note?`<p class="footnote">${p.note}</p>`:''}
+  `;
+  main.querySelectorAll('.toggle button').forEach(b=>b.onclick=()=>{dir=b.dataset.d;render();});
+  main.querySelectorAll('.knock-item button').forEach(b=>b.onclick=()=>select(b.dataset.id));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const m = document.getElementById('mark'); if(m) m.style.left = pos+'%';
+  }));
+}
+
+function renderSym(){
+  const s = sById[curS];
+  main.innerHTML = `
+    <div class="crumb">${s.group}</div>
+    <div class="title-row"><h2>${s.name}</h2></div>
+    <p class="does">${s.desc}</p>
+    ${s.quick?`<div class="quick"><b>Quick check</b>${s.quick}</div>`:''}
+    <section>
+      <h3>Likely causes — most common first</h3>
+      ${s.causes.map((c,i)=>`
+        <div class="cause">
+          <span class="rank">${String(i+1).padStart(2,'0')}</span>
+          <div class="body"><strong>${c.label}</strong><p>${c.fix}</p></div>
+          <button data-id="${c.id}">${byId[c.id].name} →</button>
+        </div>`).join('')}
+    </section>
+    <p class="footnote">Change one thing at a time and do at least three clean laps before judging it — single-lap impressions lie. The arrow buttons jump to the full cause-and-effect page for each parameter.</p>
+  `;
+  main.querySelectorAll('.cause > button').forEach(b=>b.onclick=()=>{mode='params';select(b.dataset.id);});
+}
+
+/* ──────────────────── engineer: helpers ──────────────────── */
+const hasFS = !!(window.SetupRippleDir || ('showDirectoryPicker' in window));
+
+function get(obj,path){ return path.split('.').reduce((o,k)=>o&&o[k]!==undefined?o[k]:undefined,obj); }
+function tilt(pid,delta){
+  if(!pid||!delta) return null;
+  const b = delta>0 ? byId[pid].up.bal : byId[pid].down.bal;
+  return b>0?'looser':(b<0?'tighter':null);
+}
+function chip(t){ return t?`<span class="chip ${t==='looser'?'loose':'tight'}">${t}</span>`:''; }
+function confChip(c){ return (c==='likely'||c==='guess')?` <span class="chip">${c}</span>`:''; }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmt(v){ return typeof v==='number' ? (Number.isInteger(v)?v:+v.toFixed(3)) : v; }
+
+function addSetup(name,label,text,saveDir){
+  try{
+    const parsed = parseSVM(text);
+    parsed.name = name;
+    parsed.label = label;
+    parsed.saveDir = saveDir;
+    setups.push(parsed);
+  }catch(e){ console.warn('Could not parse setup', label, e); }
+}
+
+const isSvmName = n => /\.svm$/i.test(n);
+
+async function pickFolder(){
+  try{
+    if(window.SetupRippleDir){
+      const files = await window.SetupRippleDir.pick();
+      let added=0;
+      for(const f of files){
+        try{
+          if(isSvmName(f.name)){
+            // svm is text; bridge gives .text for json-likes, but svm may arrive as buffer — handle both
+            const text = f.text!=null ? f.text : (f.buffer ? new TextDecoder().decode(new Uint8Array(f.buffer)) : null);
+            if(text!=null){ addSetup(f.name, f.relPath, text, f.fullPath); added++; }
+          }
+        }catch(e){ console.warn('Skipped', f.relPath, e); }
+      }
+      if(!added && files.length) console.warn('Folder had '+files.length+' files but no .svm setups loaded.');
+    }else{
+      const root = await window.showDirectoryPicker();
+      async function walk(dh,prefix,depth){
+        if(depth>4) return;
+        for await(const [nm,h] of dh.entries()){
+          if(h.kind==='directory') await walk(h,prefix?prefix+' / '+nm:nm,depth+1);
+          else if(isSvmName(nm)){
+            const lbl=(prefix?prefix+' / ':'')+nm;
+            try{ addSetup(nm,lbl,await (await h.getFile()).text(),dh); }catch(e){ console.warn('Skipped',lbl,e); }
+          }
+        }
+      }
+      await walk(root,'',0);
+    }
+    selA = setups.length>0 ? (selA<0?0:selA) : -1;
+    buildNav(); renderEng();
+  }catch(e){ if(e && e.name!=='AbortError') console.warn('Folder load failed:', e); }
+}
+
+function setupOptions(sel){
+  return setups.map((s,i)=>`<option value="${i}" ${i===sel?'selected':''}>${esc(s.label)}${s.className?' · '+s.className:''}</option>`).join('');
+}
+
+// Build the value lookup for a parsed setup: "SECTION.Key" -> {value, display, adjustable}
+function svmField(parsed, section, key){
+  const idx = parsed.settingIndex[section+'.'+key];
+  if(idx===undefined) return null;
+  const line = parsed.lineMap[idx];
+  const v = line.match(/=([-0-9]+)/);
+  const d = (line.match(/\/\/(.*)$/)||[])[1];
+  const display = d!==undefined ? d.trim() : '';
+  const NON_ADJ = /^(Non-adjustable|Fixed|N\/A|Detached|Standard)$/i;
+  return { value:+v[1], display, adjustable: !NON_ADJ.test(display) && display!=='' };
+}
+
+// Render one field row (label + value), greyed if non-adjustable / missing
+// Render nudge controls (◄ ►) + pending-step badge for an adjustable field.
+// linked=true mirrors L/R. Buttons carry data attrs wired in renderEng.
+function nudgeCtl(section, key, label, linked){
+  const id = section+'.'+key;
+  const pend = pendingEdits[id] ? pendingEdits[id].steps : 0;
+  const badge = `<span class="eng-pend">${pend!==0?(pend>0?'+':'')+pend:''}</span>`;
+  const lk = linked?'1':'0';
+  return `<span class="eng-nudge">${badge}`+
+    `<button class="nbtn" data-sec="${section}" data-key="${key}" data-lbl="${esc(label)}" data-d="-1" data-lk="${lk}" title="One click down">◄</button>`+
+    `<button class="nbtn" data-sec="${section}" data-key="${key}" data-lbl="${esc(label)}" data-d="1" data-lk="${lk}" title="One click up">►</button></span>`;
+}
+
+function fieldRow(parsed, section, key, label){
+  const f = svmField(parsed, section, key);
+  if(!f) return ''; // field doesn't exist for this car/class — skip entirely
+  const cls = f.adjustable ? 'eng-row' : 'eng-row na';
+  const val = f.display!=='' ? f.display : '—';
+  const ctl = f.adjustable ? nudgeCtl(section, key, label, false) : '';
+  return `<div class="${cls}"><span class="eng-k">${esc(label)}</span><span class="eng-cell"><span class="eng-v">${esc(val)}</span>${ctl}</span></div>`;
+}
+
+// For L/R linked groups, the FRONTLEFT/REARLEFT key drives display; we show one value (linked) + 3rd spring if present
+// 3rd-spring (heave) fields live in [SUSPENSION] as Front3rd*/Rear3rd* keys.
+function thirdKeyFor(leftSection, key){
+  const side = leftSection.indexOf('FRONT')===0 ? 'Front' : (leftSection.indexOf('REAR')===0 ? 'Rear' : null);
+  if(!side) return null;
+  const map = {
+    SpringSetting:'3rdSpringSetting', PackerSetting:'3rdPackerSetting',
+    SlowBumpSetting:'3rdSlowBumpSetting', SlowReboundSetting:'3rdSlowReboundSetting',
+    FastBumpSetting:'3rdFastBumpSetting', FastReboundSetting:'3rdFastReboundSetting',
+  };
+  if(!map[key]) return null;
+  return ['SUSPENSION', side+map[key]];
+}
+
+function lrFieldRow(parsed, leftSection, key, label, third){
+  const f = svmField(parsed, leftSection, key);
+  if(!f) return '';
+  const cls = f.adjustable ? 'eng-row' : 'eng-row na';
+  const val = f.display!=='' ? f.display : '—';
+  const ctl = f.adjustable ? nudgeCtl(leftSection, key, label, true) : '';
+  let thirdCell = '';
+  if(third){
+    const tk = thirdKeyFor(leftSection, key);
+    if(tk){
+      const t = svmField(parsed, tk[0], tk[1]);
+      if(t && t.display!=='' && !/^(Non-adjustable|Detached|N\/A)$/i.test(t.display)){
+        const tctl = t.adjustable ? nudgeCtl(tk[0], tk[1], label+' (3rd)', false) : '';
+        thirdCell = `<span class="eng-cell eng-3rd" title="3rd spring / heave element"><span class="eng-v3">3rd: ${esc(t.display)}</span>${tctl}</span>`;
+      }
+    }
+  }
+  return `<div class="${cls}"><span class="eng-k">${esc(label)}</span><span class="eng-cell"><span class="eng-v">${esc(val)}</span>${ctl}</span>${thirdCell}</div>`;
+}
+
+function renderEngGroup(parsed, g){
+  const rows = g.fields.map(([sec,key,lbl])=>{
+    if(g.lr) return lrFieldRow(parsed, sec, key, lbl, g.third);
+    return fieldRow(parsed, sec, key, lbl);
+  }).join('');
+  if(!rows.trim()) return ''; // whole group empty for this car
+  return `<div class="eng-group"><h4>${esc(g.title)}${g.lr?' <span class="eng-lr">L/R linked</span>':''}</h4>${rows}</div>`;
+}
+
+function renderEngPage(parsed, pageId){
+  const page = LMU_PAGES.find(p=>p.id===pageId) || LMU_PAGES[0];
+  const groups = page.groups.map(g=>renderEngGroup(parsed,g)).join('');
+  return `<div class="eng-page">${groups||'<p class="eng-empty">No adjustable settings on this page for this car.</p>'}</div>`;
+}
+
+/* ──────────────── stage 3: driver-request fixes (manual + presets) ──────────────── */
+// Pending edits are stored as integer deltas against the loaded setup, keyed "SECTION.Key".
+// We never predict the displayed value (per-car step sizes make it unpredictable) — we step
+// the integer and let the game show the exact value on load. The UI shows direction + click count.
+
+let pendingEdits = {};   // "SECTION.Key" -> { steps:int, label, section, key }
+
+function pendingCount(){ return Object.keys(pendingEdits).length; }
+
+// Step a field by delta clicks. For L/R linked fields, the caller passes the LEFT section;
+// we also mirror to the matching RIGHT section so the saved file changes both (as in-game link).
+function nudge(section, key, label, delta, linked){
+  const id = section+'.'+key;
+  const cur = pendingEdits[id] ? pendingEdits[id].steps : 0;
+  const steps = cur + delta;
+  if(steps===0){ delete pendingEdits[id]; }
+  else { pendingEdits[id] = { steps, label, section, key }; }
+  // mirror L/R: if this is a LEFT corner field, mirror to RIGHT
+  if(linked && /LEFT$/.test(section)){
+    const rightSec = section.replace(/LEFT$/,'RIGHT');
+    const rid = rightSec+'.'+key;
+    if(steps===0) delete pendingEdits[rid];
+    else pendingEdits[rid] = { steps, label, section:rightSec, key, mirror:true };
+  }
+  renderEng();
+}
+
+// Apply all pending edits to the parsed setup, return new .svm text
+function buildEditedSVM(parsed){
+  let text = parsed.raw;
+  let p = parseSVM(text);
+  for(const id in pendingEdits){
+    const e = pendingEdits[id];
+    const idx = p.settingIndex[id];
+    if(idx===undefined) continue;
+    const line = p.lineMap[idx];
+    const m = line.match(/=([-0-9]+)/);
+    if(!m) continue;
+    const newInt = parseInt(m[1],10) + e.steps;
+    text = setSettingValue(p, e.section, e.key, newInt);
+    p = parseSVM(text); // re-parse so indices stay valid for next edit
+  }
+  return text;
+}
+
+function downloadSVM(text, filename){
+  const blob = new Blob([text], {type:'application/octet-stream'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+}
+
+function saveEdited(){
+  const a = selA>=0 ? setups[selA] : null;
+  if(!a || !pendingCount()) return;
+  const text = buildEditedSVM(a);
+  const base = (a.name||'setup').replace(/\.svm$/i,'');
+  const fileName = base+'_SR.svm';
+  const msg = document.getElementById('saveMsg');
+  // Desktop app: save in place beside the original via the bridge. Browser: download.
+  if(window.SetupRippleDir && window.SetupRippleDir.save){
+    window.SetupRippleDir.save(a.saveDir||a.fullPath||null, fileName, text).then(res=>{
+      if(res && res.ok){
+        if(msg) msg.textContent = 'Saved to '+res.path+'. It appears in-game when you load it (the game shows the final values).';
+      }else{
+        // bridge failed — fall back to download
+        downloadSVM(text, fileName);
+        if(msg) msg.textContent = 'Saved '+fileName+' to your downloads — drop it into your track\'s setup folder.';
+      }
+    }).catch(()=>{
+      downloadSVM(text, fileName);
+      if(msg) msg.textContent = 'Saved '+fileName+' to your downloads — drop it into your track\'s setup folder.';
+    });
+  }else{
+    downloadSVM(text, fileName);
+    if(msg) msg.textContent = 'Saved '+fileName+' — drop it into your track\'s setup folder. The game shows the final values when you load it.';
+  }
+}
+
+function clearEdits(){ pendingEdits = {}; renderEng(); }
+
+// ── Preset problems: handling complaint -> setting nudges ──
+// Each fix nudges integer steps. Direction respects front/rear axle effect.
+// Only applies fixes whose target fields are ADJUSTABLE in the loaded car (checked at render).
+const PRESET_FIXES = [
+  { id:'entry_under', name:'Less understeer on entry', desc:'Frees the car to rotate under trail-braking.',
+    nudges:[
+      {section:'CONTROLS', key:'RearBrakeSetting', label:'Shift brake bias rearward — the entry rotation tool', delta:1},
+      {section:'DRIVELINE', key:'DiffCoastSetting', label:'Less coast diff lock off-throttle', delta:-1},
+      {section:'SUSPENSION', key:'FrontAntiSwaySetting', label:'Softer front bar for mid-corner support', delta:-1},
+    ]},
+  { id:'entry_snap', name:'Calmer rear on entry', desc:'Steadies a rear that steps out under trail-braking.',
+    nudges:[
+      {section:'CONTROLS', key:'RearBrakeSetting', label:'Shift brake bias forward for braking stability', delta:-1},
+      {section:'DRIVELINE', key:'DiffCoastSetting', label:'More coast lock steadies the rear off-throttle', delta:1},
+    ]},
+  { id:'mid_under', name:'Less understeer mid-corner', desc:'More mechanical front grip at all speeds.',
+    nudges:[
+      {section:'SUSPENSION', key:'FrontAntiSwaySetting', label:'The cleanest mid-corner balance tool', delta:-1},
+      {section:'FRONTLEFT', key:'SpringSetting', label:'Softer front spring (L/R linked)', delta:-1},
+    ]},
+  { id:'mid_over', name:'Less oversteer mid-corner', desc:'Calms a rear that edges wide at steady state.',
+    nudges:[
+      {section:'SUSPENSION', key:'RearAntiSwaySetting', label:'Softer rear bar', delta:-1},
+      {section:'REARLEFT', key:'SpringSetting', label:'Softer rear spring (L/R linked)', delta:-1},
+    ]},
+  { id:'fast_under', name:'Less understeer in fast corners', desc:'Pulls aero balance forward — speed-dependent fix.',
+    nudges:[
+      {section:'REARWING', key:'RWSetting', label:'A step less wing (top speed bonus)', delta:-1},
+      {section:'FRONTLEFT', key:'RideHeightSetting', label:'Lower front = more rake = more front aero', delta:-1},
+    ]},
+  { id:'fast_over', name:'More stability in fast corners', desc:'Pushes aero balance rearward for confidence at speed.',
+    nudges:[
+      {section:'REARWING', key:'RWSetting', label:'A step more wing — the biggest single fix', delta:1},
+      {section:'REARLEFT', key:'RideHeightSetting', label:'Slightly less rake', delta:-1},
+    ]},
+  { id:'traction', name:'More traction on exit', desc:'Helps the rear hook up out of slow corners.',
+    nudges:[
+      {section:'REARLEFT', key:'SpringSetting', label:'Softer rear spring (L/R linked)', delta:-1},
+      {section:'SUSPENSION', key:'RearAntiSwaySetting', label:'Softer rear bar keeps the inside rear planted', delta:-1},
+      {section:'DRIVELINE', key:'DiffPowerSetting', label:'Less power lock stops single-wheel spin-up', delta:-1},
+    ]},
+  { id:'power_push', name:'Less push on throttle', desc:'For a front that gives up the moment you accelerate.',
+    nudges:[
+      {section:'DRIVELINE', key:'DiffPowerSetting', label:'More power lock — a locked diff drives straight', delta:1},
+      {section:'REARLEFT', key:'SpringSetting', label:'Stiffer rear spring limits squat lifting the nose', delta:1},
+    ]},
+  /* ── LMU-specific extras (Hypercar/hybrid — auto-hidden on cars without these fields) ── */
+  { id:'hybrid_brake', name:'Unsettled braking on a hybrid', desc:'Regen tugs the car as you trail off the brake.',
+    nudges:[
+      {section:'ENGINE', key:'RegenerationMapSetting', label:'Lower regen for a cleaner brake feel', delta:-1},
+    ]},
+  { id:'energy_short', name:'Running out of energy', desc:'Not reaching the next stop on the current plan.',
+    nudges:[
+      {section:'ENGINE', key:'ElectricMotorMapSetting', label:'Gentler deploy map makes the energy last', delta:-1},
+      {section:'ENGINE', key:'RegenerationMapSetting', label:'More harvest refills the system', delta:1},
+    ]},
+];
+
+function applyPreset(fix, parsed){
+  fix.nudges.forEach(n=>{
+    const f = svmField(parsed, n.section, n.key);
+    if(f && f.adjustable){
+      const linked = false; // preset targets are central/axle settings, not L/R corner pairs
+      const id=n.section+'.'+n.key;
+      const cur=pendingEdits[id]?pendingEdits[id].steps:0;
+      const steps=cur+n.delta;
+      if(steps===0) delete pendingEdits[id];
+      else pendingEdits[id]={steps, label:n.label, section:n.section, key:n.key};
+    }
+  });
+  renderEng();
+}
+
+// Which preset fixes are applicable (have at least one adjustable target) for this car
+function applicablePresets(parsed){
+  return PRESET_FIXES.filter(fix=> fix.nudges.some(n=>{ const f=svmField(parsed,n.section,n.key); return f && f.adjustable; }));
+}
+
+// Render the pending-edits preview list
+function renderPending(parsed){
+  if(!pendingCount()) return '';
+  const rows = Object.values(pendingEdits).filter(e=>!e.mirror).map(e=>{
+    const dir = e.steps>0 ? '+'+e.steps : ''+e.steps;
+    const f = svmField(parsed, e.section, e.key);
+    const from = f ? f.display : '';
+    return `<tr><td>${esc(e.label||e.key)}</td><td class="cmp-a">${esc(from)}</td><td class="cmp-arrow">${dir} click${Math.abs(e.steps)===1?'':'s'}</td></tr>`;
+  }).join('');
+  return `<table class="cmp-table"><thead><tr><th>Change</th><th>From</th><th>Step</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="eng-note">The game shows the exact new values when you load the setup — per-car step sizes mean the app steps the setting, the game finalises the number.</p>
+    <div class="eng-actions">
+      <button class="btn primary" id="btnSaveEdit">Download fixed setup</button>
+      <button class="btn" id="btnClearEdit">Clear changes</button>
+    </div>
+    <p class="eng-status" id="saveMsg"></p>`;
+}
+
+let engPage = 'basic';   // current six-page sub-tab
+
+function renderEng(){
+  const a = selA>=0 ? setups[selA] : null;
+  const pageTabs = LMU_PAGES.map(p=>
+    `<button class="eng-ptab ${p.id===engPage?'on':''}" data-pg="${p.id}">${esc(p.name)}</button>`
+  ).join('');
+
+  main.innerHTML = `
+    <div class="crumb">Engineer</div>
+    <div class="title-row"><h2>Race engineer</h2></div>
+    <p class="does">Load your Le Mans Ultimate <strong>.svm</strong> setup files, then read them laid out like the in-game setup screen — Basic, Powertrain, Wheels &amp; Brakes, Suspension, Dampers, Chassis &amp; Aero. Non-adjustable settings for the car are greyed. Left/right are linked as in-game; the 3rd spring is shown separately. Class is detected automatically from the file.</p>
+
+    <section id="engSource">
+      <h3>1 · Load setups</h3>
+      <p class="does" style="margin-bottom:12px">Open your Le Mans Ultimate setups folder. Setups live under <code>...\\Steam\\steamapps\\common\\Le Mans Ultimate\\UserData\\player\\Settings\\&lt;track&gt;</code> (on whichever drive your Steam games are installed). All classes share a track folder; each file's class is read from inside it.</p>
+      <div class="eng-actions">
+        <button class="btn primary" id="btnFolder" ${hasFS?'':'disabled'}>Open setups folder</button>
+        <button class="btn" id="btnFiles">Add setup files…</button>
+        ${setups.length?`<button class="btn" id="btnClear">Clear all</button>`:''}
+        <input type="file" id="fileInput" accept=".svm" multiple style="display:none">
+      </div>
+      <p class="eng-status">${setups.length?`<b>${setups.length}</b> setup${setups.length===1?'':'s'} loaded`:'Nothing loaded yet'}${hasFS?'':' · folder picker needs Chrome or Edge — use “Add setup files” instead'}</p>
+    </section>
+
+    <section id="engView">
+      <h3>2 · View setup</h3>
+      ${setups.length?`
+      <div class="selrow"><label>Setup</label><select id="selA">${setupOptions(selA)}</select></div>
+      ${a?`<p class="eng-meta">${esc(a.className||'Unknown class')}${a.car?' · '+esc(a.car):''}</p>
+      <div class="eng-ptabs">${pageTabs}</div>
+      ${renderEngPage(a, engPage)}`:''}`:`<p class="eng-empty">Load a setup above to view it page by page.</p>`}
+    </section>
+
+    <section id="engCompare">
+      <h3>3 · Compare two setups</h3>
+      ${setups.length<2?`<p class="eng-empty">Load at least two setups to compare.</p>`:`
+      <div class="selrow"><label>A</label><select id="selCmpA">${setupOptions(selA)}</select></div>
+      <div class="selrow"><label>B</label><select id="selCmpB">${setupOptions(selB)}</select></div>
+      ${(selA>=0&&selB>=0&&selA!==selB)?renderCompare(setups[selA],setups[selB]):'<p class="eng-empty">Pick two different setups.</p>'}`}
+    </section>
+
+    <section id="engFix">
+      <h3>4 · Driver requests</h3>
+      ${a?`
+      <p class="does" style="margin-bottom:12px">Nudge any adjustable setting with the ◄ ► buttons on the setup above, or pick a handling problem below and the app stages the usual fixes. Changes collect here as a preview — nothing's written until you download. The app steps the setting by one click at a time and lets the game show the exact value on load (per-car step sizes vary, especially hybrid regen).</p>
+      <div class="fix-grid">
+        ${applicablePresets(a).map(fix=>`<button class="fix-card" data-fix="${fix.id}"><h4>${esc(fix.name)}</h4><p>${esc(fix.desc)}</p></button>`).join('')}
+      </div>
+      ${pendingCount()?`<h4 class="fix-sub">Pending changes</h4>${renderPending(a)}`:'<p class="eng-empty">No changes staged yet. Nudge a setting or pick a problem above.</p>'}`:`<p class="eng-empty">Load and select a setup above — requests are applied to it.</p>`}
+    </section>
+
+    <section id="fuelCalc">
+      ${fuelCalcHTML()}
+    </section>
+  `;
+
+  // wiring
+  const bf=document.getElementById('btnFolder'); if(bf) bf.onclick=pickFolder;
+  const bfiles=document.getElementById('btnFiles'); if(bfiles) bfiles.onclick=()=>document.getElementById('fileInput').click();
+  const fi=document.getElementById('fileInput'); if(fi) fi.onchange=onFilePick;
+  const bc=document.getElementById('btnClear'); if(bc) bc.onclick=()=>{ setups=[]; selA=-1; selB=-1; buildNav(); renderEng(); };
+  const sa=document.getElementById('selA'); if(sa) sa.onchange=()=>{ selA=+sa.value; renderEng(); };
+  const ca=document.getElementById('selCmpA'); if(ca) ca.onchange=()=>{ selA=+ca.value; renderEng(); };
+  const cb=document.getElementById('selCmpB'); if(cb) cb.onchange=()=>{ selB=+cb.value; renderEng(); };
+  document.querySelectorAll('.eng-ptab').forEach(b=>b.onclick=()=>{ engPage=b.dataset.pg; renderEng(); });
+
+  // stage 3 wiring: nudge buttons, preset cards, save/clear
+  document.querySelectorAll('.nbtn').forEach(b=>b.onclick=()=>{
+    nudge(b.dataset.sec, b.dataset.key, b.dataset.lbl, +b.dataset.d, b.dataset.lk==='1');
+  });
+  document.querySelectorAll('.fix-card').forEach(b=>b.onclick=()=>{
+    const fix=PRESET_FIXES.find(f=>f.id===b.dataset.fix);
+    if(fix && selA>=0) applyPreset(fix, setups[selA]);
+  });
+  const bse=document.getElementById('btnSaveEdit'); if(bse) bse.onclick=saveEdited;
+  const bce=document.getElementById('btnClearEdit'); if(bce) bce.onclick=clearEdits;
+
+  // fuel calc wiring (preserved from shell)
+  ['fLap','fTime','fLen','fUnit','fForm','fMargin'].forEach(id=>{
+    const el=document.getElementById(id); if(el){ el.oninput=readFuel; el.onchange=readFuel; }
+  });
+  renderFuelOut();
+}
+
+function fuelCalcHTML(){
+  return `
+    <h3>Fuel calculator</h3>
+    <div class="fuel">
+      <p class="sub">Plan a stint. Enter your numbers — everything updates live.</p>
+      <p class="sub" style="margin-bottom:12px">In LMU, set <b>Virtual Energy to 100%</b> and use the <b>Fuel Ratio</b> to control how much fuel goes in — the ratio maps to litres carried (the game shows the litres next to it). This calculator works in litres per lap; read your fuel-per-lap from the car's MFD or telemetry.</p>
+      <div class="fuel-row"><label>Fuel per lap (L)</label><input type="number" id="fLap" step="0.1" min="0" value="${fuel.perLap}"></div>
+      <div class="fuel-row"><label>Lap time (m:ss)</label><input type="text" id="fTime" placeholder="1:45" value="${fuel.lapTime}"></div>
+      <div class="fuel-row"><label>Race length</label><input type="number" id="fLen" step="1" min="0" value="${fuel.length}"></div>
+      <div class="fuel-row"><label>Length is</label>
+        <select id="fUnit" style="width:auto;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px">
+          <option value="laps" ${fuel.unit==='laps'?'selected':''}>laps</option>
+          <option value="mins" ${fuel.unit==='mins'?'selected':''}>minutes</option>
+        </select></div>
+      <div class="fuel-row"><label>Formation lap?</label><input type="checkbox" id="fForm" ${fuel.formation?'checked':''} style="width:auto;accent-color:var(--amber)"></div>
+      <div class="fuel-row"><label>Safety margin (laps)</label><input type="number" id="fMargin" step="1" min="0" value="${fuel.margin}"></div>
+      <div class="fuel-out" id="fuelOut"></div>
+    </div>`;
+}
+
+function readFuel(){
+  fuel.perLap=parseFloat(document.getElementById('fLap').value)||0;
+  fuel.lapTime=document.getElementById('fTime').value.trim();
+  fuel.length=parseFloat(document.getElementById('fLen').value)||0;
+  fuel.unit=document.getElementById('fUnit').value;
+  fuel.formation=document.getElementById('fForm').checked;
+  fuel.margin=parseFloat(document.getElementById('fMargin').value)||0;
+  renderFuelOut();
+}
+
+function onFilePick(e){
+  const files=[...e.target.files];
+  let pending=files.length;
+  if(!pending) return;
+  files.forEach(file=>{
+    const r=new FileReader();
+    r.onload=()=>{ if(isSvmName(file.name)) addSetup(file.name, file.name, r.result, null); if(--pending===0){ selA=selA<0?0:selA; buildNav(); renderEng(); } };
+    r.onerror=()=>{ if(--pending===0){ buildNav(); renderEng(); } };
+    r.readAsText(file);
+  });
+}
+
+// Compare two parsed setups: show changed settings, mapped to friendly labels via the page map
+// Handling-effect knowledge: for a given setting key, what does INCREASING the value tend to do
+// to the car's balance? 'tight' = more stable / understeer-biased, 'loose' = more rotation / oversteer-biased.
+// Direction is the general setup-theory tendency; the app labels the change, the driver judges feel.
+// front-axle changes and rear-axle changes push balance opposite ways — encoded per key.
+const HANDLING = {
+  // springs / ARB: stiffer front -> looser (less front grip); stiffer rear -> tighter
+  'SUSPENSION.FrontAntiSwaySetting':{up:'loose',label:'front ARB'},
+  'SUSPENSION.RearAntiSwaySetting':{up:'tight',label:'rear ARB'},
+  // wings: more rear wing -> tighter (rear grip); more front wing -> looser
+  'REARWING.RWSetting':{up:'tight',label:'rear wing'},
+  'FRONTWING.FWSetting':{up:'loose',label:'front wing'},
+  // toe: more front toe-in -> tighter entry; more rear toe-in -> tighter overall
+  'SUSPENSION.FrontToeInSetting':{up:'tight',label:'front toe'},
+  'SUSPENSION.RearToeInSetting':{up:'tight',label:'rear toe'},
+  // brake bias: more rearward -> looser on entry (RearBrakeSetting raises rear %)
+  'CONTROLS.RearBrakeSetting':{up:'loose',label:'brake bias rear'},
+  // diff: more power-side locking -> looser on power; more preload -> tighter mid
+  'DRIVELINE.DiffPowerSetting':{up:'loose',label:'power-side lock'},
+  'DRIVELINE.DiffCoastSetting':{up:'tight',label:'coast-side lock'},
+};
+
+function effectLabel(key, fromInt, toInt){
+  const h = HANDLING[key];
+  if(!h) return '';
+  const dir = toInt>fromInt ? h.up : (h.up==='tight'?'loose':'tight');
+  return dir; // 'tight' | 'loose'
+}
+
+function renderCompare(a,b){
+  const labelFor = (sectionKey)=>{
+    const [sec,key]=sectionKey.split('.');
+    for(const pg of LMU_PAGES) for(const g of pg.groups) for(const [s,k,l] of g.fields)
+      if(s===sec && k===key) return {page:pg.name, label:l};
+    return {page:'', label:sectionKey};
+  };
+  const changes = diffSetups(a,b).map(c=>{ const m=labelFor(c.key); return {...c, ...m}; })
+    .filter(c=>c.label);
+  if(!changes.length) return '<p class="eng-empty">These two setups are identical (in mapped fields).</p>';
+  const rows = changes.map(c=>{
+    const eff = effectLabel(c.key, c.fromInt, c.toInt);
+    const chip = eff ? `<span class="chip ${eff}">${eff==='tight'?'tighter':'looser'}</span>` : '';
+    return `<tr><td>${esc(c.page)}</td><td>${esc(c.label)}</td><td class="cmp-a">${esc(c.fromDisplay||c.fromInt)}</td><td class="cmp-arrow">→</td><td class="cmp-b">${esc(c.toDisplay||c.toInt)}</td><td>${chip}</td></tr>`;
+  }).join('');
+  return `<table class="cmp-table"><thead><tr><th>Page</th><th>Setting</th><th>A</th><th></th><th>B</th><th>Effect of B</th></tr></thead><tbody>${rows}</tbody></table>
+  <p class="eng-note">“Tighter/looser” shows the general setup-theory tendency of the change toward stability (tighter) or rotation (looser), where known. Tyres, fuel and track change the feel — treat it as a pointer, not a promise.</p>`;
+}
+
+function parseLapTime(s){
+  if(!s) return null;
+  s=String(s).trim();
+  if(s.includes(':')){
+    const [m,sec]=s.split(':');
+    const mm=parseFloat(m), ss=parseFloat(sec);
+    if(isNaN(mm)||isNaN(ss)) return null;
+    return mm*60+ss;
+  }
+  const v=parseFloat(s);
+  return isNaN(v)?null:v;
+}
+
+function renderFuelOut(){
+  const out=document.getElementById('fuelOut');
+  if(!out) return;
+  const perLap=fuel.perLap;
+  let laps;
+  if(fuel.unit==='laps'){
+    laps=Math.ceil(fuel.length);
+  }else{
+    const lt=parseLapTime(fuel.lapTime);
+    if(!lt||lt<=0){
+      out.innerHTML=`<p class="fuel-warn">Enter a valid lap time (e.g. 1:45) to convert ${fuel.length} minutes into laps.</p>`;
+      return;
+    }
+    laps=Math.ceil((fuel.length*60)/lt);
+  }
+  const formationLaps=fuel.formation?1:0;
+  const totalLaps=laps+formationLaps+fuel.margin;
+  const litres=perLap*totalLaps;
+  const need=Math.ceil(litres);
+  if(perLap<=0||totalLaps<=0){
+    out.innerHTML=`<p class="fuel-warn">Enter fuel per lap and race length to calculate.</p>`;
+    return;
+  }
+  out.innerHTML=`
+    <div class="big">${need}<span> L</span></div>
+    <div class="line"><span>Racing laps</span><b>${laps}</b></div>
+    ${formationLaps?`<div class="line"><span>Formation lap</span><b>+${formationLaps}</b></div>`:''}
+    ${fuel.margin?`<div class="line"><span>Safety margin</span><b>+${fuel.margin} lap${fuel.margin===1?'':'s'}</b></div>`:''}
+    <div class="line"><span>Total laps fuelled</span><b>${totalLaps}</b></div>
+    <div class="line"><span>Exact need</span><b>${litres.toFixed(1)} L</b></div>
+    <p class="fuel-warn">Rounded up to ${need} L. Carrying spare fuel adds weight — trim the margin for quali or sprints.</p>`;
+}
+
+/* ─────────────────────── Bono AI ───────────────────────
+   Bridge contract (provided by Electron preload, window.SetupRippleAI):
+   • available() -> Promise<{ok:true} | {ok:false, reason:string}>
+       (also tolerated: a plain boolean, or a non-Promise value)
+   • send(prompt, { allowWrite, onChunk, onDone, onError })
+       streaming callback model:
+         onChunk(text)   – called repeatedly as output streams
+         onDone(fullText)– called once on clean completion
+         onError(message)– called on failure
+       allowWrite (bool, default false) – when false the bridge prepends
+         a read-only instruction so Bono never edits files without approval.
+       (also tolerated: send() returning Promise<fullText> instead of streaming)
+   The folder-picker bridge is window.SetupRippleDir.pick() — NOT
+   showDirectoryPicker, which is a reserved browser name contextBridge
+   refuses to bind over (that collision blocked SetupRippleAI entirely).
+──────────────────────────────────────────────────────── */
+function AI(){ return window.SetupRippleAI || null; }
+
+/* ---- Bono setup picker: derive car / track / setup from loaded setups ----
+   Setup labels look like "GT3 / Audi / audi_spa.carsetup" (folder relPath) or
+   just a filename. We split on " / " — last part is the setup, the part before
+   it the track, and anything earlier joined as the car/category path. This is
+   purely a naming aid: it inserts a clear reference into the message so both
+   you and Bono know exactly which setup you mean. Bono reads the files itself. */
+function spParts(label){
+  const segs=String(label).split(' / ').map(s=>s.trim()).filter(Boolean);
+  const setup=segs.length?segs[segs.length-1]:label;
+  const track=segs.length>=2?segs[segs.length-2]:'';
+  const car  =segs.length>=3?segs.slice(0,segs.length-2).join(' / '):'';
+  return {car,track,setup};
+}
+function spCars(){
+  return [...new Set(aiSetups.map(s=>spParts(s).car).filter(Boolean))].sort();
+}
+function spTracks(car){
+  return [...new Set(aiSetups.filter(s=>spParts(s).car===car).map(s=>spParts(s).track).filter(Boolean))].sort();
+}
+function spSetups(car,track){
+  return aiSetups.filter(s=>{const p=spParts(s);return p.car===car&&p.track===track;})
+    .map(s=>spParts(s).setup).sort();
+}
+function spReference(){
+  const bits=[];
+  if(spCar) bits.push(spCar);
+  if(spTrack) bits.push(spTrack);
+  if(spSetup) bits.push(spSetup);
+  return bits.join(' / ');
+}
+// Bono loads its own setup name list — independent of the Engineer tab.
+// Reuses the same bridge but only keeps the relPath labels (names, not file data).
+async function aiPickFolder(){
+  try{
+    if(window.SetupRippleDir){
+      const files = await window.SetupRippleDir.pick();
+      aiSetups = files.map(f=>f.relPath).filter(Boolean).sort();
+    }else if(window.showDirectoryPicker){
+      const root=await window.showDirectoryPicker();
+      const labels=[];
+      async function walk(dh,prefix,depth){
+        if(depth>4) return;
+        for await(const [name,h] of dh.entries()){
+          if(h.kind==='directory') await walk(h,prefix?prefix+' / '+name:name,depth+1);
+          else if(/\.(carsetup|setup|json)$/i.test(name)) labels.push((prefix?prefix+' / ':'')+name);
+        }
+      }
+      await walk(root,'',0);
+      aiSetups=labels.sort();
+    }
+    spCar=''; spTrack=''; spSetup='';
+    if(mode==='ai') renderAI();
+  }catch(e){
+    if(e && e.name!=='AbortError') console.warn('Bono folder load failed:', e);
+  }
+}
+
+const AI_EXAMPLES=[
+  'Why might my setup understeer in slow corners?',
+  'Compare my two loaded setups and explain the difference.',
+  'What should I change to get more traction out of hairpins?'
+];
+
+function renderAI(){
+  const bridge=AI();
+  // State 1 — no bridge at all (plain browser)
+  if(!bridge){
+    main.innerHTML=`
+      <div class="crumb">Bono AI</div>
+      <div class="title-row"><h2>Bono AI</h2></div>
+      <div class="fallback">
+        <div class="icon">🖥️</div>
+        <h3>Runs in the desktop app</h3>
+        <p>Bono is your local race engineer — a chat that can read your setup files and reason about them. It only works in the Setup Ripple LMU desktop app, because it needs access to your computer that a browser tab can’t give.</p>
+        <p>Everything else — Parameters, Diagnose, and the Engineer tab — works fine here in the browser.</p>
+      </div>`;
+    return;
+  }
+  // State 2 — bridge exists but not yet probed
+  if(aiStatus===null){
+    main.innerHTML=`
+      <div class="crumb">Bono AI</div>
+      <div class="title-row"><h2>Bono AI</h2></div>
+      <div class="fallback"><div class="icon">⏳</div><h3>Checking for Claude Code…</h3>
+      <p>Making sure Claude Code is installed and ready.</p></div>`;
+    Promise.resolve(bridge.available()).then(r=>{
+      if(r===true) aiStatus={ok:true};
+      else if(r===false) aiStatus={ok:false,reason:'Claude Code was not detected.'};
+      else aiStatus=r||{ok:false,reason:'Could not determine Claude Code status.'};
+      if(mode==='ai') renderAI();
+    }).catch(e=>{
+      aiStatus={ok:false,reason:(e&&e.message)||'Could not reach Claude Code.'};
+      if(mode==='ai') renderAI();
+    });
+    return;
+  }
+  // State 3 — probed, not available
+  if(!aiStatus.ok){
+    main.innerHTML=`
+      <div class="crumb">Bono AI</div>
+      <div class="title-row"><h2>Bono AI</h2></div>
+      <div class="fallback fallback-wide">
+        <div class="icon">🔌</div>
+        <h3>Let’s switch Bono on</h3>
+        <p>Bono is a race engineer you can chat to. It runs through a free tool called <b>Claude Code</b> on your own computer, using your own Claude account — so your setups never leave your machine. It takes about five minutes to set up once.</p>
+        <p class="tut-status">${esc(aiStatus.reason||'Claude Code was not detected.')}</p>
+        <div class="tut">
+          <div class="tut-step"><span class="tut-n">1</span><div>
+            <b>Get a Claude account.</b><br>
+            If you don’t already have one, sign up at <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>. Bono runs on your account’s usage — a paid plan gives you far more, but a free account works to start.
+          </div></div>
+          <div class="tut-step"><span class="tut-n">2</span><div>
+            <b>Install Node.js</b> (Claude Code needs it to run).<br>
+            Go to <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a>, download the “LTS” version, and run the installer with the default options.
+          </div></div>
+          <div class="tut-step"><span class="tut-n">3</span><div>
+            <b>Install Claude Code.</b><br>
+            Open a terminal — on Windows, press the Start key, type <code>powershell</code>, and hit Enter — then paste this in and press Enter:
+            <div class="tut-cmd"><code>npm install -g @anthropic-ai/claude-code</code></div>
+          </div></div>
+          <div class="tut-step"><span class="tut-n">4</span><div>
+            <b>Sign in.</b><br>
+            In the same terminal, type <code>claude</code> and press Enter. It’ll open your browser to log in with your Claude account. You only do this once.
+          </div></div>
+          <div class="tut-step"><span class="tut-n">5</span><div>
+            <b>Come back and hit Retry.</b><br>
+            Click the button below — Bono should connect.
+          </div></div>
+          <div class="tut-step"><span class="tut-n">6</span><div>
+            <b>Point Bono at your setups.</b><br>
+            Once connected, use the <b>Open setups folder</b> button above the chat to load your setups (your Le Mans Ultimate setups folder). Then pick a car, track and setup from the dropdowns to ask Bono about a specific one.
+          </div></div>
+        </div>
+        <p class="tut-foot">Stuck? See the <a href="https://docs.claude.com/en/docs/claude-code/overview" target="_blank" rel="noopener">official Claude Code guide</a>. Everything else in Setup Ripple LMU — Parameters, Diagnose and the Engineer tab — works fully without any of this.</p>
+        <button class="btn primary" id="aiRetry">Retry connection</button>
+      </div>`;
+    const rb=document.getElementById('aiRetry');
+    if(rb) rb.onclick=()=>{ aiStatus=null; renderAI(); };
+    return;
+  }
+  // State 4 — ready: the chat surface
+  main.innerHTML=`
+    <div class="crumb">Bono AI · connected</div>
+    <div class="title-row"><h2>Bono AI</h2></div>
+    <div class="chat-wrap">
+      <div class="chat-log" id="chatLog">${
+        aiMessages.length? aiMessages.map(m=>msgHTML(m)).join('') :
+        `<div class="chat-empty">Ask Bono anything about your setups — it can read the files in your setups folder and reason about them.
+          <span class="ex">${AI_EXAMPLES.map(x=>`<button data-ex="${esc(x)}">${esc(x)}</button>`).join('')}</span>
+        </div>`
+      }</div>
+      <div class="setup-picker" id="setupPicker">${
+        aiSetups.length ? `
+        <span class="sp-label">Setup</span>
+        <select id="spCar"><option value="">Car…</option>${spCars().map(c=>`<option value="${esc(c)}" ${c===spCar?'selected':''}>${esc(c)}</option>`).join('')}</select>
+        <select id="spTrack" ${spCar?'':'disabled'}><option value="">Track…</option>${(spCar?spTracks(spCar):[]).map(t=>`<option value="${esc(t)}" ${t===spTrack?'selected':''}>${esc(t)}</option>`).join('')}</select>
+        <select id="spSetup" ${spCar&&spTrack?'':'disabled'}><option value="">Setup…</option>${(spCar&&spTrack?spSetups(spCar,spTrack):[]).map(s=>`<option value="${esc(s)}" ${s===spSetup?'selected':''}>${esc(s)}</option>`).join('')}</select>
+        <button id="spInsert" ${spSetup?'':'disabled'}>Insert →</button>
+        <button id="spReload" title="Load a different folder">↻</button>`
+        : `<button class="btn" id="spOpen">Open setups folder</button>
+           <span class="sp-hint">Open your top-level setups folder (ACC: <b>Setups</b> · AC Evo: <b>Car Setups</b>) to pick a setup by car, track and name below. This is just a naming aid — Bono can already read your files; it makes clear which one you mean.</span>`
+      }</div>
+      <div class="chat-tools">
+        <label title="When off (default), Bono can read and advise but never changes files without you ticking this first."><input type="checkbox" id="aiWrite" ${aiAllowWrite?'checked':''}> Allow Bono to edit setup files</label>
+      </div>
+      <div class="chat-input">
+        <textarea id="aiInput" rows="2" placeholder="Ask your race engineer…" ${aiBusy?'disabled':''}></textarea>
+        <button class="btn primary" id="aiSend" ${aiBusy?'disabled':''}>${aiBusy?'…':'Send'}</button>
+      </div>
+    </div>`;
+
+  const log=document.getElementById('chatLog');
+  if(log) log.scrollTop=log.scrollHeight;
+  const wc=document.getElementById('aiWrite'); if(wc) wc.onchange=()=>{aiAllowWrite=wc.checked;};
+  const input=document.getElementById('aiInput');
+  const send=document.getElementById('aiSend');
+  const doSend=()=>{ if(input && input.value.trim()) aiSendMsg(input.value.trim()); };
+  if(send) send.onclick=doSend;
+  if(input){
+    input.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); doSend(); } };
+    input.oninput=()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; };
+    if(!aiBusy) input.focus();
+  }
+  main.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>aiSendMsg(b.dataset.ex));
+  // setup picker wiring (Bono-independent)
+  const spOpen=document.getElementById('spOpen'); if(spOpen) spOpen.onclick=aiPickFolder;
+  const spReload=document.getElementById('spReload'); if(spReload) spReload.onclick=aiPickFolder;
+  const cSel=document.getElementById('spCar');
+  const tSel=document.getElementById('spTrack');
+  const sSel=document.getElementById('spSetup');
+  if(cSel) cSel.onchange=()=>{ spCar=cSel.value; spTrack=''; spSetup=''; renderAI(); };
+  if(tSel) tSel.onchange=()=>{ spTrack=tSel.value; spSetup=''; renderAI(); };
+  if(sSel) sSel.onchange=()=>{ spSetup=sSel.value; renderAI(); };
+  const ins=document.getElementById('spInsert');
+  if(ins) ins.onclick=()=>{
+    const ref=spReference();
+    if(!ref) return;
+    const inp=document.getElementById('aiInput');
+    if(inp){
+      const prefix=`Regarding my setup "${ref}": `;
+      inp.value = inp.value ? (prefix+inp.value) : prefix;
+      inp.focus();
+      inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,140)+'px';
+      inp.setSelectionRange(inp.value.length, inp.value.length);
+    }
+  };
+}
+
+function msgHTML(m){
+  if(m.role==='user') return `<div class="msg user">${esc(m.text)}</div>`;
+  if(m.role==='err') return `<div class="msg err">${esc(m.text)}</div>`;
+  return `<div class="msg ai"><div class="who">Bono</div>${m.streaming&&!m.text?`<span class="typing"><span></span><span></span><span></span></span>`:esc(m.text)}</div>`;
+}
+
+function aiSendMsg(text){
+  const bridge=AI();
+  if(!bridge||aiBusy) return;
+  aiMessages.push({role:'user',text});
+  const aiMsg={role:'ai',text:'',streaming:true};
+  aiMessages.push(aiMsg);
+  aiBusy=true;
+  renderAI();
+
+  const finish=()=>{ aiMsg.streaming=false; aiBusy=false; renderAI(); };
+  let settled=false;
+
+  try{
+    const ret=bridge.send(text,{
+      allowWrite:aiAllowWrite,
+      onChunk:(t)=>{ aiMsg.text+=t; if(mode==='ai'){ const l=document.getElementById('chatLog'); renderAI(); } },
+      onDone:(full)=>{ if(settled) return; settled=true; if(typeof full==='string'&&full) aiMsg.text=full; finish(); },
+      onError:(msg)=>{ if(settled) return; settled=true; aiMessages.pop(); aiMessages.push({role:'err',text:msg||'Something went wrong talking to Claude Code.'}); aiBusy=false; aiMsg.streaming=false; renderAI(); }
+    });
+    // Fallback: send() returned a Promise of the full reply instead of streaming
+    if(ret && typeof ret.then==='function'){
+      ret.then(full=>{ if(settled) return; settled=true; if(typeof full==='string') aiMsg.text=full; finish(); })
+         .catch(e=>{ if(settled) return; settled=true; aiMessages.pop(); aiMessages.push({role:'err',text:(e&&e.message)||'Request failed.'}); aiBusy=false; renderAI(); });
+    }
+  }catch(e){
+    settled=true; aiMessages.pop();
+    aiMessages.push({role:'err',text:(e&&e.message)||'Could not start the request.'});
+    aiBusy=false; renderAI();
+  }
+}
+
+function setMode(m){ mode=m; buildNav(); render(); }
+function select(id){
+  cur=id; dir='up'; mode='params';
+  buildNav(); render();
+  main.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function selectSym(id){
+  curS=id;
+  buildNav(); render();
+  main.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+buildNav(); render();
+</script>
+</body>
+</html>

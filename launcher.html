@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup Ripple</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+  :root{
+    --bg:#141414; --panel:#1a1a1a; --panel-2:#222222; --line:#303030;
+    --text:#f4f6f5; --muted:#8a8a8a; --red:#e8112d; --navy:#003374;
+    --disp:'Barlow Condensed',sans-serif; --body:'Barlow',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--body);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:100vh;padding:40px 24px;
+  }
+  .brand{font-family:var(--mono);font-weight:700;font-size:34px;letter-spacing:.01em;margin-bottom:6px}
+  .brand .ripple{color:var(--red)}
+  .tagline{color:var(--muted);font-size:14px;margin-bottom:48px;text-align:center;max-width:520px;line-height:1.5}
+  .choose{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+  .cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+  .card{
+    width:280px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:28px 26px;cursor:pointer;text-align:left;transition:border-color .15s, transform .15s;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .card:hover{border-color:var(--red);transform:translateY(-3px)}
+  .card:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  .card .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+  .card h2{font-family:var(--disp);font-size:26px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;line-height:1;color:var(--text)}
+  .card .games{color:var(--text);font-size:15px;font-weight:600}
+  .card p{color:var(--muted);font-size:13px;line-height:1.5}
+  .card .go{margin-top:6px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .card:hover .go{color:var(--red)}
+  .foot{margin-top:46px;color:var(--muted);font-size:11px;font-family:var(--mono);letter-spacing:.05em;text-align:center}
+</style>
+</head>
+<body>
+  <div class="brand">SETUP <span class="ripple">RIPPLE</span></div>
+  <div class="tagline">Setup cause &amp; effect, an in-game-style engineer view, and driver requests — for two sim families. Pick the one you're racing.</div>
+
+  <div class="choose">Choose your sim</div>
+  <div class="cards">
+    <button class="card" data-app="setup-ripple.html">
+      <span class="tag">Kunos</span>
+      <h2>ACC / AC Evo</h2>
+      <span class="games">Assetto Corsa Competizione &amp; Evo</span>
+      <p>GT3 cause &amp; effect, six-page setup view, compare, and driver requests for both Kunos sims.</p>
+      <span class="go">Open →</span>
+    </button>
+    <button class="card" data-app="setup-ripple-lmu.html">
+      <span class="tag">Le Mans Ultimate</span>
+      <h2>LMU</h2>
+      <span class="games">Hypercar · LMP · GT3</span>
+      <p>Hypercar/LMP/GT3 cause &amp; effect, six-page engineer view, hybrid energy tools, and Bono AI.</p>
+      <span class="go">Open →</span>
+    </button>
+  </div>
+
+  <div class="foot">One app, two sims · switch anytime from the top bar</div>
+
+  <script>
+    document.querySelectorAll('.card').forEach(c=>{
+      c.addEventListener('click', ()=>{ window.location.href = c.dataset.app; });
+    });
+  </script>
+</body>
+</html>

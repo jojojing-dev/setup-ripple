@@ -1,0 +1,38 @@
+{
+  "name": "setup-ripple",
+  "version": "1.0.0",
+  "description": "Setup Ripple — sim racing setup tools for ACC / AC Evo and Le Mans Ultimate",
+  "author": "JojoJing",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.1.0"
+  },
+  "build": {
+    "appId": "com.setupripple.suite",
+    "productName": "Setup Ripple",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "launcher.html",
+      "setup-ripple.html",
+      "setup-ripple-lmu.html"
+    ],
+    "win": {
+      "icon": "icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    }
+  }
+}

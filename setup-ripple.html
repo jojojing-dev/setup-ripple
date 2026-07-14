@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup Ripple — GT3 cause &amp; effect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#141414;
+    --panel:#1a1a1a;
+    --panel-2:#222222;
+    --line:#303030;
+    --text:#f4f6f5;
+    --muted:#8a8a8a;
+    --tight:#3d7fd6;   /* understeer / "tight" */
+    --loose:#e8a13d;   /* oversteer / "loose" - warm, kept distinct from the red accent */
+    --amber:#e8112d;   /* LM red - the brand accent (var name kept for minimal-diff) */
+    --navy:#003374;
+    --green:#7fd98a;
+    --disp:'Barlow Condensed',sans-serif;
+    --body:'Barlow',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--body);
+    font-size:15px;line-height:1.5;
+  }
+  .app{display:flex;min-height:100vh;max-width:1200px;margin:0 auto}
+
+  /* ---------- sidebar ---------- */
+  nav{
+    width:264px;flex:0 0 264px;border-right:1px solid var(--line);
+    padding:20px 0 32px;background:var(--panel);
+  }
+  .brand{padding:0 18px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+  .brand h1{font-family:var(--disp);font-weight:700;font-size:26px;letter-spacing:.04em;text-transform:uppercase}
+  .brand h1 span{color:var(--amber);display:block}
+  .brand p{font-size:12px;color:var(--muted);margin-top:2px}
+  .group{margin-top:14px}
+  .group h2{
+    font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--muted);padding:0 18px 6px;
+  }
+  .group button{
+    display:block;width:100%;text-align:left;padding:7px 18px;border:0;
+    background:none;color:var(--text);font-family:var(--body);font-size:14px;
+    cursor:pointer;border-left:3px solid transparent;
+  }
+  .group button:hover{background:var(--panel-2)}
+  .group button.active{background:var(--panel-2);border-left-color:var(--amber);font-weight:600}
+  .group button.linked{color:var(--amber)}
+  .group button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+
+  /* ---------- main ---------- */
+  main{flex:1;padding:26px 30px 60px;min-width:0}
+  .crumb{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .title-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin:4px 0 4px}
+  .title-row h2{font-family:var(--disp);font-size:38px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+  .does{color:var(--muted);max-width:62ch;margin-bottom:18px}
+
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:18px}
+  .toggle button{
+    border:0;background:var(--panel);color:var(--muted);padding:9px 18px;
+    font-family:var(--disp);font-size:17px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.05em;cursor:pointer;
+  }
+  .toggle button.on{background:var(--panel-2);color:var(--text);box-shadow:inset 0 -3px 0 var(--amber)}
+  .toggle button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+
+  /* ---------- mode tabs & diagnose ---------- */
+  .mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:12px 12px 0;background:var(--line)}
+  .mobile-nav .mode-tabs{margin:0 0 10px}
+  .mode-tabs button{
+    min-width:0;border:0;background:var(--panel);color:var(--muted);padding:9px 4px;
+    font-family:var(--disp);font-size:14px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.03em;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .mode-tabs button.on{background:var(--panel-2);color:var(--text);box-shadow:inset 0 -3px 0 var(--amber)}
+  .mode-tabs button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+  .quick{
+    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);
+    border-radius:8px;padding:12px 14px;margin-bottom:20px;font-size:14px;
+  }
+  .quick b{
+    display:block;color:var(--amber);font-family:var(--mono);font-size:11px;
+    font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px;
+  }
+  .cause{
+    display:flex;gap:12px;align-items:flex-start;background:var(--panel);
+    border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:8px;
+  }
+  .cause .rank{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:3px}
+  .cause .body{flex:1;min-width:0}
+  .cause .body strong{display:block}
+  .cause .body p{font-size:14px;color:var(--muted)}
+  .cause > button{
+    flex:0 0 auto;border:1px solid var(--line);background:var(--panel-2);color:var(--amber);
+    font-family:var(--mono);font-size:12px;padding:4px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;
+  }
+  .cause > button:hover{border-color:var(--amber)}
+
+  /* ---------- engineer ---------- */
+  .eng-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+  .btn{
+    border:1px solid var(--line);background:var(--panel-2);color:var(--text);
+    font-family:var(--disp);font-size:15px;font-weight:600;letter-spacing:.05em;
+    text-transform:uppercase;padding:9px 16px;border-radius:8px;cursor:pointer;
+  }
+  .btn:hover{border-color:var(--amber)}
+  .btn.primary{background:var(--amber);color:#fff;border-color:var(--amber)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  .eng-status{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:18px}
+  .eng-status b{color:var(--green)}
+  .selrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+  .selrow label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .selrow select{
+    flex:1;min-width:200px;background:var(--panel);color:var(--text);
+    border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-family:var(--body);font-size:14px;
+  }
+  table.diff{width:100%;border-collapse:collapse;margin:14px 0 6px;font-size:14px}
+  table.diff th{
+    text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);
+  }
+  table.diff td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.diff td.num{font-family:var(--mono);font-size:13px;white-space:nowrap}
+  .chip{
+    display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+    text-transform:uppercase;padding:2px 7px;border-radius:99px;border:1px solid var(--line);
+  }
+  .chip.tight{color:var(--tight);border-color:var(--tight)}
+  .chip.loose{color:var(--loose);border-color:var(--loose)}
+  .chip.min{color:var(--amber);border-color:var(--amber)}
+  .fix-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:18px}
+  .fix-card{
+    text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px;cursor:pointer;color:var(--text);font-family:var(--body);
+  }
+  .fix-card:hover{border-color:var(--green)}
+  .fix-card.on{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+  .fix-card h4{font-family:var(--disp);font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .fix-card p{font-size:13px;color:var(--muted);margin-top:4px}
+  .warn{color:var(--amber);font-size:13px;margin:8px 0}
+  .eng-empty{color:var(--muted);font-size:14px;padding:14px;border:1px dashed var(--line);border-radius:8px}
+  td input[type=checkbox]{accent-color:var(--green)}
+
+  /* ---------- view setup (six-page) - matches LMU eng-ptab style ---------- */
+  .vpages{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:0}
+  .vpage{
+    background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);
+    font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    padding:8px 12px;cursor:pointer;margin-bottom:-1px;
+  }
+  .vpage:hover{color:var(--text)}
+  .vpage.on{color:var(--text);border-bottom-color:var(--amber)}
+  .vpage:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+  .eng-nudge{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;white-space:nowrap;margin-left:6px}
+  .nbtn{
+    background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+    width:22px;height:22px;border-radius:5px;cursor:pointer;font-size:11px;line-height:1;
+    display:inline-flex;align-items:center;justify-content:center;padding:0;flex:0 0 auto;
+  }
+  .nbtn:hover{border-color:var(--amber);color:var(--amber)}
+  .nbtn:active{background:var(--amber);color:#fff}
+  /* badge sits in a fixed-width slot that's always reserved, so it never shifts the row */
+  .eng-pend{font-family:var(--mono);font-size:11px;color:var(--amber);text-align:right;flex:0 0 20px;min-width:20px;display:inline-block}
+  .vbody{margin-top:6px}
+  .vgroup{margin-bottom:18px}
+  .vgroup h4{font-family:var(--disp);font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+  .vrow{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:6px 0;border-bottom:1px solid var(--panel-2)}
+  .vlabel{font-size:14px;color:var(--text);flex:0 0 auto}
+  .vcells{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+  .vcell{display:inline-flex;align-items:center;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:3px 9px;min-height:28px}
+  .vcl{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase}
+  .vcv{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:600;min-width:42px}
+
+  /* ---------- fuel calculator (engineer sidebar) ---------- */
+  .fuel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:8px}
+  .fuel h3{font-family:var(--disp);font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--amber);margin-bottom:4px}
+  .fuel .sub{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .fuel-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .fuel-row label{font-size:13.5px;color:var(--text)}
+  .fuel-row input{width:84px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:var(--mono);font-size:13px;text-align:right}
+  .fuel-row input:focus{outline:none;border-color:var(--amber)}
+  .fuel-out{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+  .fuel-out .big{font-family:var(--disp);font-size:34px;font-weight:700;color:var(--green);line-height:1}
+  .fuel-out .big span{font-size:16px;color:var(--muted);font-weight:600}
+  .fuel-out .line{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px}
+  .fuel-out .line b{color:var(--text);font-family:var(--mono)}
+  .fuel-warn{color:var(--amber);font-size:12.5px;margin-top:8px}
+
+  /* ---------- Bono AI chat ---------- */
+  .chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:420px}
+  .chat-log{flex:1;overflow-y:auto;padding:4px 2px 12px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:88%;padding:11px 14px;border-radius:12px;font-size:14.5px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+  .msg.user{align-self:flex-end;background:var(--panel-2);border:1px solid var(--line)}
+  .msg.ai{align-self:flex-start;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber)}
+  .msg.ai .who{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+  .msg.err{align-self:flex-start;background:rgba(255,92,92,.08);border:1px solid var(--loose);color:var(--loose)}
+  .chat-input{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+  .chat-input textarea{flex:1;resize:none;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:var(--body);font-size:14.5px;line-height:1.4;max-height:140px}
+  .chat-input textarea:focus{outline:none;border-color:var(--amber)}
+  .chat-tools{display:flex;align-items:center;gap:14px;margin-bottom:10px;font-size:13px;color:var(--muted)}
+  .chat-tools label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  .chat-tools input[type=checkbox]{accent-color:var(--amber)}
+  .setup-picker{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .setup-picker .sp-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .setup-picker select{flex:1;min-width:120px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 9px;font-family:var(--body);font-size:13.5px}
+  .setup-picker select:disabled{opacity:.4}
+  .setup-picker button{flex:0 0 auto;border:1px solid var(--line);background:var(--panel-2);color:var(--amber);font-family:var(--mono);font-size:12px;padding:7px 11px;border-radius:8px;cursor:pointer}
+  .setup-picker button:hover:not(:disabled){border-color:var(--amber)}
+  .setup-picker button:disabled{opacity:.4;cursor:not-allowed}
+  .setup-picker .sp-hint{flex-basis:100%;font-size:12px;color:var(--muted)}
+  .setup-picker .sp-hint a{color:var(--amber);cursor:pointer;text-decoration:underline}
+  .setup-picker .sp-hint b{color:var(--text)}
+  #spReload{flex:0 0 auto;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px}
+  #spReload:hover{border-color:var(--amber);color:var(--amber)}
+  .chat-empty{align-self:center;text-align:center;color:var(--muted);font-size:14px;margin:auto;max-width:46ch}
+  .chat-empty .ex{display:block;margin-top:14px;font-size:13px}
+  .chat-empty .ex button{display:block;width:100%;margin:6px 0;text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:9px 12px;cursor:pointer;font-family:var(--body);font-size:13.5px}
+  .chat-empty .ex button:hover{border-color:var(--amber)}
+  .fallback{max-width:54ch;margin:40px auto;text-align:center}
+  .fallback .icon{font-size:40px;margin-bottom:14px}
+  .fallback h3{font-family:var(--disp);font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px}
+  .fallback p{color:var(--muted);font-size:14.5px;margin-bottom:10px}
+  .fallback ol{text-align:left;color:var(--text);font-size:14px;margin:14px auto;padding-left:22px;max-width:40ch;line-height:1.7}
+  .fallback code{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:12.5px}
+  .fallback a{color:var(--amber)}
+  .fallback-wide{max-width:60ch}
+  .tut{text-align:left;margin:18px auto;max-width:52ch;display:flex;flex-direction:column;gap:14px}
+  .tut-step{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.6;color:var(--text)}
+  .tut-n{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--amber);color:#fff;font-family:var(--mono);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .tut-cmd{margin-top:7px}
+  .tut-cmd code{display:block;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:12.5px;color:var(--amber);word-break:break-all}
+  .tut-status{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;display:inline-block}
+  .tut-foot{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6}
+  .typing{display:inline-flex;gap:4px;align-items:center}
+  .typing span{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:tp 1s infinite}
+  .typing span:nth-child(2){animation-delay:.15s} .typing span:nth-child(3){animation-delay:.3s}
+  @keyframes tp{0%,60%,100%{opacity:.3}30%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.typing span{animation:none;opacity:.7}}
+
+  /* ---------- balance bar (signature) ---------- */
+  .bal{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px 20px;margin-bottom:22px}
+  .bal-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+  .bal-labels .t{color:var(--tight)} .bal-labels .n{color:var(--muted)} .bal-labels .l{color:var(--loose)}
+  .bal-track{position:relative;height:10px;border-radius:5px;margin-top:10px;
+    background:linear-gradient(90deg,var(--tight) 0%,#3b4a5c 38%,#3b4a5c 62%,var(--loose) 100%)}
+  .bal-mark{
+    position:absolute;top:-7px;width:4px;height:24px;border-radius:2px;background:#fff;
+    left:50%;transform:translateX(-50%);transition:left .45s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 0 8px rgba(255,255,255,.55);
+  }
+  .bal-tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.25);left:50%}
+  .bal-note{font-size:13px;color:var(--muted);margin-top:12px}
+  .bal-note strong{color:var(--text)}
+  @media (prefers-reduced-motion:reduce){.bal-mark{transition:none}}
+
+  /* ---------- sections ---------- */
+  section{margin-bottom:24px}
+  section h3{
+    font-family:var(--disp);font-size:19px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--amber);margin-bottom:8px;
+  }
+  section h3.kn{color:var(--tight)}
+  section h3.cp{color:var(--green)}
+  ul.fx{list-style:none}
+  ul.fx li{padding:7px 0 7px 16px;border-bottom:1px solid var(--line);position:relative}
+  ul.fx li::before{content:"";position:absolute;left:0;top:15px;width:6px;height:6px;border-radius:50%;background:var(--amber)}
+  .knock{display:flex;flex-direction:column;gap:8px}
+  .knock-item{
+    display:flex;gap:12px;align-items:flex-start;background:var(--panel);
+    border:1px solid var(--line);border-radius:8px;padding:10px 12px;
+  }
+  .knock-item button{
+    flex:0 0 auto;border:1px solid var(--line);background:var(--panel-2);color:var(--amber);
+    font-family:var(--mono);font-size:12px;padding:4px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;
+  }
+  .knock-item button:hover{border-color:var(--amber)}
+  .knock-item p{font-size:14px;color:var(--text)}
+  .comp li::before{background:var(--green)}
+  .footnote{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;max-width:70ch}
+
+  /* ---------- mobile ---------- */
+  .mobile-nav{display:none}
+  @media (max-width:760px){
+    .app{flex-direction:column}
+    nav{display:none}
+    .mobile-nav{display:block;position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 14px;border-bottom:1px solid var(--line)}
+    .mobile-nav .brand{padding:0 0 10px;border:0;margin:0}
+    .mobile-nav select{
+      width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);
+      border-radius:8px;padding:10px 12px;font-family:var(--body);font-size:15px;
+    }
+    main{padding:18px 16px 50px}
+    .title-row h2{font-size:30px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav id="nav"></nav>
+  <div style="flex:1;min-width:0">
+    <div class="mobile-nav">
+      <div class="brand"><h1>Setup Ripple <span>ACC/EVO</span></h1><p>GT3 cause &amp; effect — ACC / AC Evo · v7.1</p></div>
+      <div id="mTabs"></div>
+      <select id="mobileSel" aria-label="Choose a setup parameter or symptom"></select>
+    </div>
+    <main id="main"></main>
+  </div>
+</div>
+
+<script>
+const P = [
+/* ───────────────────────── TYRES ───────────────────────── */
+{id:'pressure',group:'Tyres',name:'Tyre pressures',
+ upLabel:'Raise',downLabel:'Lower',
+ does:'Set the size and shape of the contact patch — the single biggest grip factor. You are chasing a hot-pressure window: roughly 26–27 psi on ACC’s current (v1.9+) tyre, nearer 27.5 on AC Evo slicks. Pressures climb as the tyre heats, so set them cold and judge them hot.',
+ up:{bal:0,fx:[
+  'Smaller contact patch once over the window — less grip at that end of the car',
+  'Centre of the tread overheats first; slides get snappier, less progressive',
+  'Slightly sharper initial steering response and lower rolling resistance',
+  'Per axle: high rears only = looser car; high fronts only = tighter car'],
+  comp:[
+   {id:'brakeDucts',a:'Open the brake ducts a step — brake heat soaks into the rim and is often why pressures creep high'},
+   {id:'camber',a:'Check camber: too much inner-edge temperature drags the whole pressure up'}]},
+ down:{bal:0,fx:[
+  'Below the window the carcass flexes — vague, mushy response and the shoulders overheat',
+  'Takes longer to switch the tyre on at the start of a stint',
+  'Per axle: low rears = sluggish but planted rear; low fronts = lazy turn-in'],
+  comp:[
+   {id:'brakeDucts',a:'Close the ducts a step to push more heat into the rims and lift pressures'}]},
+ knock:[
+  {id:'brakeDucts',why:'Duct openings are your main in-race pressure control — heat from the discs feeds straight into the rims'},
+  {id:'camber',why:'Camber decides how temperature spreads across the tread, which feeds back into pressure'},
+  {id:'rideHeightF',why:'Pressure changes alter tyre radius slightly, nudging ride height and rake'}],
+ note:'Track temp and fuel burn both move pressures across a stint — a setup that is perfect on lap 2 may be over the window by lap 15.'},
+
+{id:'camber',group:'Tyres',name:'Camber',
+ upLabel:'More negative',downLabel:'Less negative',
+ does:'Tilts the top of the tyre inwards so the tread sits flat when the car rolls in a corner. You are trading mid-corner grip against straight-line braking and traction.',
+ up:{bal:0,fx:[
+  'More mid-corner grip at that axle as the tread loads evenly under roll',
+  'Inner-edge temperature climbs — watch the I/M/O spread (aim for roughly even, inner slightly warmer)',
+  'Less braking and traction grip in a straight line (smaller upright contact patch)',
+  'Per axle: more front camber = sharper, slightly looser mid-corner; more rear = more planted, tighter'],
+  comp:[
+   {id:'pressure',a:'Re-check hot pressures — the inner edge will be doing more work'},
+   {id:'toe',a:'A touch less front toe-out offsets the extra scrub heat'}]},
+ down:{bal:0,fx:[
+  'Better braking and corner-exit traction, weaker mid-corner',
+  'Outer shoulder takes more punishment in long corners',
+  'More even wear on tracks with few fast corners'],
+  comp:[
+   {id:'arbF',a:'If mid-corner grip drops too far, soften the ARB at that end instead of adding camber back'}]},
+ knock:[
+  {id:'pressure',why:'Camber redistributes heat across the tread, which moves hot pressures'},
+  {id:'caster',why:'Caster adds dynamic camber when steered — more caster lets you run less static camber'}],
+ note:'ACC GT3s usually like a lot of front camber (around −3.5 to −4.0°) and a little less at the rear.'},
+
+{id:'toe',group:'Tyres',name:'Toe',
+ upLabel:'More toe',downLabel:'Less toe',
+ does:'Angles the wheels relative to straight ahead. Convention: front toe-out for response, rear toe-in for stability. "More toe" here means more toe-out at the front or more toe-in at the rear.',
+ up:{bal:1,fx:[
+  'Front toe-out: sharper, more eager turn-in — the inside wheel is already pointing into the corner',
+  'Rear toe-in: calmer, more planted corner exits and better stability over kerbs',
+  'Both add scrub — more tyre temperature, more wear, a touch more drag',
+  'Too much front toe-out makes the car nervous and darty in a straight line'],
+  comp:[
+   {id:'pressure',a:'Watch hot pressures rise from the extra scrub'},
+   {id:'electronics',a:'With added rear toe-in you can often run one click less TC'}]},
+ down:{bal:-1,fx:[
+  'Straighter-running, lower drag, cooler tyres — good for long straights and tyre life',
+  'Lazier turn-in at the front; livelier (less damped) rear on exit',
+  'Front toe near zero suits flowing tracks; tight tracks miss the response'],
+  comp:[
+   {id:'caster',a:'Add caster to recover some turn-in feel without the scrub penalty'},
+   {id:'arbF',a:'A softer front ARB can also wake up turn-in'}]},
+ knock:[
+  {id:'pressure',why:'Toe scrub is a steady heat source — it shifts where your pressures settle'},
+  {id:'caster',why:'Caster and front toe both shape turn-in; tune them together'}],
+ note:'Balance shift shown is for the usual case (front response / rear stability traded together). Tune one axle at a time.'},
+
+{id:'caster',group:'Tyres',name:'Caster',
+ upLabel:'More',downLabel:'Less',
+ does:'Tilts the steering axis backwards. More caster gains camber as you steer — grip arrives exactly when you wind on lock — and strengthens self-centring.',
+ up:{bal:1,fx:[
+  'More dynamic camber mid-corner: front grip improves the more lock you carry',
+  'Heavier, more communicative steering with stronger self-centring',
+  'Slightly more stable under braking',
+  'Almost no downside in ACC — most setups run high caster'],
+  comp:[
+   {id:'camber',a:'You may be able to take out a little static camber and gain braking grip for free'}]},
+ down:{bal:-1,fx:[
+  'Lighter steering, weaker feedback',
+  'Less camber gain — the front washes out earlier in long corners'],
+  comp:[
+   {id:'camber',a:'Add static camber back to recover mid-corner front grip'}]},
+ knock:[
+  {id:'camber',why:'Caster is camber-on-demand: the two budgets add together when steered'}],
+ note:'In ACC, caster is close to a free upgrade for front grip — lower it mainly if steering weight bothers you.'},
+
+/* ───────────────────────── AERO ───────────────────────── */
+{id:'rearWing',group:'Aero',name:'Rear wing',
+ upLabel:'More wing',downLabel:'Less wing',
+ does:'The big lever for rear downforce. Every step changes three things at once: rear grip at speed, drag, and the front-to-rear aero balance. Its effects grow with speed — it does almost nothing in a hairpin.',
+ up:{bal:-2,fx:[
+  'Rear planted in fast corners and under braking from high speed',
+  'More drag — top speed drops, fuel use rises slightly',
+  'Aero balance moves rearwards: understeer builds the faster the corner',
+  'Car becomes less pitch-sensitive — more forgiving over crests and kerbs at speed'],
+  comp:[
+   {id:'rideHeightF',a:'Lower the front (or raise the rear) — more rake pulls aero balance forward again'},
+   {id:'frontSplitter',a:'Add a splitter step if the car has one, to match the front to the new rear'},
+   {id:'brakeBias',a:'Move bias rearwards ~0.5% — the rear can now take more braking load'},
+   {id:'arbF',a:'Soften the front ARB a click to claw back grip in the slow corners the wing can’t help'}]},
+ down:{bal:2,fx:[
+  'Top speed up — strong on long straights and for defending',
+  'Rear gets light in fast corners and under braking from speed',
+  'Oversteer grows with speed; the car rewards smooth hands',
+  'More pitch-sensitive: kerbs and bumps at speed unsettle it more'],
+  comp:[
+   {id:'brakeBias',a:'Move bias forward to protect the now-lighter rear under braking'},
+   {id:'rideHeightR',a:'Drop the rear a touch (less rake) to push aero balance back'},
+   {id:'arbR',a:'Soften the rear ARB so mechanical grip covers some of what the aero gave up'}]},
+ knock:[
+  {id:'rideHeightF',why:'Rake and wing together set the aero balance — change one, re-check the other'},
+  {id:'brakeBias',why:'Rear downforce decides how much braking the rear axle can take at speed'},
+  {id:'springR',why:'More wing means more load crushing the rear at speed — the springs must hold the platform'},
+  {id:'frontSplitter',why:'Front and rear aero are a matched pair; moving one strands the other'}],
+ note:'Rule of thumb: if the balance problem appears only in fast corners, it’s aero. If it’s everywhere, look at mechanical grip first.'},
+
+{id:'frontSplitter',group:'Aero',name:'Front splitter',
+ upLabel:'More splitter',downLabel:'Less splitter',
+ does:'Adds front downforce (only some cars expose it — e.g. the AMG and Bentley in ACC). The front-end counterpart to the rear wing, and like the wing, it only works at speed.',
+ up:{bal:2,fx:[
+  'Front bites harder in fast corners — turn-in at speed sharpens',
+  'Aero balance moves forward: the rear becomes comparatively lighter',
+  'Small drag increase',
+  'Works harder the closer the front runs to the ground'],
+  comp:[
+   {id:'rearWing',a:'Add wing to keep the rear matched'},
+   {id:'rideHeightF',a:'Raise the front slightly if high-speed oversteer appears'}]},
+ down:{bal:-2,fx:[
+  'High-speed understeer; the rear feels relatively more secure',
+  'A touch less drag'],
+  comp:[
+   {id:'rearWing',a:'Trim a step of wing to re-centre the aero balance'}]},
+ knock:[
+  {id:'rearWing',why:'Splitter and wing set the two ends of the aero see-saw'},
+  {id:'rideHeightF',why:'Splitter performance is very sensitive to front ride height'}],
+ note:'If your car has no splitter setting, rake (ride heights) is your front-downforce tool instead.'},
+
+{id:'rideHeightF',group:'Aero',name:'Front ride height',
+ upLabel:'Raise',downLabel:'Lower',
+ does:'With the rear height, this sets rake — the nose-down angle of the floor. More rake (lower front) means more front downforce. Lower also drops the centre of gravity. The catch: run too low and the car sits on its bumpstops.',
+ up:{bal:-1,fx:[
+  'Less rake — aero balance shifts rearwards, high-speed understeer',
+  'More suspension travel: friendlier over kerbs and bumps',
+  'Slightly higher centre of gravity'],
+  comp:[
+   {id:'rearWing',a:'Trim a step of wing so the rear doesn’t over-dominate the new balance'},
+   {id:'rideHeightR',a:'Raise the rear by the same amount if you only wanted clearance, not a rake change'}]},
+ down:{bal:2,fx:[
+  'More rake — front downforce up, sharper at speed',
+  'Lower centre of gravity: a little less weight transfer everywhere',
+  'Risk: bottoming onto the bumpstops mid-corner causes sudden, ugly understeer over bumps and kerbs'],
+  comp:[
+   {id:'bumpstops',a:'Stiffen or shorten bumpstop range so the platform stays controlled when it touches down'},
+   {id:'springF',a:'Stiffer front springs help hold the car off the stops'},
+   {id:'rearWing',a:'If it’s now loose at speed, a step of wing rebalances it'}]},
+ knock:[
+  {id:'bumpstops',why:'The lower you run, the more the bumpstops become part of the active suspension'},
+  {id:'frontSplitter',why:'Splitter downforce rises sharply as the front nears the ground'},
+  {id:'springF',why:'Springs and ride height together decide whether the floor stays where you put it'},
+  {id:'rearWing',why:'Rake and wing are the two halves of aero balance'}],
+ note:'ACC meta setups run very low and stiff for exactly this reason: maximum rake, bumpstops doing real work.'},
+
+{id:'rideHeightR',group:'Aero',name:'Rear ride height',
+ upLabel:'Raise',downLabel:'Lower',
+ does:'The other half of rake. Raising the rear tips the floor nose-down (more rake, more front aero) but lifts the centre of gravity at the driven axle.',
+ up:{bal:1,fx:[
+  'More rake — aero balance forward, livelier at speed',
+  'Higher rear CoG: a bit more weight transfer, slightly more squat and dive',
+  'Diffuser/floor generally works the rake harder (car-dependent)'],
+  comp:[
+   {id:'rearWing',a:'A step of wing covers the rear if high-speed confidence drops'},
+   {id:'springR',a:'Check rear springs — more transfer may want a touch more support'}]},
+ down:{bal:-1,fx:[
+  'Less rake — high-speed understeer tendency',
+  'Lower CoG at the rear: traction off slow corners often improves',
+  'Less travel before the rear bumpstops'],
+  comp:[
+   {id:'rideHeightF',a:'Lower the front too if you want the rake back with a lower car overall'}]},
+ knock:[
+  {id:'rideHeightF',why:'Rake is the difference between the two heights — they only mean something together'},
+  {id:'rearWing',why:'Rake and wing trade against each other for the same aero balance'},
+  {id:'springR',why:'Height changes shift how soon the rear reaches its bumpstops'}],
+ note:'Tune rake in small steps — a few millimetres of rake change is clearly felt at 200 km/h.'},
+
+/* ─────────────────── SUSPENSION & DAMPERS ─────────────────── */
+{id:'springF',group:'Suspension & dampers',name:'Front springs',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'Wheel rate at the front. Stiffness trades slow-corner mechanical grip against response and aero platform stability.',
+ up:{bal:-1,fx:[
+  'Sharper, more immediate turn-in response',
+  'Less mechanical front grip — understeer in slow corners',
+  'Steadier front platform: splitter and rake work more consistently at speed (can make it *looser* in fast corners)',
+  'Harsher over kerbs and bumps'],
+  comp:[
+   {id:'arbF',a:'Soften the front ARB to win back slow-corner grip while keeping the response'},
+   {id:'dampers',a:'Re-match damper rates to the new spring — stiffer springs want more damping'},
+   {id:'rideHeightF',a:'You can often run a little lower now the spring holds the platform'}]},
+ down:{bal:1,fx:[
+  'More slow-corner front grip as the tyre stays loaded over bumps',
+  'Lazier response; more dive under braking',
+  'Front aero platform moves around more — less consistent at speed'],
+  comp:[
+   {id:'dampers',a:'Soften front damping to match, or the spring can’t do its job'},
+   {id:'rideHeightF',a:'May need a touch more ride height to avoid the bumpstops'}]},
+ knock:[
+  {id:'dampers',why:'Dampers are tuned to the spring — change one without the other and the wheel loses contact'},
+  {id:'bumpstops',why:'Softer springs reach the stops sooner; stiffer springs may never use them'},
+  {id:'rideHeightF',why:'Spring rate decides how far the car settles and how low you can safely run'}],
+ note:'Mechanical grip rules below ~120 km/h; aero rules above. Decide which corners matter at this track before touching springs.'},
+
+{id:'springR',group:'Suspension & dampers',name:'Rear springs',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'Wheel rate at the rear — the traction axle. The classic trade: softer rear hooks up out of slow corners, stiffer rear holds the aero platform at speed.',
+ up:{bal:1,fx:[
+  'Less traction out of slow corners — power oversteer appears earlier',
+  'Steadier rear platform: more consistent downforce in fast corners',
+  'Sharper response to throttle balance changes'],
+  comp:[
+   {id:'arbR',a:'Soften the rear ARB to recover some slow-corner traction'},
+   {id:'electronics',a:'A click more TC papers over exit wheelspin while you test'},
+   {id:'dampers',a:'Re-match rear damping'}]},
+ down:{bal:-1,fx:[
+  'Better drive off slow corners — the rear squats and grips',
+  'More squat means more dynamic rake change: aero balance moves around on throttle',
+  'Slightly tighter feel overall'],
+  comp:[
+   {id:'dampers',a:'Soften rear damping to suit'},
+   {id:'rideHeightR',a:'Check the rear isn’t now sitting on its bumpstops under load'}]},
+ knock:[
+  {id:'diffPreload',why:'Spring rate and diff locking both shape how the rear puts power down'},
+  {id:'dampers',why:'Springs and dampers are one system'},
+  {id:'rideHeightR',why:'Softer rear = more squat = the static height number means something different'}],
+ note:''},
+
+{id:'arbF',group:'Suspension & dampers',name:'Front anti-roll bar',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'Resists body roll by tying the front wheels together. The cleanest mid-corner balance tool there is — it changes roll stiffness distribution without touching ride or aero.',
+ up:{bal:-2,fx:[
+  'Crisper, flatter turn-in',
+  'More load forced through the outside front — mid-corner understeer',
+  'Inside front stays more planted under braking'],
+  comp:[
+   {id:'arbR',a:'Stiffen the rear bar too if you wanted response, not a balance change'},
+   {id:'camber',a:'The loaded outside front may want a touch more camber'}]},
+ down:{bal:2,fx:[
+  'More mid-corner front grip — the car rotates better',
+  'Slower, softer initial response; more body roll',
+  'Can feel lazy on quick direction changes (chicanes)'],
+  comp:[
+   {id:'dampers',a:'Slightly firmer front slow bump keeps transitions tidy despite the softer bar'}]},
+ knock:[
+  {id:'arbR',why:'Balance lives in the front/rear bar *ratio* — one bar alone is half the story'},
+  {id:'springF',why:'Bars and springs both add roll stiffness; they overlap'}],
+ note:'ARBs are the first thing to reach for when the balance problem is mid-corner, at all speeds.'},
+
+{id:'arbR',group:'Suspension & dampers',name:'Rear anti-roll bar',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'The rear half of the roll-stiffness ratio. Strongly shapes on-throttle behaviour from mid-corner to exit.',
+ up:{bal:2,fx:[
+  'Car rotates more — oversteer, especially on throttle from mid-corner',
+  'Flatter, more responsive rear in direction changes',
+  'Inside rear unloads more: worse traction out of slow corners'],
+  comp:[
+   {id:'diffPreload',a:'A little more preload can steady the rear on throttle pickup'},
+   {id:'electronics',a:'One more click of TC while you learn the new balance'}]},
+ down:{bal:-2,fx:[
+  'More traction and a calmer rear on exit',
+  'More roll; slightly lazier in chicanes',
+  'Mild understeer tendency mid-corner'],
+  comp:[
+   {id:'arbF',a:'Soften the front bar too if you only wanted traction, not push'}]},
+ knock:[
+  {id:'arbF',why:'It’s the ratio between bars that sets balance'},
+  {id:'diffPreload',why:'Both control how the rear behaves under power'}],
+ note:''},
+
+{id:'dampers',group:'Suspension & dampers',name:'Dampers (bump / rebound)',
+ upLabel:'Stiffer',downLabel:'Softer',
+ does:'Dampers don’t change how much weight transfers — only how fast. Slow bump/rebound shape braking, turn-in and throttle transitions; fast bump/rebound handle kerbs and bumps. They are your transient balance tool.',
+ up:{bal:0,fx:[
+  'Weight transfer slows down: calmer, more deliberate transitions',
+  'Stiffer front bump = less dive, lazier turn-in (entry understeer)',
+  'Stiffer rear rebound = rear held down on throttle, steadier exits',
+  'Stiffer fast damping = harsh over kerbs; the wheel can skip and lose contact'],
+  comp:[
+   {id:'springF',a:'Damping should track spring rate — if you’re maxing dampers, the spring is wrong'},
+   {id:'bumpstops',a:'On kerb-heavy tracks, let fast damping stay soft and use bumpstops for the platform'}]},
+ down:{bal:0,fx:[
+  'Faster weight transfer: livelier turn-in, more dive and squat',
+  'Better kerb absorption and bumpy-track compliance',
+  'Too soft and the car floats — balance becomes vague and delayed'],
+  comp:[
+   {id:'arbF',a:'If the car got too eager on entry, a stiffer front bar steadies it without slowing the dampers again'}]},
+ knock:[
+  {id:'springF',why:'Each spring rate has a damping range that suits it'},
+  {id:'bumpstops',why:'Fast damping and bumpstops share the job of kerbs and bottoming'}],
+ note:'Diagnose dampers by *when* the problem happens: entry/exit transitions = slow damping; kerbs and bumps = fast damping; steady mid-corner = not the dampers.'},
+
+{id:'bumpstops',group:'Suspension & dampers',name:'Bumpstops (rate / range)',
+ upLabel:'Stiffer / less range',downLabel:'Softer / more range',
+ does:'Secondary springs that catch the suspension at the end of its travel. In ACC’s low-and-stiff meta they’re not a safety net — they’re an aero platform tool the car deliberately rides on.',
+ up:{bal:0,fx:[
+  'Car rides the stops sooner/harder: very consistent aero platform at speed',
+  'Sudden balance change the instant one end hits — can feel like a wall of understeer (front) or a snap (rear)',
+  'Harsh over kerbs'],
+  comp:[
+   {id:'rideHeightF',a:'Tune ride height so the stops engage where you want them to, not by accident'},
+   {id:'springF',a:'Main spring and stop share the load — set them as a pair'}]},
+ down:{bal:0,fx:[
+  'More usable travel, friendlier kerbs',
+  'Aero platform floats more at speed — less consistent downforce',
+  'Risk of harsh bottoming if you’re running very low'],
+  comp:[
+   {id:'rideHeightF',a:'Raise slightly if the floor is slamming down on compressions'}]},
+ knock:[
+  {id:'rideHeightF',why:'Ride height decides when the stops engage'},
+  {id:'springF',why:'Total wheel rate = spring + engaged bumpstop'},
+  {id:'dampers',why:'Fast damping and stops both manage big hits'}],
+ note:'If the balance changes *suddenly* at one speed or one compression, suspect a bumpstop engaging.'},
+
+/* ───────────────────────── BRAKES ───────────────────────── */
+{id:'brakeBias',group:'Brakes',name:'Brake bias',
+ upLabel:'Forward',downLabel:'Rearward',
+ does:'Splits braking force front/rear. The fastest balance change in the car — and the one you can adjust from the wheel mid-stint. Its effect is speed-sensitive, because at high speed the wing is pressing the rear down.',
+ up:{bal:-1,fx:[
+  'Stable, predictable braking; the rear stays in line',
+  'Front lockup risk rises, especially as the fronts wear',
+  'Understeer on corner entry under trail-braking — the car resists rotation'],
+  comp:[
+   {id:'electronics',a:'A click less ABS can recover some front bite if lockups aren’t the issue'},
+   {id:'arbF',a:'Softer front bar restores some entry rotation'}]},
+ down:{bal:1,fx:[
+  'Car rotates into the corner under trail-braking — great for hairpins',
+  'Rear lockup / snap risk under hard braking, worst at low speed where the wing isn’t helping',
+  'Less margin in panic stops and on cold tyres'],
+  comp:[
+   {id:'rearWing',a:'More wing makes rearward bias safer at speed (but not in slow corners)'},
+   {id:'electronics',a:'A click more ABS adds a safety net while you adapt'}]},
+ knock:[
+  {id:'rearWing',why:'Rear downforce sets how much braking the rear can take — bias and wing move together'},
+  {id:'electronics',why:'ABS decides how forgiving each bias setting is'},
+  {id:'diffPreload',why:'Off-throttle diff locking also shapes entry rotation — they stack'}],
+ note:'Typical GT3 window is roughly 55–62% forward. Move it in 0.5% steps and re-judge after a few laps, not one corner.'},
+
+{id:'brakeDucts',group:'Brakes',name:'Brake ducts',
+ upLabel:'More open',downLabel:'More closed',
+ does:'Cooling for discs and pads — but their stealth role is tyre pressure control, because brake heat soaks through the rim into the air in the tyre.',
+ up:{bal:0,fx:[
+  'Cooler brakes: consistent pedal, less pad wear over a stint',
+  'Tyre pressures settle lower (often ~0.3–0.6 psi per duct step)',
+  'A little more drag; brakes and tyres take longer to warm up'],
+  comp:[
+   {id:'pressure',a:'Raise cold pressures to land in the same hot window'}]},
+ down:{bal:0,fx:[
+  'Faster warm-up — good for short stints, qualifying and cold tracks',
+  'Pressures settle higher; fade and pad wear risk in long stints',
+  'Slightly less drag'],
+  comp:[
+   {id:'pressure',a:'Drop cold pressures to compensate for the extra rim heat'}]},
+ knock:[
+  {id:'pressure',why:'Duct steps are effectively a pressure adjustment you can plan a stint around'},
+  {id:'brakeBias',why:'Brake temperature changes pedal feel and bite, which changes how a given bias behaves'}],
+ note:'In ACC, duct settings are one of the few “free” tools for fixing pressures without touching the rest of the setup.'},
+
+/* ─────────────── DRIVETRAIN & ELECTRONICS ─────────────── */
+{id:'diffPreload',group:'Drivetrain & electronics',name:'Differential preload',
+ upLabel:'More',downLabel:'Less',
+ does:'How strongly the diff resists a speed difference between the rear wheels before torque is even applied. It shapes the car in the *transitions* — off-throttle into the corner, and the moment you pick the throttle back up.',
+ up:{bal:-1,fx:[
+  'More locked off-throttle: stable, planted entry that resists rotation (entry understeer)',
+  'Stronger, more connected drive on throttle pickup',
+  'On tight exits the locked axle can push wide — or snap if grip runs out',
+  'Smoother across throttle transitions overall'],
+  comp:[
+   {id:'brakeBias',a:'A touch rearward bias restores entry rotation the preload took away'},
+   {id:'arbF',a:'Softer front bar also brings back rotation, mid-corner instead of entry'}]},
+ down:{bal:1,fx:[
+  'Car rotates freely off-throttle — agile, eager entries',
+  'Throttle pickup feels looser; inside wheel spins up easier out of slow corners',
+  'Can feel nervous in fast lift-off moments'],
+  comp:[
+   {id:'electronics',a:'A click more TC covers the looser throttle pickup'},
+   {id:'springR',a:'Slightly softer rear springs add traction to compensate'}]},
+ knock:[
+  {id:'brakeBias',why:'Both shape entry rotation — set them as a pair'},
+  {id:'electronics',why:'TC and the diff fight over the same wheelspin'},
+  {id:'arbR',why:'Rear roll stiffness changes how loaded each rear wheel is, which changes what the diff sees'}],
+ note:'Test preload in the slowest corner on the track — that’s where its character is loudest.'},
+
+{id:'electronics',group:'Drivetrain & electronics',name:'TC & ABS',
+ upLabel:'More assist',downLabel:'Less assist',
+ does:'Traction control limits wheelspin; ABS limits lockup. Crucial honesty check: they mask balance problems rather than fix them. If you need lots of TC, the setup (or your right foot) has an exit problem.',
+ up:{bal:0,fx:[
+  'Safer, more repeatable exits and braking zones; less tyre wear over a stint',
+  'Over-set TC cuts power and costs real exit speed',
+  'Over-set ABS lengthens braking distances slightly',
+  'Hides what the chassis is actually doing — bad for learning'],
+  comp:[
+   {id:'diffPreload',a:'If you keep needing more TC, the real fix is often diff/springs at the rear'}]},
+ down:{bal:0,fx:[
+  'Faster exits and shorter stops *if* the chassis and your inputs are clean',
+  'Wheelspin and lockup punish mistakes immediately',
+  'More tyre wear when you get it wrong'],
+  comp:[
+   {id:'springR',a:'Softer rear springs / ARB make low TC liveable'},
+   {id:'toe',a:'A touch more rear toe-in steadies exits without electronic help'}]},
+ knock:[
+  {id:'diffPreload',why:'Diff locking and TC manage the same exit wheelspin from opposite ends'},
+  {id:'brakeBias',why:'ABS level changes how aggressive a bias setting you can run'},
+  {id:'pressure',why:'Less assist = more sliding = more tyre temperature'}],
+ note:'When learning setups, run TC one click lower than comfortable for a session — you’ll *feel* what every change does instead of having it filtered.'}
+];
+
+/* ──────────────────────── symptoms ──────────────────────── */
+const S = [
+/* Corner entry */
+{id:'entryUnder',group:'Corner entry',name:'Won’t turn in (entry understeer)',
+ desc:'You brake, turn, and the nose washes wide before the apex — worst while you’re still on the brakes.',
+ quick:'Cheapest test first: move brake bias 0.5% rearward from the wheel. If it improves, the problem is your entry tools, not outright front grip.',
+ causes:[
+  {id:'brakeBias',label:'Bias too far forward',fix:'Move rearward in 0.5% steps — frees the car to rotate under trail-braking'},
+  {id:'diffPreload',label:'Diff preload too high',fix:'Lower it — a locked diff resists rotation off-throttle'},
+  {id:'dampers',label:'Front slow bump too stiff',fix:'Soften so the nose can dive and load the fronts on turn-in'},
+  {id:'arbF',label:'Front bar too stiff',fix:'Soften a click — this helps mid-corner too'},
+  {id:'pressure',label:'Fronts out of the window',fix:'Check hot pressures before touching anything mechanical'}]},
+
+{id:'entrySnap',group:'Corner entry',name:'Rear snaps under trail-braking',
+ desc:'The rear steps out as you brake and turn in together — the classic spin-at-corner-entry.',
+ quick:'Note where it happens. Fast corners point to aero; slow corners point to bias, diff or cold rears.',
+ causes:[
+  {id:'brakeBias',label:'Bias too far rearward',fix:'Move forward 0.5–1% for instant stability'},
+  {id:'diffPreload',label:'Preload too low',fix:'More preload steadies the rear off-throttle'},
+  {id:'rearWing',label:'Not enough rear downforce (fast corners only)',fix:'Add a step of wing if it only happens at speed'},
+  {id:'pressure',label:'Cold or low rear pressures',fix:'Rears below the window can’t take braking and turning at once'},
+  {id:'dampers',label:'Rear rebound too stiff',fix:'Soften so the rear stays planted as weight moves forward'}]},
+
+/* Mid-corner */
+{id:'midUnder',group:'Mid-corner',name:'Understeer mid-corner, all speeds',
+ desc:'The front washes out at steady throttle, slow and fast corners alike — a mechanical front grip shortage.',
+ quick:'“All speeds” is the key clue. If it were only fast corners, it would be aero — see the high-speed symptoms instead.',
+ causes:[
+  {id:'arbF',label:'Front bar too stiff',fix:'Soften — the cleanest mid-corner balance tool there is'},
+  {id:'camber',label:'Not enough front camber',fix:'More negative camber; check inner temps afterwards'},
+  {id:'springF',label:'Front springs too stiff',fix:'Soften for slow-corner grip (costs a little response)'},
+  {id:'pressure',label:'Fronts over the window',fix:'High pressures shrink the contact patch'}]},
+
+{id:'midOver',group:'Mid-corner',name:'Loose mid-corner, all speeds',
+ desc:'The rear edges wide at steady state and you’re constantly making small corrections.',
+ quick:'Same logic in reverse: everywhere = mechanical, fast corners only = aero.',
+ causes:[
+  {id:'arbR',label:'Rear bar too stiff',fix:'Soften a click'},
+  {id:'camber',label:'Not enough rear camber',fix:'More negative rear camber plants the rear mid-corner'},
+  {id:'toe',label:'Not enough rear toe-in',fix:'A touch more calms the rear everywhere'},
+  {id:'pressure',label:'Rears over the window',fix:'Check hot rears'}]},
+
+/* High speed */
+{id:'fastUnder',group:'High-speed corners',name:'Understeer only in fast corners',
+ desc:'Fine in the slow stuff, but the nose pushes in quick corners — an aero balance problem.',
+ quick:'Confirm it really is speed-dependent before touching aero. One slow corner with push disqualifies this diagnosis.',
+ causes:[
+  {id:'rideHeightF',label:'Not enough rake',fix:'Lower the front (or raise the rear) to pull aero balance forward'},
+  {id:'frontSplitter',label:'Splitter setting too low',fix:'Add a step if your car has one'},
+  {id:'rearWing',label:'Too much wing',fix:'Trim a step — you gain top speed as a bonus'}]},
+
+{id:'fastOver',group:'High-speed corners',name:'Nervous or loose at high speed',
+ desc:'No confidence in fast corners; the rear feels light over crests and quick direction changes.',
+ quick:'If the balance changes suddenly at one specific compression, suspect a bumpstop engaging rather than pure aero.',
+ causes:[
+  {id:'rearWing',label:'Not enough wing',fix:'Add a step — the single biggest fix for this'},
+  {id:'rideHeightR',label:'Too much rake',fix:'Lower the rear a touch'},
+  {id:'bumpstops',label:'Rear riding its stops',fix:'More range or softer rate at the rear'},
+  {id:'dampers',label:'Fast damping too stiff over crests',fix:'Soften fast bump/rebound'}]},
+
+/* Exit */
+{id:'exitSpin',group:'Corner exit',name:'Wheelspin / loose on throttle',
+ desc:'The rear breaks away as you feed in power out of slow and medium corners.',
+ quick:'Watch the replay: inside wheel spinning alone points at the diff; both wheels points at rear grip.',
+ causes:[
+  {id:'springR',label:'Rear too stiff',fix:'Soften the springs for traction'},
+  {id:'arbR',label:'Rear bar too stiff',fix:'Soften — keeps the inside rear planted'},
+  {id:'diffPreload',label:'Inside wheel lighting up',fix:'More preload locks the axle and stops single-wheel spin'},
+  {id:'toe',label:'Not enough rear toe-in',fix:'Add a little for calmer exits'},
+  {id:'electronics',label:'TC too low for the setup',fix:'One click more while you fix the mechanical cause'}]},
+
+{id:'exitPush',group:'Corner exit',name:'Pushes wide on throttle (power understeer)',
+ desc:'The front gives up the moment you accelerate — you run out of road on exit.',
+ quick:'Common on tight exits with high preload: the locked diff simply wants to drive straight.',
+ causes:[
+  {id:'diffPreload',label:'Preload too high',fix:'Lower it — frees the car to keep rotating under power'},
+  {id:'springR',label:'Rear too soft (squat lifts the nose)',fix:'Slightly stiffer rear keeps the front loaded on throttle'},
+  {id:'electronics',label:'TC over-set',fix:'Heavy TC can feel like push — try a click less'}]},
+
+/* Braking */
+{id:'frontLock',group:'Braking zones',name:'Front lockups',
+ desc:'One or both fronts lock under hard braking, flat-spotting tyres and lengthening stops.',
+ quick:'Lockups that only appear late in a stint are usually tyre wear, not setup — check before changing anything.',
+ causes:[
+  {id:'brakeBias',label:'Bias too far forward',fix:'Move rearward 0.5–1%'},
+  {id:'electronics',label:'ABS too low',fix:'One click up costs almost nothing in ACC'},
+  {id:'brakeDucts',label:'Discs out of their temp window',fix:'Adjust ducts — cold and overheated brakes both bite unevenly'},
+  {id:'camber',label:'Too much front camber',fix:'Less camber enlarges the upright, straight-line contact patch'}]},
+
+/* Kerbs & bumps */
+{id:'kerbLaunch',group:'Kerbs & bumps',name:'Launched or unsettled by kerbs',
+ desc:'The car skips, hops or gets thrown off line when you take kerbs you ought to be able to use.',
+ quick:'Kerb behaviour is almost entirely fast damping + bumpstops + ride height. Springs and bars are rarely the culprit.',
+ causes:[
+  {id:'dampers',label:'Fast damping too stiff',fix:'Soften fast bump/rebound so the wheel can swallow the kerb'},
+  {id:'bumpstops',label:'Stops too stiff or too short',fix:'Softer rate or more range'},
+  {id:'rideHeightF',label:'Running too low',fix:'A couple of millimetres higher buys real compliance'}]},
+
+{id:'bumpUnder',group:'Kerbs & bumps',name:'Sudden understeer over bumps at speed',
+ desc:'Fine on smooth tarmac, but the front washes out the instant it hits a compression or bump mid-corner.',
+ quick:'This is the signature of the front bumpstops engaging — the platform hits a wall and the tyre unloads.',
+ causes:[
+  {id:'bumpstops',label:'Front stops engaging harshly',fix:'Softer rate or more range at the front'},
+  {id:'rideHeightF',label:'Front too low',fix:'Raise 1–2 mm so compressions don’t bottom it'},
+  {id:'springF',label:'Springs too soft for the ride height',fix:'Stiffer fronts hold the car off the stops'}]},
+
+/* Tyres */
+{id:'hotPressures',group:'Tyres over a stint',name:'Pressures climb out of the window',
+ desc:'Perfect on lap 3, over the window by lap 12 — grip fades and the car gets snappy as the stint goes on.',
+ quick:'Set up for mid-stint, not lap 1: start slightly under the window and let the stint bring them in.',
+ causes:[
+  {id:'pressure',label:'Cold pressures set too high',fix:'Drop colds 0.2–0.5 psi and re-test'},
+  {id:'brakeDucts',label:'Ducts too closed',fix:'One step more open bleeds heat out of the rims'},
+  {id:'toe',label:'Too much scrub',fix:'Excess toe is a constant heat source'},
+  {id:'electronics',label:'Sliding generating heat',fix:'If you’re fighting the car, fix the balance — sliding cooks tyres'}]},
+
+{id:'coldTyres',group:'Tyres over a stint',name:'Can’t get heat in (quali / cold track)',
+ desc:'Tyres take too long to switch on — the first laps are skating and the window never quite arrives.',
+ quick:'Mostly a qualifying and cold-conditions problem; don’t compromise a race setup for it.',
+ causes:[
+  {id:'brakeDucts',label:'Ducts too open',fix:'Close a step — brake heat is your tyre warmer'},
+  {id:'pressure',label:'Colds set too low for conditions',fix:'Raise colds so the window arrives sooner'},
+  {id:'camber',label:'Tyre not working hard enough',fix:'A touch more camber and toe puts energy into the tread'}]}
+];
+
+/* ──────────────────── engineer: ACC field map ──────────────────── */
+const CN = ['LF','RF','LR','RR'];
+const FIELDS = [
+ {p:'basicSetup.tyres.tyrePressure',l:'Tyre pressure',c:CN,pid:'pressure'},
+ {p:'basicSetup.tyres.tyreCompound',l:'Tyre compound'},
+ {p:'basicSetup.alignment.camber',l:'Camber',c:CN,pid:'camber'},
+ {p:'basicSetup.alignment.toe',l:'Toe',c:CN,pid:'toe'},
+ {p:'basicSetup.alignment.casterLF',l:'Caster (left)',pid:'caster'},
+ {p:'basicSetup.alignment.casterRF',l:'Caster (right)',pid:'caster'},
+ {p:'basicSetup.alignment.steerRatio',l:'Steering ratio'},
+ {p:'basicSetup.electronics.tC1',l:'TC1',pid:'electronics'},
+ {p:'basicSetup.electronics.tC2',l:'TC2',pid:'electronics'},
+ {p:'basicSetup.electronics.abs',l:'ABS',pid:'electronics'},
+ {p:'basicSetup.electronics.eCUMap',l:'ECU map'},
+ {p:'basicSetup.strategy.fuel',l:'Fuel load'},
+ {p:'basicSetup.strategy.tyreSet',l:'Tyre set'},
+ {p:'basicSetup.strategy.frontBrakePadCompound',l:'Front brake pads'},
+ {p:'basicSetup.strategy.rearBrakePadCompound',l:'Rear brake pads'},
+ {p:'advancedSetup.mechanicalBalance.aRBFront',l:'Front anti-roll bar',pid:'arbF'},
+ {p:'advancedSetup.mechanicalBalance.aRBRear',l:'Rear anti-roll bar',pid:'arbR'},
+ {p:'advancedSetup.mechanicalBalance.wheelRate',l:'Wheel rate',c:CN,pidIdx:{0:'springF',1:'springF',2:'springR',3:'springR'}},
+ {p:'advancedSetup.mechanicalBalance.bumpStopRateUp',l:'Bumpstop rate (up)',c:CN,pid:'bumpstops'},
+ {p:'advancedSetup.mechanicalBalance.bumpStopRateDn',l:'Bumpstop rate (down)',c:CN,pid:'bumpstops'},
+ {p:'advancedSetup.mechanicalBalance.bumpStopWindow',l:'Bumpstop range',c:CN,pid:'bumpstops'},
+ {p:'advancedSetup.mechanicalBalance.brakeTorque',l:'Brake power'},
+ {p:'advancedSetup.mechanicalBalance.brakeBias',l:'Brake bias',pid:'brakeBias'},
+ {p:'advancedSetup.dampers.bumpSlow',l:'Damper bump (slow)',c:CN,pid:'dampers'},
+ {p:'advancedSetup.dampers.bumpFast',l:'Damper bump (fast)',c:CN,pid:'dampers'},
+ {p:'advancedSetup.dampers.reboundSlow',l:'Damper rebound (slow)',c:CN,pid:'dampers'},
+ {p:'advancedSetup.dampers.reboundFast',l:'Damper rebound (fast)',c:CN,pid:'dampers'},
+ {p:'advancedSetup.aeroBalance.rideHeight',l:'Ride height',c:['Front','(n/a)','Rear','(n/a)'],pidIdx:{0:'rideHeightF',2:'rideHeightR'}},
+ {p:'advancedSetup.aeroBalance.splitter',l:'Front splitter',pid:'frontSplitter'},
+ {p:'advancedSetup.aeroBalance.rearWing',l:'Rear wing',pid:'rearWing'},
+ {p:'advancedSetup.aeroBalance.brakeDuct',l:'Brake ducts',c:['Front','Rear'],pid:'brakeDucts'},
+ {p:'advancedSetup.drivetrain.preload',l:'Diff preload',pid:'diffPreload'}
+];
+const SKIP = ['staticCamber','toeOutLinear','pitStrategy','fuelPerLap','telemetryLaps','trackBopType','nPitStops','tyreCompound'];
+
+/* ──────────────── engineer: AC Evo .carsetup field map ──────────────── */
+/* Evo stores a protobuf-style binary with REAL physical values (psi, °, N/m, mm, %).
+   Labels carry a confidence level: high (verified pattern), likely, guess. */
+const EVO_MAP = {};
+function em(p,l,pid,conf){ EVO_MAP[p]={l,pid:pid||null,conf:conf||'high'}; }
+em('1.1[0]','Front ARB stiffness (N/m)','arbF');
+em('1.1[1]','Rear ARB stiffness (N/m)','arbR');
+em('1.2','Steering ratio');
+em('1.3.1','Brake bias (%)','brakeBias');
+em('1.3.2','Brake power? (not in UI)',null,'guess');
+em('1.4.1','Diff power ramp? (not in UI)','diffPreload','guess');
+em('1.4.2','Diff coast ramp? (not in UI)','diffPreload','guess');
+em('1.4.3','Diff preload (Nm)','diffPreload');
+for(let i=0;i<4;i++){
+  const fr = i<2?'springF':'springR';
+  em(`2[${i}].1`,`Wheel rate (N/m) — ${CN[i]}`,fr);
+  em(`2[${i}].2.1`,`Bumpstop range (m) — ${CN[i]}`,'bumpstops');
+  em(`2[${i}].2.2`,`Bumpstop rate (N) — ${CN[i]}`,'bumpstops');
+  em(`2[${i}].3.1`,`Unknown bumpstop-related (2) — ${CN[i]}`,'bumpstops','guess');
+  em(`2[${i}].3.2`,`Unknown bumpstop-related (3) — ${CN[i]}`,'bumpstops','guess');
+  em(`3[${i}].1`,`Slow bump — ${CN[i]}`,'dampers');
+  em(`3[${i}].2`,`Fast bump — ${CN[i]}`,'dampers','likely');
+  em(`3[${i}].3`,`Slow rebound — ${CN[i]}`,'dampers');
+  em(`3[${i}].4`,`Fast rebound — ${CN[i]}`,'dampers','likely');
+  em(`4[${i}].1`,`Tyre pressure (psi) — ${CN[i]}`,'pressure');
+  em(`4[${i}].2`,`Camber (°) — ${CN[i]}`,'camber');
+  em(`4[${i}].3`,`Toe (°) — ${CN[i]}`,'toe');
+  em(`4[${i}].4`,`Caster — ${CN[i]}`,'caster');
+}
+em('5.1','TC1','electronics');
+em('5.2','TC2','electronics');
+em('5.3','ABS','electronics');
+em('5.5','Telemetry laps');
+em('6.2','Front ride height (mm)','rideHeightF');
+em('6.3','Rear ride height (mm)','rideHeightR');
+em('6.5','Rear wing angle (°)','rearWing');
+em('7.1','Fuel load (L)');
+em('9','Car / preset id');
+em('10','Tyre compound?',null,'guess');
+const EVO_SKIP = p => /^4\[\d\]\.(5|6)$/.test(p) || /^6\.1\[\d\]$/.test(p) || p==='10' || p==='9';
+const EVO_FLOOR0 = new Set(['6.2','6.3','6.5','1.4.3']);
+
+/* ──────────────── engineer: Evo binary decoder ──────────────── */
+function evoParse(bytes, base){
+  const out=[]; let o=0;
+  const dv=new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  function rv(){ let r=0,s=0;
+    while(o<bytes.length){ const x=bytes[o++]; r += (x&0x7f)*Math.pow(2,s);
+      if(!(x&0x80)) return r; s+=7; if(s>49) return null; }
+    return null;
+  }
+  while(o<bytes.length){
+    const tag=rv(); if(tag===null) return null;
+    const f=Math.floor(tag/8), wt=tag%8;
+    if(f===0||f>100000) return null;
+    if(wt===0){ const v=rv(); if(v===null) return null; out.push({f,t:'varint',v}); }
+    else if(wt===5){ if(o+4>bytes.length) return null;
+      out.push({f,t:'f32',v:dv.getFloat32(o,true),off:base+o}); o+=4; }
+    else if(wt===1){ if(o+8>bytes.length) return null;
+      out.push({f,t:'f64',v:dv.getFloat64(o,true),off:base+o}); o+=8; }
+    else if(wt===2){
+      const ln=rv(); if(ln===null||o+ln>bytes.length) return null;
+      const chunk=bytes.subarray(o,o+ln);
+      const sub = ln>0 ? evoParse(chunk, base+o) : [];
+      const subBad = !sub || sub.some(n=>n.t==='f64');
+      let done=false;
+      if(subBad && ln>0 && ln%4===0){
+        const fl=[]; let ok=true;
+        for(let i=0;i<ln;i+=4){ const x=dv.getFloat32(o+i,true);
+          if(!isFinite(x)||Math.abs(x)>1e8){ ok=false; break; } fl.push({v:x,off:base+o+i}); }
+        if(ok){ out.push({f,t:'packed',v:fl}); done=true; }
+      }
+      if(!done){
+        if(sub && !subBad && ln>0){ out.push({f,t:'msg',v:sub}); }
+        else{
+          let str=null;
+          try{ const s=new TextDecoder('utf-8',{fatal:true}).decode(chunk);
+            if([...s].every(c=>c.charCodeAt(0)>=32&&c.charCodeAt(0)<127)) str=s; }catch(e){}
+          if(str!==null) out.push({f,t:'str',v:str});
+          else out.push({f,t:'bytes',v:[...chunk].map(b=>b.toString(16).padStart(2,'0')).join('')});
+        }
+      }
+      o+=ln;
+    }
+    else return null;
+  }
+  return out;
+}
+
+function evoFlatten(nodes, prefix, out){
+  const counts={}; nodes.forEach(n=>counts[n.f]=(counts[n.f]||0)+1);
+  const seen={};
+  for(const n of nodes){
+    let idx='';
+    if(counts[n.f]>1){ const k=seen[n.f]||0; seen[n.f]=k+1; idx='['+k+']'; }
+    const path = prefix ? prefix+'.'+n.f+idx : ''+n.f+idx;
+    if(n.t==='msg') evoFlatten(n.v, path, out);
+    else if(n.t==='packed') n.v.forEach((x,i)=>out[path+'['+i+']']={v:x.v,off:x.off});
+    else out[path]={v:n.v,off:n.off};
+  }
+  return out;
+}
+
+function loadEvo(name, label, buf, saveDir){
+  const bytes = new Uint8Array(buf);
+  const nodes = evoParse(bytes, 0);
+  if(!nodes) return null;
+  const flat = evoFlatten(nodes, '', {});
+  let car='';
+  if(flat['9'] && typeof flat['9'].v==='string')
+    car = flat['9'].v.split('_preset')[0].replace(/^ks_/,'');
+  return {name, label: label+(car?' · '+car:''), kind:'evo', bytes, flat, car, saveDir};
+}
+const isEvoName = n => /\.(carsetup|setup)$/i.test(n);
+
+/* ──────────────────── engineer: driver requests ──────────────────── */
+/* ch = ACC click changes; evo = AC Evo physical-value changes (experimental) */
+const FIXES = [
+ {id:'fxEntryUnder',name:'Less understeer on entry',d:'Frees the car to rotate under trail-braking.',ch:[
+  {p:'advancedSetup.mechanicalBalance.brakeBias',d:-2,why:'Bias rearward — the entry rotation tool'},
+  {p:'advancedSetup.drivetrain.preload',d:-1,why:'Less diff locking off-throttle'},
+  {p:'advancedSetup.mechanicalBalance.aRBFront',d:-1,why:'Softer front bar for mid-corner support'}],
+  evo:[
+  {p:'1.3.1',d:-0.5,why:'Bias rearward 0.5% — the entry rotation tool'},
+  {p:'1.4.3',d:-10,why:'Less diff preload — less locking off-throttle'}]},
+ {id:'fxEntrySnap',name:'Calmer rear on entry',d:'Steadies a rear that steps out under trail-braking.',ch:[
+  {p:'advancedSetup.mechanicalBalance.brakeBias',d:2,why:'Bias forward for braking stability'},
+  {p:'advancedSetup.drivetrain.preload',d:1,why:'More locking steadies the rear off-throttle'}],
+  evo:[
+  {p:'1.3.1',d:0.5,why:'Bias forward 0.5% for braking stability'},
+  {p:'1.4.3',d:10,why:'More preload steadies the rear off-throttle'}]},
+ {id:'fxMidUnder',name:'Less understeer mid-corner',d:'More mechanical front grip at all speeds.',ch:[
+  {p:'advancedSetup.mechanicalBalance.aRBFront',d:-1,why:'The cleanest mid-corner balance tool'},
+  {p:'advancedSetup.mechanicalBalance.wheelRate',i:0,d:-1,why:'Softer front spring (left)'},
+  {p:'advancedSetup.mechanicalBalance.wheelRate',i:1,d:-1,why:'Softer front spring (right)'}],
+  evo:[
+  {p:'2[0].1',d:-20000,why:'Softer front spring (left) for mechanical grip'},
+  {p:'2[1].1',d:-20000,why:'Softer front spring (right) for mechanical grip'},
+  {p:'4[0].2',d:-0.1,why:'A touch more front camber (left)'},
+  {p:'4[1].2',d:-0.1,why:'A touch more front camber (right)'}]},
+ {id:'fxMidOver',name:'Less oversteer mid-corner',d:'Calms a rear that edges wide at steady state.',ch:[
+  {p:'advancedSetup.mechanicalBalance.aRBRear',d:-1,why:'Softer rear bar'},
+  {p:'advancedSetup.mechanicalBalance.wheelRate',i:2,d:-1,why:'Softer rear spring (left)'},
+  {p:'advancedSetup.mechanicalBalance.wheelRate',i:3,d:-1,why:'Softer rear spring (right)'}],
+  evo:[
+  {p:'2[2].1',d:-20000,why:'Softer rear spring (left)'},
+  {p:'2[3].1',d:-20000,why:'Softer rear spring (right)'},
+  {p:'4[2].2',d:-0.1,why:'A touch more rear camber (left)'},
+  {p:'4[3].2',d:-0.1,why:'A touch more rear camber (right)'}]},
+ {id:'fxFastUnder',name:'Less understeer in fast corners',d:'Pulls aero balance forward — speed-dependent fix.',ch:[
+  {p:'advancedSetup.aeroBalance.rearWing',d:-1,why:'A step less wing (top speed bonus)'},
+  {p:'advancedSetup.aeroBalance.rideHeight',i:0,d:-1,why:'Lower front = more rake = more front aero'}],
+  evo:[
+  {p:'6.5',d:-1,why:'A step less wing (top speed bonus)'},
+  {p:'6.2',d:-2,why:'Front 2 mm lower = more rake = more front aero'}]},
+ {id:'fxFastOver',name:'More stability in fast corners',d:'Pushes aero balance rearward for confidence at speed.',ch:[
+  {p:'advancedSetup.aeroBalance.rearWing',d:1,why:'A step more wing — the biggest single fix'},
+  {p:'advancedSetup.aeroBalance.rideHeight',i:2,d:-1,why:'Slightly less rake'}],
+  evo:[
+  {p:'6.5',d:1,why:'A step more wing — the biggest single fix'},
+  {p:'6.3',d:-2,why:'Rear 2 mm lower = slightly less rake'}]},
+ {id:'fxTraction',name:'More traction on exit',d:'Helps the rear hook up out of slow corners.',ch:[
+  {p:'advancedSetup.mechanicalBalance.wheelRate',i:2,d:-1,why:'Softer rear spring (left)'},
+  {p:'advancedSetup.mechanicalBalance.wheelRate',i:3,d:-1,why:'Softer rear spring (right)'},
+  {p:'advancedSetup.mechanicalBalance.aRBRear',d:-1,why:'Softer rear bar keeps the inside rear planted'},
+  {p:'advancedSetup.drivetrain.preload',d:1,why:'Stops single-wheel spin-up'}],
+  evo:[
+  {p:'2[2].1',d:-20000,why:'Softer rear spring (left) for traction'},
+  {p:'2[3].1',d:-20000,why:'Softer rear spring (right) for traction'},
+  {p:'1.4.3',d:10,why:'More preload stops single-wheel spin-up'}]},
+ {id:'fxPowerPush',name:'Less push on throttle',d:'For a front that gives up the moment you accelerate.',ch:[
+  {p:'advancedSetup.drivetrain.preload',d:-1,why:'A locked diff wants to drive straight'},
+  {p:'advancedSetup.mechanicalBalance.wheelRate',i:2,d:1,why:'Stiffer rear (left) limits squat lifting the nose'},
+  {p:'advancedSetup.mechanicalBalance.wheelRate',i:3,d:1,why:'Stiffer rear (right) limits squat lifting the nose'}],
+  evo:[
+  {p:'1.4.3',d:-10,why:'A locked diff wants to drive straight'},
+  {p:'2[2].1',d:20000,why:'Stiffer rear spring (left) limits squat lifting the nose'},
+  {p:'2[3].1',d:20000,why:'Stiffer rear spring (right) limits squat lifting the nose'}]}
+];
+
+/* ───────────────────────── app ───────────────────────── */
+const groups = [...new Set(P.map(p=>p.group))];
+const byId = Object.fromEntries(P.map(p=>[p.id,p]));
+const sGroups = [...new Set(S.map(s=>s.group))];
+const sById = Object.fromEntries(S.map(s=>[s.id,s]));
+let mode='params', cur='rearWing', dir='up', curS=S[0].id;
+
+/* engineer state */
+let setups=[];
+let selA=-1, selB=-1, curFix=null, preview=null;
+let selView=-1;         // View setup's own setup picker (independent of Compare)
+let pendingNudge={};    // nudge edits: id -> {steps, label, setup-relative locator}
+
+/* Per-field nudge step. Returns the step size (in the field's stored unit) or null
+   if the field must not be nudged (unknown step / derived / absent).
+   ACC: every field is a click → step 1 (integer JSON value).
+   Evo: per-field physical steps confirmed from 1-click tests; integers step by 1. */
+function nudgeStepACC(path){
+  return 1; // ACC stores click values; one click = +1 integer everywhere
+}
+function nudgeStepEVO(key, node){
+  // key is the EVO_MAP key (e.g. '4[0].1'); node is the flat entry {v, off}
+  if(node===undefined || node===null) return null;
+  // strip corner index to match templates: 4[0].1 -> 4[C].1
+  const tmpl = key.replace(/\[\d+\]/, '[C]');
+  const STEPS = {
+    '4[C].1': 0.1,   // tyre pressure (psi)
+    '4[C].2': 0.1,   // camber (°)
+    '1.3.1' : 0.2,   // brake bias (%)
+    '4[C].3': 0.01,  // toe (°) — only when present (handled below)
+  };
+  if(STEPS[tmpl]!==undefined){
+    // toe is only safe to nudge when the field already exists (non-zero in file)
+    if(tmpl==='4[C].3' && (node.v===undefined)) return null;
+    return STEPS[tmpl];
+  }
+  // integer fields = clicks: dampers, wheel rate, ARB, ride height, wing, fuel
+  const INT_TMPLS = ['3[C].1','3[C].2','3[C].3','3[C].4','2[C].1','1.1[0]','1.1[1]','6.2','6.3','6.5','7.1','1.4.3'];
+  if(INT_TMPLS.includes(tmpl) || INT_TMPLS.includes(key)){
+    if(Number.isInteger(node.v)) return 1;
+  }
+  // everything else (derived geometry, unverified floats) = view-only
+  return null;
+}
+let gameFilter='all';   // 'all' | 'acc' | 'evo'
+let engPage='tyres';    // current six-page sub-tab in View setup
+let nudges={};          // pending manual nudges, keyed by field id (Stage C)
+
+/* fuel calculator state */
+let fuel={perLap:2.9, lapTime:'1:45', length:20, unit:'laps', formation:true, margin:1};
+
+/* bono ai state */
+let aiStatus=null;      // null = not yet probed; {ok:true} or {ok:false,reason}
+let aiMessages=[];      // {role:'user'|'ai'|'err', text}
+let aiSetups=[];        // Bono's own loaded setup list (independent of Engineer tab)
+let spCar='', spTrack='', spSetup='';   // Bono setup-picker selections
+let aiBusy=false;
+let aiAllowWrite=false;
+
+const nav = document.getElementById('nav');
+const main = document.getElementById('main');
+const mobileSel = document.getElementById('mobileSel');
+const mTabs = document.getElementById('mTabs');
+
+function tabsHTML(){
+  return `<div class="mode-tabs" role="tablist" aria-label="Mode">
+    <button class="${mode==='params'?'on':''}" data-m="params">Parameters</button>
+    <button class="${mode==='diagnose'?'on':''}" data-m="diagnose">Diagnose</button>
+    <button class="${mode==='engineer'?'on':''}" data-m="engineer">Engineer</button>
+    <button class="${mode==='ai'?'on':''}" data-m="ai">Bono AI</button>
+  </div>`;
+}
+
+function buildNav(){
+  let items='';
+  if(mode==='params'){
+    items = groups.map(g=>`<div class="group"><h2>${g}</h2>` +
+      P.filter(p=>p.group===g).map(p=>
+        `<button data-id="${p.id}" class="${p.id===cur?'active':''} ${isLinked(p.id)?'linked':''}">${p.name}</button>`
+      ).join('') + `</div>`).join('');
+  }else if(mode==='diagnose'){
+    items = sGroups.map(g=>`<div class="group"><h2>${g}</h2>` +
+      S.filter(s=>s.group===g).map(s=>
+        `<button data-id="${s.id}" class="${s.id===curS?'active':''}">${s.name}</button>`
+      ).join('') + `</div>`).join('');
+  }else if(mode==='engineer'){
+    items = `<div class="group"><h2>Workflow</h2>
+      <button data-go="engSource">1 · Load setups</button>
+      <button data-go="engView">2 · View setup</button>
+      <button data-go="engCompare">3 · Compare</button>
+      <button data-go="engFix">4 · Driver requests</button>
+      <button data-go="engFuel">Fuel calculator</button></div>
+      <div class="group"><h2>Loaded</h2>
+      <button disabled style="cursor:default;color:var(--muted)">${setups.length} setup file${setups.length===1?'':'s'}</button></div>`;
+  }else{
+    items = `<div class="group"><h2>Bono AI</h2>
+      <button disabled style="cursor:default;color:var(--muted)">Your local race engineer</button></div>
+      <div class="group"><h2>About</h2>
+      <button disabled style="cursor:default;color:var(--muted);white-space:normal;line-height:1.5">Asks questions in plain English about your setups. Runs locally via Claude Code.</button></div>`;
+  }
+  nav.innerHTML = `<div class="brand"><h1>Setup Ripple <span>ACC/EVO</span></h1><p>GT3 cause &amp; effect — ACC / AC Evo · v7.1</p></div>` + tabsHTML() + items;
+  nav.querySelectorAll('.mode-tabs button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+  nav.querySelectorAll('.group button[data-id]').forEach(b=>b.onclick=()=>mode==='params'?select(b.dataset.id):selectSym(b.dataset.id));
+  nav.querySelectorAll('.group button[data-go]').forEach(b=>b.onclick=()=>{
+    const el=document.getElementById(b.dataset.go); if(el) el.scrollIntoView({behavior:'smooth'});
+  });
+
+  mTabs.innerHTML = tabsHTML();
+  mTabs.querySelectorAll('button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+  if(mode==='engineer'||mode==='ai'){ mobileSel.style.display='none'; }
+  else{
+    mobileSel.style.display='';
+    if(mode==='params'){
+      mobileSel.innerHTML = groups.map(g=>
+        `<optgroup label="${g}">` + P.filter(p=>p.group===g).map(p=>
+          `<option value="${p.id}" ${p.id===cur?'selected':''}>${p.name}</option>`).join('') + `</optgroup>`).join('');
+    }else{
+      mobileSel.innerHTML = sGroups.map(g=>
+        `<optgroup label="${g}">` + S.filter(s=>s.group===g).map(s=>
+          `<option value="${s.id}" ${s.id===curS?'selected':''}>${s.name}</option>`).join('') + `</optgroup>`).join('');
+    }
+  }
+}
+mobileSel.onchange = e=>mode==='params'?select(e.target.value):selectSym(e.target.value);
+
+function isLinked(id){
+  const p = byId[cur];
+  return id!==cur && p.knock.some(k=>k.id===id);
+}
+
+function balText(b){
+  if(b<=-2) return 'Shifts the balance clearly towards <strong>tight / understeer</strong>.';
+  if(b===-1) return 'Nudges the balance towards <strong>tight / understeer</strong>.';
+  if(b===0)  return 'Roughly <strong>balance-neutral</strong> overall — its effects depend on which end you change, or it alters character rather than balance.';
+  if(b===1)  return 'Nudges the balance towards <strong>loose / oversteer</strong>.';
+  return 'Shifts the balance clearly towards <strong>loose / oversteer</strong>.';
+}
+
+function render(){
+  if(mode==='params') renderParam();
+  else if(mode==='diagnose') renderSym();
+  else if(mode==='engineer') renderEng();
+  else renderAI();
+}
+
+function renderParam(){
+  const p = byId[cur], d = p[dir];
+  const pos = 50 + d.bal*15;
+  main.innerHTML = `
+    <div class="crumb">${p.group}</div>
+    <div class="title-row"><h2>${p.name}</h2></div>
+    <p class="does">${p.does}</p>
+
+    <div class="toggle" role="tablist" aria-label="Direction of change">
+      <button class="${dir==='up'?'on':''}" data-d="up">▲ ${p.upLabel}</button>
+      <button class="${dir==='down'?'on':''}" data-d="down">▼ ${p.downLabel}</button>
+    </div>
+
+    <div class="bal">
+      <div class="bal-labels"><span class="t">◀ Tight · understeer</span><span class="n">neutral</span><span class="l">Loose · oversteer ▶</span></div>
+      <div class="bal-track"><div class="bal-tick"></div><div class="bal-mark" id="mark" style="left:50%"></div></div>
+      <p class="bal-note">${balText(d.bal)}</p>
+    </div>
+
+    <section>
+      <h3>What happens</h3>
+      <ul class="fx">${d.fx.map(f=>`<li>${f}</li>`).join('')}</ul>
+    </section>
+
+    <section>
+      <h3 class="kn">Knock-on effects — what else this touches</h3>
+      <div class="knock">${p.knock.map(k=>`
+        <div class="knock-item">
+          <button data-id="${k.id}">${byId[k.id].name} →</button>
+          <p>${k.why}</p>
+        </div>`).join('')}
+      </div>
+    </section>
+
+    <section>
+      <h3 class="cp">How to compensate</h3>
+      <ul class="fx comp">${d.comp.map(c=>`<li><strong style="color:var(--green)">${byId[c.id].name}:</strong> ${c.a}</li>`).join('')}</ul>
+    </section>
+
+    ${p.note?`<p class="footnote">${p.note}</p>`:''}
+  `;
+  main.querySelectorAll('.toggle button').forEach(b=>b.onclick=()=>{dir=b.dataset.d;render();});
+  main.querySelectorAll('.knock-item button').forEach(b=>b.onclick=()=>select(b.dataset.id));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const m = document.getElementById('mark'); if(m) m.style.left = pos+'%';
+  }));
+}
+
+function renderSym(){
+  const s = sById[curS];
+  main.innerHTML = `
+    <div class="crumb">${s.group}</div>
+    <div class="title-row"><h2>${s.name}</h2></div>
+    <p class="does">${s.desc}</p>
+    ${s.quick?`<div class="quick"><b>Quick check</b>${s.quick}</div>`:''}
+    <section>
+      <h3>Likely causes — most common first</h3>
+      ${s.causes.map((c,i)=>`
+        <div class="cause">
+          <span class="rank">${String(i+1).padStart(2,'0')}</span>
+          <div class="body"><strong>${c.label}</strong><p>${c.fix}</p></div>
+          <button data-id="${c.id}">${byId[c.id].name} →</button>
+        </div>`).join('')}
+    </section>
+    <p class="footnote">Change one thing at a time and do at least three clean laps before judging it — single-lap impressions lie. The arrow buttons jump to the full cause-and-effect page for each parameter.</p>
+  `;
+  main.querySelectorAll('.cause > button').forEach(b=>b.onclick=()=>{mode='params';select(b.dataset.id);});
+}
+
+/* ──────────────────── engineer: helpers ──────────────────── */
+const hasFS = !!(window.SetupRippleDir || ('showDirectoryPicker' in window));
+
+function get(obj,path){ return path.split('.').reduce((o,k)=>o&&o[k]!==undefined?o[k]:undefined,obj); }
+function fieldFor(path){ return FIELDS.find(f=>f.p===path); }
+function pidFor(f,i){ if(f.pidIdx&&f.pidIdx[i]!==undefined) return f.pidIdx[i]; return f.pid||null; }
+function tilt(pid,delta){
+  if(!pid||!delta) return null;
+  const b = delta>0 ? byId[pid].up.bal : byId[pid].down.bal;
+  return b>0?'looser':(b<0?'tighter':null);
+}
+function chip(t){ return t?`<span class="chip ${t==='looser'?'loose':'tight'}">${t}</span>`:''; }
+function confChip(c){ return (c==='likely'||c==='guess')?` <span class="chip">${c}</span>`:''; }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmt(v){ return typeof v==='number' ? (Number.isInteger(v)?v:+v.toFixed(3)) : v; }
+
+function addSetup(name,label,content,saveDir){
+  if(content.json!==undefined){
+    setups.push({name,label,kind:'acc',json:content.json,saveDir});
+  }else{
+    const s=loadEvo(name,label,content.buf,saveDir);
+    if(s) setups.push(s);
+  }
+}
+
+async function pickFolder(){
+  try{
+    if(window.SetupRippleDir){
+      // Electron: bridge returns a plain array of file objects (methods don't survive contextBridge)
+      const files = await window.SetupRippleDir.pick();
+      let added=0;
+      for(const f of files){
+        try{
+          if(f.isEvo) addSetup(f.name, f.relPath, {buf:f.buffer}, f.fullPath);
+          else        addSetup(f.name, f.relPath, {json:JSON.parse(f.text)}, f.fullPath);
+          added++;
+        }catch(e){ console.warn('Skipped setup file', f.relPath, e); }
+      }
+      if(!added && files.length) console.warn('Folder had '+files.length+' candidate files but none loaded.');
+    }else{
+      // Browser: walk the File System Access API directory handle
+      const root = await window.showDirectoryPicker();
+      async function walk(dh,prefix,depth){
+        if(depth>4) return;
+        for await(const [name,h] of dh.entries()){
+          if(h.kind==='directory') await walk(h,prefix?prefix+' / '+name:name,depth+1);
+          else{
+            const lbl=(prefix?prefix+' / ':'')+name;
+            try{
+              if(name.toLowerCase().endsWith('.json')) addSetup(name,lbl,{json:JSON.parse(await (await h.getFile()).text())},dh);
+              else if(isEvoName(name)) addSetup(name,lbl,{buf:await (await h.getFile()).arrayBuffer()},dh);
+            }catch(e){ console.warn('Skipped setup file', lbl, e); }
+          }
+        }
+      }
+      await walk(root,'',0);
+    }
+    if(selView<0 && setups.length) selView=0;
+    buildNav(); renderEng();
+  }catch(e){
+    if(e && e.name!=='AbortError') console.warn('Folder load failed:', e);
+  }
+}
+
+function pickFiles(input){
+  const files=[...input.files];
+  let pending=files.length;
+  if(!pending) return;
+  const done=()=>{ if(--pending===0){ if(selView<0 && setups.length) selView=0; buildNav(); renderEng(); } };
+  files.forEach(f=>{
+    const r=new FileReader();
+    if(isEvoName(f.name)){
+      r.onload=()=>{ try{ addSetup(f.name,f.name,{buf:r.result},null); }catch(e){} done(); };
+      r.readAsArrayBuffer(f);
+    }else{
+      r.onload=()=>{ try{ addSetup(f.name,f.name,{json:JSON.parse(r.result)},null); }catch(e){} done(); };
+      r.readAsText(f);
+    }
+  });
+}
+
+function flatten(o,prefix='',out={}){
+  if(Array.isArray(o)) o.forEach((v,i)=>flatten(v,prefix+'['+i+']',out));
+  else if(o&&typeof o==='object') Object.keys(o).forEach(k=>flatten(o[k],prefix?prefix+'.'+k:k,out));
+  else out[prefix]=o;
+  return out;
+}
+
+function diffSetups(a,b){
+  const rows=[];
+  if(a.kind==='evo'){
+    const keys=[...new Set([...Object.keys(a.flat),...Object.keys(b.flat)])].sort();
+    for(const k of keys){
+      if(EVO_SKIP(k)) continue;
+      const va=a.flat[k]?a.flat[k].v:undefined, vb=b.flat[k]?b.flat[k].v:undefined;
+      const eq = (typeof va==='number'&&typeof vb==='number') ? Math.abs(va-vb)<1e-4 : va===vb;
+      if(eq) continue;
+      const m=EVO_MAP[k];
+      const delta=(typeof va==='number'&&typeof vb==='number')?vb-va:null;
+      rows.push({label:m?m.l:k,va:fmt(va),vb:fmt(vb),delta:delta===null?null:fmt(delta),
+        t:delta!==null&&m?tilt(m.pid,delta):null,known:!!m,conf:m?m.conf:null});
+    }
+    return rows;
+  }
+  const fa=flatten(a.json), fb=flatten(b.json);
+  const keys=[...new Set([...Object.keys(fa),...Object.keys(fb)])].sort();
+  for(const k of keys){
+    if(fa[k]===fb[k]) continue;
+    const mArr=k.match(/^(.*)\[(\d+)\]$/);
+    const path=mArr?mArr[1]:k, i=mArr?+mArr[2]:null;
+    if(SKIP.some(s=>path.includes(s))) continue;
+    const f=fieldFor(path);
+    let label, pid=null;
+    if(f){
+      label=f.l+(i!==null&&f.c?` — ${f.c[i]||i}`:'');
+      pid=pidFor(f,i);
+      if(f.c&&i!==null&&String(f.c[i]).includes('n/a')) continue;
+    }else label=k;
+    const va=fa[k], vb=fb[k];
+    const delta=(typeof va==='number'&&typeof vb==='number')?vb-va:null;
+    rows.push({label,va,vb,delta,t:delta!==null?tilt(pid,delta):null,known:!!f,conf:null});
+  }
+  return rows;
+}
+
+function diffTable(rows){
+  if(!rows.length) return `<p class="eng-empty">No differences — these two setups are identical in every adjustable field.</p>`;
+  return `<table class="diff"><tr><th>Parameter</th><th>A</th><th>B</th><th>Δ</th><th>B vs A</th></tr>` +
+    rows.map(r=>`<tr>
+      <td>${esc(r.label)}${r.known?'':' <span class="chip">raw</span>'}${confChip(r.conf)}</td>
+      <td class="num">${esc(r.va===undefined?'—':r.va)}</td>
+      <td class="num">${esc(r.vb===undefined?'—':r.vb)}</td>
+      <td class="num">${r.delta===null?'—':(r.delta>0?'+':'')+r.delta}</td>
+      <td>${chip(r.t)}</td></tr>`).join('') + `</table>`;
+}
+
+function buildPreview(fix){
+  const s=setups[selA];
+  const rows=[];
+  if(s.kind==='evo'){
+    if(!fix.evo) return {fix,rows};
+    for(const c of fix.evo){
+      const node=s.flat[c.p];
+      if(!node||typeof node.v!=='number') continue;
+      const before=node.v;
+      let after=before+c.d;
+      if(EVO_FLOOR0.has(c.p)) after=Math.max(0,after);
+      const m=EVO_MAP[c.p];
+      rows.push({...c,label:m?m.l:c.p,before:fmt(before),after:fmt(after),rawAfter:after,off:node.off,
+        atMin:after===before&&c.d<0,on:true,t:tilt(m?m.pid:null,c.d),conf:m?m.conf:null});
+    }
+    return {fix,rows};
+  }
+  for(const c of fix.ch){
+    const node=get(s.json,c.p);
+    if(node===undefined) continue;
+    const f=fieldFor(c.p);
+    const before = c.i!==undefined?node[c.i]:node;
+    if(typeof before!=='number') continue;
+    const after=Math.max(0,before+c.d);
+    rows.push({...c,label:f?f.l+(c.i!==undefined&&f.c?` — ${f.c[c.i]}`:''):c.p,
+      before,after,atMin:after===before&&c.d<0,on:true,conf:null,
+      t:tilt(pidFor(f||{},c.i!==undefined?c.i:undefined)||((f||{}).pid),c.d)});
+  }
+  return {fix,rows};
+}
+
+function applyPreview(){
+  const s=setups[selA];
+  if(s.kind==='evo'){
+    const bytes=new Uint8Array(s.bytes);
+    const dv=new DataView(bytes.buffer);
+    for(const r of preview.rows){
+      if(!r.on||r.off===undefined) continue;
+      dv.setFloat32(r.off, r.rawAfter, true);
+    }
+    return bytes;
+  }
+  const j=JSON.parse(JSON.stringify(s.json));
+  for(const r of preview.rows){
+    if(!r.on) continue;
+    const node=get(j,r.p);
+    if(r.i!==undefined) node[r.i]=r.after;
+    else{
+      const parts=r.p.split('.'), last=parts.pop();
+      get(j,parts.join('.'))[last]=r.after;
+    }
+  }
+  return j;
+}
+
+async function saveResult(){
+  const out=applyPreview();
+  const s=setups[selA];
+  const isEvo=s.kind==='evo';
+  const ext=isEvo?(s.name.match(/\.[^.]+$/)||['.carsetup'])[0]:'.json';
+  const base=s.name.replace(/\.[^.]+$/,'');
+  const newName=`${base} - ${preview.fix.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')}${ext}`;
+  const payload=isEvo?out:JSON.stringify(out,null,2);
+  // Electron: saveDir is the source file's absolute path; save the new file alongside it via the bridge
+  if(typeof s.saveDir==='string' && window.SetupRippleDir && window.SetupRippleDir.save){
+    try{
+      const res=await window.SetupRippleDir.save(s.saveDir, newName, payload, isEvo);
+      if(res && res.ok){
+        document.getElementById('saveMsg').innerHTML=`<b>Saved</b> ${esc(newName)} into the same folder — it will appear in the game’s setup list.`;
+        return;
+      }
+    }catch(e){ console.warn('IPC save failed, falling back to download:', e); }
+  }
+  // Browser File System Access API: saveDir is a directory handle
+  if(s.saveDir && s.saveDir.getFileHandle && hasFS){
+    try{
+      const fh=await s.saveDir.getFileHandle(newName,{create:true});
+      const w=await fh.createWritable();
+      await w.write(payload); await w.close();
+      document.getElementById('saveMsg').innerHTML=`<b>Saved</b> ${esc(newName)} into the same folder — it will appear in the game’s setup list.`;
+      return;
+    }catch(e){ console.warn('Handle save failed, falling back to download:', e); }
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([payload],{type:isEvo?'application/octet-stream':'application/json'}));
+  a.download=newName; a.click();
+  document.getElementById('saveMsg').innerHTML=`<b>Downloaded</b> ${esc(newName)} — drop it into your setups folder.`;
+}
+
+function copyForAI(kind){
+  let txt='';
+  if(kind==='diff'&&selA>=0&&selB>=0){
+    const a=setups[selA], b=setups[selB];
+    const game=a.kind==='evo'?'Assetto Corsa Evo':'Assetto Corsa Competizione';
+    const unit=a.kind==='evo'?'physical units':'setup-screen clicks';
+    const rows=diffSetups(a,b).map(r=>`- ${r.label}: ${r.va} -> ${r.vb}${r.delta!==null?` (${r.delta>0?'+':''}${r.delta})`:''}`).join('\n');
+    txt=`I'm comparing two ${game} setups.\nSetup A: ${a.label}\nSetup B: ${b.label}\nDifferences (values are ${unit}):\n${rows}\n\nPlease explain how setup B will feel different to drive than setup A (entry / mid-corner / exit / high-speed), and which differences matter most.`;
+  }else if(kind==='fix'&&preview){
+    const rows=preview.rows.filter(r=>r.on).map(r=>`- ${r.label}: ${r.before} -> ${r.after} (${r.why})`).join('\n');
+    txt=`I'm applying this change to my setup "${setups[selA].label}" to get: ${preview.fix.name}.\n${rows}\n\nPlease sanity-check these changes and suggest anything I should watch for on track.`;
+  }
+  navigator.clipboard.writeText(txt);
+}
+
+/* ──────────────────── engineer: render ──────────────────── */
+function visibleSetups(){
+  return setups.map((s,i)=>({s,i})).filter(x=>gameFilter==='all'||x.s.kind===gameFilter);
+}
+function setupOptions(sel){
+  const grp=(kind,label)=>{
+    if(gameFilter!=='all'&&gameFilter!==kind) return '';
+    const opts=setups.map((s,i)=>({s,i})).filter(x=>x.s.kind===kind);
+    if(!opts.length) return '';
+    return `<optgroup label="${label}">`+opts.map(x=>
+      `<option value="${x.i}" ${x.i===sel?'selected':''}>${esc(x.s.label)}</option>`).join('')+`</optgroup>`;
+  };
+  return `<option value="-1">— choose a setup —</option>` + grp('acc','ACC') + grp('evo','AC Evo');
+}
+
+/* ─────────── ACC six-page setup map (mirrors the in-game setup screen) ───────────
+   Each page lists the FIELDS paths shown on that ACC setup tab. The view resolves
+   values from the loaded setup: ACC via get(json,path); Evo via the flat map. */
+const ACC_PAGES = [
+  { id:'tyres', name:'Tyres', groups:[
+    { title:'Pressures & compound', paths:[
+      'basicSetup.tyres.tyrePressure',
+      'basicSetup.tyres.tyreCompound' ] },
+    { title:'Alignment', paths:[
+      'basicSetup.alignment.camber',
+      'basicSetup.alignment.toe',
+      'basicSetup.alignment.casterLF',
+      'basicSetup.alignment.casterRF',
+      'basicSetup.alignment.steerRatio' ] } ] },
+  { id:'electronics', name:'Electronics', groups:[
+    { title:'Driver aids', paths:[
+      'basicSetup.electronics.tC1',
+      'basicSetup.electronics.abs',
+      'basicSetup.electronics.eCUMap',
+      'basicSetup.electronics.tC2' ] } ] },
+  { id:'strategy', name:'Fuel & strategy', groups:[
+    { title:'Fuel & tyres', paths:[
+      'basicSetup.strategy.fuel',
+      'basicSetup.strategy.tyreSet' ] },
+    { title:'Brake pads', paths:[
+      'basicSetup.strategy.frontBrakePadCompound',
+      'basicSetup.strategy.rearBrakePadCompound' ] } ] },
+  { id:'mechanical', name:'Mechanical grip', groups:[
+    { title:'Anti-roll bars', paths:[
+      'advancedSetup.mechanicalBalance.aRBFront',
+      'advancedSetup.mechanicalBalance.aRBRear' ] },
+    { title:'Springs & bumpstops', paths:[
+      'advancedSetup.mechanicalBalance.wheelRate',
+      'advancedSetup.mechanicalBalance.bumpStopRateUp',
+      'advancedSetup.mechanicalBalance.bumpStopRateDn',
+      'advancedSetup.mechanicalBalance.bumpStopWindow' ] },
+    { title:'Brakes & differential', paths:[
+      'advancedSetup.mechanicalBalance.brakeTorque',
+      'advancedSetup.mechanicalBalance.brakeBias',
+      'advancedSetup.drivetrain.preload' ] } ] },
+  { id:'dampers', name:'Dampers', groups:[
+    { title:'Bump', paths:[
+      'advancedSetup.dampers.bumpSlow',
+      'advancedSetup.dampers.bumpFast' ] },
+    { title:'Rebound', paths:[
+      'advancedSetup.dampers.reboundSlow',
+      'advancedSetup.dampers.reboundFast' ] } ] },
+  { id:'aero', name:'Aero', groups:[
+    { title:'Ride height & wing', paths:[
+      'advancedSetup.aeroBalance.rideHeight',
+      'advancedSetup.aeroBalance.splitter',
+      'advancedSetup.aeroBalance.rearWing' ] },
+    { title:'Brake ducts', paths:[
+      'advancedSetup.aeroBalance.brakeDuct' ] } ] }
+];
+
+/* Evo six-page map — keyed to EVO_MAP's own positional keys (per-corner).
+   Evo stores real physical values. Corner fields are grouped so the row shows LF/RF/LR/RR. */
+const EVO_PAGES = [
+  { id:'tyres', name:'Tyres', groups:[
+    { title:'Pressures', corner:true, keys:['4[C].1'], label:'Tyre pressure (psi)' },
+    { title:'Camber', corner:true, keys:['4[C].2'], label:'Camber (°)' },
+    { title:'Toe', corner:true, keys:['4[C].3'], label:'Toe (°)' },
+    { title:'Caster', corner:true, keys:['4[C].4'], label:'Caster' },
+    { title:'Steering', keys:['1.2'] } ] },
+  { id:'electronics', name:'Electronics', groups:[
+    { title:'Driver aids', keys:['5.1','5.2','5.3'] } ] },
+  { id:'strategy', name:'Fuel & strategy', groups:[
+    { title:'Fuel', keys:['7.1'] } ] },
+  { id:'mechanical', name:'Suspension', groups:[
+    { title:'Anti-roll bars', keys:['1.1[0]','1.1[1]'] },
+    { title:'Wheel rate', corner:true, keys:['2[C].1'], label:'Wheel rate (N/m)' },
+    { title:'Bumpstops', corner:true, keys:['2[C].2.1','2[C].2.2'], label:'Bumpstop' },
+    { title:'Brakes & differential', keys:['1.3.1','1.4.3'] } ] },
+  { id:'dampers', name:'Dampers', groups:[
+    { title:'Bump', corner:true, keys:['3[C].1','3[C].2'], label:'Bump' },
+    { title:'Rebound', corner:true, keys:['3[C].3','3[C].4'], label:'Rebound' } ] },
+  { id:'aero', name:'Aero', groups:[
+    { title:'Ride height & wing', keys:['6.2','6.3','6.5'] } ] }
+];
+const EVO_CORNERS=['LF','RF','LR','RR'];
+
+/* Read a field's value(s) from a loaded setup, ACC or Evo.
+   Returns {field:{l}, cells:[{label,value,pid,path,idx}]}. */
+function readField(setup, path){
+  const f=fieldFor(path);
+  if(!f) return null;
+  const v=get(setup.json, path);
+  if(v===undefined) return null;
+  if(Array.isArray(v)){
+    const cells=v.map((val,i)=>{
+      const lab=f.c?(f.c[i]!==undefined?String(f.c[i]):String(i)):String(i);
+      if(String(lab).includes('n/a')) return null;
+      return {label:lab, value:fmt(val), rawValue:val, pid:pidFor(f,i), path, idx:i};
+    }).filter(Boolean);
+    return {field:f, cells};
+  }
+  return {field:f, cells:[{label:null, value:fmt(v), rawValue:v, pid:pidFor(f,null), path, idx:null}]};
+}
+
+/* Nudge controls (◄ ►) + pending badge for an adjustable field.
+   locator uniquely ids the field within the setup:
+     ACC: {kind:'acc', path, idx}   Evo: {kind:'evo', key, off} */
+function nudgeCtl(locator, label){
+  const id = nudgeId(locator);
+  const pend = pendingNudge[id] ? pendingNudge[id].steps : 0;
+  const badge = `<span class="eng-pend">${pend!==0?(pend>0?'+':'')+pend:''}</span>`;
+  const enc = encodeURIComponent(JSON.stringify(locator));
+  return `<span class="eng-nudge">${badge}`+
+    `<button class="nbtn" data-loc="${enc}" data-lbl="${esc(label)}" data-d="-1" title="One click down">◄</button>`+
+    `<button class="nbtn" data-loc="${enc}" data-lbl="${esc(label)}" data-d="1" title="One click up">►</button></span>`;
+}
+function nudgeId(loc){
+  return loc.kind==='acc' ? `acc:${loc.path}:${loc.idx==null?'':loc.idx}` : `evo:${loc.key}`;
+}
+function nudge(locator, label, delta){
+  const id = nudgeId(locator);
+  const cur = pendingNudge[id] ? pendingNudge[id].steps : 0;
+  const steps = cur + delta;
+  if(steps===0) delete pendingNudge[id];
+  else pendingNudge[id] = { steps, label, locator };
+  renderEng();
+}
+function nudgeCount(){ return Object.keys(pendingNudge).length; }
+function clearNudges(){ pendingNudge={}; renderEng(); }
+
+/* Build an edited file from pending nudges. ACC → edited json; Evo → edited bytes.
+   Only the nudged fields change; everything else stays identical (lossless for Evo). */
+function applyNudges(setup){
+  if(setup.kind==='evo'){
+    const bytes=new Uint8Array(setup.bytes);
+    const dv=new DataView(bytes.buffer);
+    for(const id in pendingNudge){
+      const e=pendingNudge[id]; const loc=e.locator;
+      if(loc.kind!=='evo' || loc.step==null || loc.off==null) continue;
+      const node=setup.flat[loc.key]; if(!node) continue;
+      const newVal=node.v + e.steps*loc.step;
+      dv.setFloat32(loc.off, newVal, true);
+    }
+    return bytes;
+  }else{
+    const j=JSON.parse(JSON.stringify(setup.json));
+    for(const id in pendingNudge){
+      const e=pendingNudge[id]; const loc=e.locator;
+      if(loc.kind!=='acc') continue;
+      const cur=get(j, loc.path);
+      if(loc.idx!=null && Array.isArray(cur)){ cur[loc.idx]=cur[loc.idx]+e.steps; }
+      else{
+        const parts=loc.path.split('.'), last=parts.pop();
+        const obj=get(j,parts.join('.')); if(obj) obj[last]=obj[last]+e.steps;
+      }
+    }
+    return j;
+  }
+}
+
+async function saveNudged(){
+  const s=setups[selView];
+  if(!s || !nudgeCount()) return;
+  const out=applyNudges(s);
+  const isEvo=s.kind==='evo';
+  const ext=isEvo?(s.name.match(/\.[^.]+$/)||['.carsetup'])[0]:'.json';
+  const base=s.name.replace(/\.[^.]+$/,'');
+  const newName=`${base} - edited${ext}`;
+  const payload=isEvo?out:JSON.stringify(out,null,2);
+  const msg=document.getElementById('nudgeMsg');
+  const ok=(name)=>{ if(msg) msg.innerHTML=`<b>Saved</b> ${esc(name)} — your original is untouched. The game shows the final values when you load it.`; };
+  // Electron bridge (in-place beside original)
+  if(typeof s.saveDir==='string' && window.SetupRippleDir && window.SetupRippleDir.save){
+    try{ const res=await window.SetupRippleDir.save(s.saveDir, newName, payload, isEvo);
+      if(res&&res.ok){ ok(newName); return; } }catch(e){ console.warn('IPC save failed:',e); }
+  }
+  // Browser FS Access API
+  if(s.saveDir && s.saveDir.getFileHandle && hasFS){
+    try{ const fh=await s.saveDir.getFileHandle(newName,{create:true});
+      const w=await fh.createWritable(); await w.write(payload); await w.close(); ok(newName); return;
+    }catch(e){ console.warn('Handle save failed:',e); }
+  }
+  // Download fallback
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([payload],{type:isEvo?'application/octet-stream':'application/json'}));
+  a.download=newName; a.click();
+  if(msg) msg.innerHTML=`<b>Downloaded</b> ${esc(newName)} — drop it into your setups folder.`;
+}
+
+
+function renderViewSetup(setup){
+  if(!setup) return `<p class="eng-empty">Choose Setup A above to view it page by page.</p>`;
+  const PAGES = setup.kind==='evo' ? EVO_PAGES : ACC_PAGES;
+  const tabs = PAGES.map(pg=>
+    `<button class="vpage ${engPage===pg.id?'on':''}" data-vp="${pg.id}">${pg.name}</button>`).join('');
+  const page = PAGES.find(p=>p.id===engPage) || PAGES[0];
+  let body;
+  if(setup.kind==='evo'){
+    body = page.groups.map(g=>{
+      let rows='';
+      if(g.corner){
+        // one row per key-template, cells per corner
+        rows = g.keys.map(tmpl=>{
+          const cells=EVO_CORNERS.map((cn,ci)=>{
+            const key=tmpl.replace('[C]','['+ci+']');
+            const node=setup.flat[key]; if(!node) return null;
+            const step=nudgeStepEVO(key, node);
+            const loc={kind:'evo', key, off:node.off, step};
+            const id=nudgeId(loc);
+            const steps=pendingNudge[id]?pendingNudge[id].steps:0;
+            const shownVal=node.v + (step?steps*step:0);
+            const ctl = step!=null ? nudgeCtl(loc, cn) : '';
+            return `<span class="vcell"><span class="vcl">${cn}</span><span class="vcv">${esc(String(fmt(shownVal)))}</span>${ctl}</span>`;
+          }).filter(Boolean).join('');
+          if(!cells) return '';
+          const m=EVO_MAP[tmpl.replace('[C]','[0]')];
+          const lbl=(m?m.l.replace(/ — LF$/,''):(g.label||tmpl));
+          return `<div class="vrow"><span class="vlabel">${esc(lbl)}</span><span class="vcells">${cells}</span></div>`;
+        }).join('');
+      }else{
+        rows = g.keys.map(key=>{
+          const node=setup.flat[key]; if(!node) return '';
+          const m=EVO_MAP[key];
+          const lbl=m?m.l:key;
+          const step=nudgeStepEVO(key, node);
+          const loc={kind:'evo', key, off:node.off, step};
+          const id=nudgeId(loc);
+          const steps=pendingNudge[id]?pendingNudge[id].steps:0;
+          const shownVal=node.v + (step?steps*step:0);
+          const ctl = step!=null ? nudgeCtl(loc, lbl) : '';
+          return `<div class="vrow"><span class="vlabel">${esc(lbl)}</span><span class="vcells"><span class="vcell"><span class="vcv">${esc(String(fmt(shownVal)))}</span>${ctl}</span></span></div>`;
+        }).join('');
+      }
+      return rows ? `<div class="vgroup"><h4>${esc(g.title)}</h4>${rows}</div>` : '';
+    }).filter(Boolean).join('');
+  }else{
+    body = page.groups.map(g=>{
+      const rows = g.paths.map(p=>{
+        const r=readField(setup, p);
+        if(!r) return '';
+        const cells=r.cells.map(c=>{
+          const loc={kind:'acc', path:c.path, idx:c.idx, step:1};
+          const id=nudgeId(loc);
+          const steps=pendingNudge[id]?pendingNudge[id].steps:0;
+          // ACC values are integer clicks; show stepped preview
+          const rawNum = typeof c.rawValue==='number'?c.rawValue:Number(c.value);
+          const shown = (steps!==0 && !Number.isNaN(rawNum)) ? fmt(rawNum+steps) : c.value;
+          const ctl = nudgeCtl(loc, c.label||r.field.l);
+          return `<span class="vcell">${c.label?`<span class="vcl">${esc(c.label)}</span>`:''}<span class="vcv">${esc(String(shown))}</span>${ctl}</span>`;
+        }).join('');
+        return `<div class="vrow"><span class="vlabel">${esc(r.field.l)}</span><span class="vcells">${cells}</span></div>`;
+      }).filter(Boolean).join('');
+      return rows ? `<div class="vgroup"><h4>${esc(g.title)}</h4>${rows}</div>` : '';
+    }).filter(Boolean).join('');
+  }
+  const note = setup.kind==='evo'
+    ? `<p class="eng-status">AC Evo values are decoded to real physical units (psi, °, N/m, mm). Some fields are inferred from the file format — cross-check against the in-game screen. Fields without ◄ ► are view-only (step not yet verified).</p>`
+    : `<p class="eng-status">ACC values are setup-screen positions (clicks), exactly as the game shows them.</p>`;
+  const saveBar = nudgeCount()
+    ? `<div class="eng-actions" style="margin-top:14px">
+         <button class="btn primary" id="btnSaveNudge">Save edited setup (${nudgeCount()} change${nudgeCount()>1?'s':''})</button>
+         <button class="btn" id="btnClearNudge">Clear changes</button>
+         <span id="nudgeMsg" class="eng-status"></span>
+       </div>`
+    : '';
+  return `<div class="vpages" role="tablist">${tabs}</div>${note}<div class="vbody">${body||'<p class="eng-empty">No fields on this page for this setup.</p>'}</div>${saveBar}`;
+}
+
+function renderEng(){
+  const nAcc=setups.filter(s=>s.kind==='acc').length;
+  const nEvo=setups.filter(s=>s.kind==='evo').length;
+  const a=setups[selA], b=setups[selB];
+  const kindMismatch=a&&b&&a.kind!==b.kind;
+  const carA=a?(a.kind==='evo'?a.car:a.json.carName):null;
+  const carB=b?(b.kind==='evo'?b.car:b.json.carName):null;
+  const sameCar=!a||!b||kindMismatch||!carA||!carB||carA===carB;
+  main.innerHTML = `
+    <div class="crumb">Engineer</div>
+    <div class="title-row"><h2>Race engineer</h2></div>
+    <p class="does">Load your real setup files — ACC .json or AC Evo .carsetup — compare any two, and apply driver requests: the same rules as the Diagnose tab, executed for you. ACC values are setup-screen clicks; Evo files are decoded to real physical values (psi, degrees, N/m, mm). Edited copies are always saved as new files; your originals are never touched.</p>
+
+    <section id="engSource">
+      <h3>1 · Load setups</h3>
+      <p class="does" style="margin-bottom:12px">Select a single <strong>track folder</strong> (the one inside a car folder that contains the setup files) — not the top-level Setups folder or a car folder. Same for both ACC and AC Evo.</p>
+      <div class="eng-actions">
+        <button class="btn primary" id="btnFolder" ${hasFS?'':'disabled'}>Open setups folder</button>
+        <button class="btn" id="btnFiles">Add setup files…</button>
+        ${setups.length?`<button class="btn" id="btnClear">Clear all</button>`:''}
+        <input type="file" id="fileInput" accept=".json,.carsetup,.setup" multiple style="display:none">
+      </div>
+      <p class="eng-status">${setups.length?`<b>${setups.length}</b> setup file${setups.length===1?'':'s'} loaded${nAcc&&nEvo?` (${nAcc} ACC, ${nEvo} Evo)`:''}`:'Nothing loaded yet'} · ACC: Documents → Assetto Corsa Competizione → Setups · AC Evo: C:\\Users\\[username]\\Saved Games\\ACE\\Car Setups — or wherever your setups are stored${hasFS?'':' · folder picker needs Chrome or Edge — use “Add setup files” instead'}</p>
+      ${nAcc&&nEvo?`<div class="toggle" role="tablist" aria-label="Filter by game" style="margin-top:4px;margin-bottom:0">
+        <button class="${gameFilter==='all'?'on':''}" data-gf="all">Both</button>
+        <button class="${gameFilter==='acc'?'on':''}" data-gf="acc">ACC</button>
+        <button class="${gameFilter==='evo'?'on':''}" data-gf="evo">AC Evo</button>
+      </div>`:''}
+    </section>
+
+    <section id="engView">
+      <h3>2 · View setup</h3>
+      ${setups.length===0?`<p class="eng-empty">Load a setup above to view it page by page.</p>`:`
+      <div class="selrow"><label>Setup</label><select id="selView">${setupOptions(selView)}</select></div>
+      ${renderViewSetup(setups[selView])}`}
+    </section>
+
+    <section id="engCompare">
+      <h3>3 · Compare two setups</h3>
+      ${setups.length<2?`<p class="eng-empty">Load at least two setups to compare.</p>`:`
+      <div class="selrow"><label>A</label><select id="selA">${setupOptions(selA)}</select></div>
+      <div class="selrow"><label>B</label><select id="selB">${setupOptions(selB)}</select></div>
+      ${kindMismatch?`<p class="warn">⚠ One of these is ACC and one is AC Evo — they store different things, so a direct comparison isn’t meaningful. Pick two from the same game.</p>`:''}
+      ${!sameCar?`<p class="warn">⚠ Different cars — values aren’t directly comparable between cars, so read this as direction only.</p>`:''}
+      ${a&&b&&!kindMismatch?diffTable(diffSetups(a,b)):''}
+      ${a&&b&&!kindMismatch?`<div class="eng-actions"><button class="btn" id="btnCopyDiff">Copy diff for AI</button></div>`:''}`}
+    </section>
+
+    <section id="engFix">
+      <h3>4 · Driver requests</h3>
+      ${selA<0?`<p class="eng-empty">Choose Setup A in Compare — requests are applied to it.</p>`:`
+      ${a.kind==='evo'?`<p class="warn">⚠ Evo support is experimental: field meanings are inferred from the file format, not official docs. Verify the result on the in-game setup screen before racing it.</p>`:''}
+      <div class="fix-grid">${FIXES.map(f=>`
+        <button class="fix-card ${curFix===f.id?'on':''}" data-fx="${f.id}"><h4>${f.name}</h4><p>${f.d}</p></button>`).join('')}
+      </div>
+      ${preview?(preview.rows.length?`
+        <table class="diff"><tr><th></th><th>Change</th><th>Before</th><th>After</th><th>Why</th></tr>
+        ${preview.rows.map((r,i)=>`<tr>
+          <td><input type="checkbox" data-row="${i}" ${r.on?'checked':''}></td>
+          <td>${esc(r.label)} ${chip(r.t)}${confChip(r.conf)}${r.atMin?' <span class="chip min">at minimum</span>':''}</td>
+          <td class="num">${r.before}</td><td class="num">${r.after}</td>
+          <td style="color:var(--muted);font-size:13px">${r.why}</td></tr>`).join('')}
+        </table>
+        <div class="eng-actions">
+          <button class="btn primary" id="btnSave">Save as new setup</button>
+          <button class="btn" id="btnCopyFix">Copy for AI</button>
+        </div>
+        <p class="eng-status" id="saveMsg"></p>`:`<p class="eng-empty">This request has no applicable fields in the selected setup.</p>`):''}`}
+    </section>
+
+    <section id="engFuel">
+      <h3>Fuel calculator</h3>
+      <div class="fuel">
+        <p class="sub">Plan a stint. Enter your numbers — everything updates live.</p>
+        <div class="fuel-row"><label>Fuel per lap (L)</label><input type="number" id="fLap" step="0.1" min="0" value="${fuel.perLap}"></div>
+        <div class="fuel-row"><label>Lap time (m:ss)</label><input type="text" id="fTime" placeholder="1:45" value="${fuel.lapTime}"></div>
+        <div class="fuel-row"><label>Race length</label><input type="number" id="fLen" step="1" min="0" value="${fuel.length}"></div>
+        <div class="fuel-row"><label>Length is</label>
+          <select id="fUnit" style="width:auto;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px">
+            <option value="laps" ${fuel.unit==='laps'?'selected':''}>laps</option>
+            <option value="mins" ${fuel.unit==='mins'?'selected':''}>minutes</option>
+          </select></div>
+        <div class="fuel-row"><label>Formation lap?</label><input type="checkbox" id="fForm" ${fuel.formation?'checked':''} style="width:auto;accent-color:var(--amber)"></div>
+        <div class="fuel-row"><label>Safety margin (laps)</label><input type="number" id="fMargin" step="1" min="0" value="${fuel.margin}"></div>
+        <div class="fuel-out" id="fuelOut"></div>
+      </div>
+    </section>
+
+    <p class="footnote">One request at a time, then drive it. The game clamps any out-of-range value safely on load. Evo labels marked “likely” or “guess” reflect decoding confidence — cross-check a few against the in-game setup screen and they can be promoted to confirmed.</p>
+  `;
+
+  const bf=document.getElementById('btnFolder'); if(bf) bf.onclick=pickFolder;
+  const fi=document.getElementById('fileInput');
+  const bfi=document.getElementById('btnFiles'); if(bfi) bfi.onclick=()=>fi.click();
+  if(fi) fi.onchange=()=>pickFiles(fi);
+  const bc=document.getElementById('btnClear'); if(bc) bc.onclick=()=>{
+    setups=[]; selA=-1; selB=-1; curFix=null; preview=null; gameFilter='all';
+    buildNav(); renderEng();
+  };
+  main.querySelectorAll('[data-gf]').forEach(b=>b.onclick=()=>{
+    gameFilter=b.dataset.gf; selA=-1; selB=-1; curFix=null; preview=null; renderEng();
+  });
+  main.querySelectorAll('[data-vp]').forEach(b=>b.onclick=()=>{
+    engPage=b.dataset.vp; renderEng();
+  });
+  main.querySelectorAll('.nbtn[data-loc]').forEach(b=>b.onclick=()=>{
+    try{ const loc=JSON.parse(decodeURIComponent(b.dataset.loc));
+      nudge(loc, b.dataset.lbl, +b.dataset.d);
+    }catch(e){ console.warn('nudge parse failed', e); }
+  });
+  { const bs=document.getElementById('btnSaveNudge'); if(bs) bs.onclick=saveNudged;
+    const bc=document.getElementById('btnClearNudge'); if(bc) bc.onclick=clearNudges; }
+  const sV=document.getElementById('selView'); if(sV) sV.onchange=e=>{selView=+e.target.value;engPage=engPage||'tyres';renderEng();};
+  const sA=document.getElementById('selA'); if(sA) sA.onchange=e=>{selA=+e.target.value;curFix=null;preview=null;renderEng();};
+  const sB=document.getElementById('selB'); if(sB) sB.onchange=e=>{selB=+e.target.value;renderEng();};
+  const cd=document.getElementById('btnCopyDiff'); if(cd) cd.onclick=()=>{copyForAI('diff');cd.textContent='Copied ✓';};
+  main.querySelectorAll('.fix-card').forEach(c=>c.onclick=()=>{
+    curFix=c.dataset.fx;
+    preview=buildPreview(FIXES.find(f=>f.id===curFix));
+    renderEng();
+    document.getElementById('engFix').scrollIntoView({behavior:'smooth'});
+  });
+  main.querySelectorAll('input[data-row]').forEach(cb=>cb.onchange=()=>{
+    preview.rows[+cb.dataset.row].on=cb.checked;
+    renderEng();
+  });
+  const bs=document.getElementById('btnSave'); if(bs) bs.onclick=saveResult;
+  const cf=document.getElementById('btnCopyFix'); if(cf) cf.onclick=()=>{copyForAI('fix');cf.textContent='Copied ✓';};
+
+  // fuel calculator
+  function readFuel(){
+    fuel.perLap=parseFloat(document.getElementById('fLap').value)||0;
+    fuel.lapTime=document.getElementById('fTime').value.trim();
+    fuel.length=parseFloat(document.getElementById('fLen').value)||0;
+    fuel.unit=document.getElementById('fUnit').value;
+    fuel.formation=document.getElementById('fForm').checked;
+    fuel.margin=parseFloat(document.getElementById('fMargin').value)||0;
+    renderFuelOut();
+  }
+  ['fLap','fTime','fLen','fUnit','fForm','fMargin'].forEach(id=>{
+    const el=document.getElementById(id); if(el){ el.oninput=readFuel; el.onchange=readFuel; }
+  });
+  renderFuelOut();
+}
+
+function parseLapTime(s){
+  if(!s) return null;
+  s=String(s).trim();
+  if(s.includes(':')){
+    const [m,sec]=s.split(':');
+    const mm=parseFloat(m), ss=parseFloat(sec);
+    if(isNaN(mm)||isNaN(ss)) return null;
+    return mm*60+ss;
+  }
+  const v=parseFloat(s);
+  return isNaN(v)?null:v;
+}
+
+function renderFuelOut(){
+  const out=document.getElementById('fuelOut');
+  if(!out) return;
+  const perLap=fuel.perLap;
+  let laps;
+  if(fuel.unit==='laps'){
+    laps=Math.ceil(fuel.length);
+  }else{
+    const lt=parseLapTime(fuel.lapTime);
+    if(!lt||lt<=0){
+      out.innerHTML=`<p class="fuel-warn">Enter a valid lap time (e.g. 1:45) to convert ${fuel.length} minutes into laps.</p>`;
+      return;
+    }
+    laps=Math.ceil((fuel.length*60)/lt);
+  }
+  const formationLaps=fuel.formation?1:0;
+  const totalLaps=laps+formationLaps+fuel.margin;
+  const litres=perLap*totalLaps;
+  const need=Math.ceil(litres);
+  if(perLap<=0||totalLaps<=0){
+    out.innerHTML=`<p class="fuel-warn">Enter fuel per lap and race length to calculate.</p>`;
+    return;
+  }
+  out.innerHTML=`
+    <div class="big">${need}<span> L</span></div>
+    <div class="line"><span>Racing laps</span><b>${laps}</b></div>
+    ${formationLaps?`<div class="line"><span>Formation lap</span><b>+${formationLaps}</b></div>`:''}
+    ${fuel.margin?`<div class="line"><span>Safety margin</span><b>+${fuel.margin} lap${fuel.margin===1?'':'s'}</b></div>`:''}
+    <div class="line"><span>Total laps fuelled</span><b>${totalLaps}</b></div>
+    <div class="line"><span>Exact need</span><b>${litres.toFixed(1)} L</b></div>
+    <p class="fuel-warn">Rounded up to ${need} L. Carrying spare fuel adds weight — trim the margin for quali or sprints.</p>`;
+}
+
+/* ─────────────────────── Bono AI ───────────────────────
+   Bridge contract (provided by Electron preload, window.SetupRippleAI):
+   • available() -> Promise<{ok:true} | {ok:false, reason:string}>
+       (also tolerated: a plain boolean, or a non-Promise value)
+   • send(prompt, { allowWrite, onChunk, onDone, onError })
+       streaming callback model:
+         onChunk(text)   – called repeatedly as output streams
+         onDone(fullText)– called once on clean completion
+         onError(message)– called on failure
+       allowWrite (bool, default false) – when false the bridge prepends
+         a read-only instruction so Bono never edits files without approval.
+       (also tolerated: send() returning Promise<fullText> instead of streaming)
+   The folder-picker bridge is window.SetupRippleDir.pick() — NOT
+   showDirectoryPicker, which is a reserved browser name contextBridge
+   refuses to bind over (that collision blocked SetupRippleAI entirely).
+──────────────────────────────────────────────────────── */
+function AI(){ return window.SetupRippleAI || null; }
+
+/* ---- Bono setup picker: derive car / track / setup from loaded setups ----
+   Setup labels look like "GT3 / Audi / audi_spa.carsetup" (folder relPath) or
+   just a filename. We split on " / " — last part is the setup, the part before
+   it the track, and anything earlier joined as the car/category path. This is
+   purely a naming aid: it inserts a clear reference into the message so both
+   you and Bono know exactly which setup you mean. Bono reads the files itself. */
+function spParts(label){
+  const segs=String(label).split(' / ').map(s=>s.trim()).filter(Boolean);
+  const setup=segs.length?segs[segs.length-1]:label;
+  const track=segs.length>=2?segs[segs.length-2]:'';
+  const car  =segs.length>=3?segs.slice(0,segs.length-2).join(' / '):'';
+  return {car,track,setup};
+}
+function spCars(){
+  return [...new Set(aiSetups.map(s=>spParts(s).car).filter(Boolean))].sort();
+}
+function spTracks(car){
+  return [...new Set(aiSetups.filter(s=>spParts(s).car===car).map(s=>spParts(s).track).filter(Boolean))].sort();
+}
+function spSetups(car,track){
+  return aiSetups.filter(s=>{const p=spParts(s);return p.car===car&&p.track===track;})
+    .map(s=>spParts(s).setup).sort();
+}
+function spReference(){
+  const bits=[];
+  if(spCar) bits.push(spCar);
+  if(spTrack) bits.push(spTrack);
+  if(spSetup) bits.push(spSetup);
+  return bits.join(' / ');
+}
+// Bono loads its own setup name list — independent of the Engineer tab.
+// Reuses the same bridge but only keeps the relPath labels (names, not file data).
+async function aiPickFolder(){
+  try{
+    if(window.SetupRippleDir){
+      const files = await window.SetupRippleDir.pick();
+      aiSetups = files.map(f=>f.relPath).filter(Boolean).sort();
+    }else if(window.showDirectoryPicker){
+      const root=await window.showDirectoryPicker();
+      const labels=[];
+      async function walk(dh,prefix,depth){
+        if(depth>4) return;
+        for await(const [name,h] of dh.entries()){
+          if(h.kind==='directory') await walk(h,prefix?prefix+' / '+name:name,depth+1);
+          else if(/\.(carsetup|setup|json)$/i.test(name)) labels.push((prefix?prefix+' / ':'')+name);
+        }
+      }
+      await walk(root,'',0);
+      aiSetups=labels.sort();
+    }
+    spCar=''; spTrack=''; spSetup='';
+    if(mode==='ai') renderAI();
+  }catch(e){
+    if(e && e.name!=='AbortError') console.warn('Bono folder load failed:', e);
+  }
+}
+
+const AI_EXAMPLES=[
+  'Why might my setup understeer in slow corners?',
+  'Compare my two loaded setups and explain the difference.',
+  'What should I change to get more traction out of hairpins?'
+];
+
+function renderAI(){
+  const bridge=AI();
+  // State 1 — no bridge at all (plain browser)
+  if(!bridge){
+    main.innerHTML=`
+      <div class="crumb">Bono AI</div>
+      <div class="title-row"><h2>Bono AI</h2></div>
+      <div class="fallback">
+        <div class="icon">🖥️</div>
+        <h3>Runs in the desktop app</h3>
+        <p>Bono is your local race engineer — a chat that can read your setup files and reason about them. It only works in the Setup Ripple desktop app, because it needs access to your computer that a browser tab can’t give.</p>
+        <p>Everything else — Parameters, Diagnose, and the Engineer tab — works fine here in the browser.</p>
+      </div>`;
+    return;
+  }
+  // State 2 — bridge exists but not yet probed
+  if(aiStatus===null){
+    main.innerHTML=`
+      <div class="crumb">Bono AI</div>
+      <div class="title-row"><h2>Bono AI</h2></div>
+      <div class="fallback"><div class="icon">⏳</div><h3>Checking for Claude Code…</h3>
+      <p>Making sure Claude Code is installed and ready.</p></div>`;
+    Promise.resolve(bridge.available()).then(r=>{
+      if(r===true) aiStatus={ok:true};
+      else if(r===false) aiStatus={ok:false,reason:'Claude Code was not detected.'};
+      else aiStatus=r||{ok:false,reason:'Could not determine Claude Code status.'};
+      if(mode==='ai') renderAI();
+    }).catch(e=>{
+      aiStatus={ok:false,reason:(e&&e.message)||'Could not reach Claude Code.'};
+      if(mode==='ai') renderAI();
+    });
+    return;
+  }
+  // State 3 — probed, not available
+  if(!aiStatus.ok){
+    main.innerHTML=`
+      <div class="crumb">Bono AI</div>
+      <div class="title-row"><h2>Bono AI</h2></div>
+      <div class="fallback fallback-wide">
+        <div class="icon">🔌</div>
+        <h3>Let’s switch Bono on</h3>
+        <p>Bono is a race engineer you can chat to. It runs through a free tool called <b>Claude Code</b> on your own computer, using your own Claude account — so your setups never leave your machine. It takes about five minutes to set up once.</p>
+        <p class="tut-status">${esc(aiStatus.reason||'Claude Code was not detected.')}</p>
+        <div class="tut">
+          <div class="tut-step"><span class="tut-n">1</span><div>
+            <b>Get a Claude account.</b><br>
+            If you don’t already have one, sign up at <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>. Bono runs on your account’s usage — a paid plan gives you far more, but a free account works to start.
+          </div></div>
+          <div class="tut-step"><span class="tut-n">2</span><div>
+            <b>Install Node.js</b> (Claude Code needs it to run).<br>
+            Go to <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a>, download the “LTS” version, and run the installer with the default options.
+          </div></div>
+          <div class="tut-step"><span class="tut-n">3</span><div>
+            <b>Install Claude Code.</b><br>
+            Open a terminal — on Windows, press the Start key, type <code>powershell</code>, and hit Enter — then paste this in and press Enter:
+            <div class="tut-cmd"><code>npm install -g @anthropic-ai/claude-code</code></div>
+          </div></div>
+          <div class="tut-step"><span class="tut-n">4</span><div>
+            <b>Sign in.</b><br>
+            In the same terminal, type <code>claude</code> and press Enter. It’ll open your browser to log in with your Claude account. You only do this once.
+          </div></div>
+          <div class="tut-step"><span class="tut-n">5</span><div>
+            <b>Come back and hit Retry.</b><br>
+            Click the button below — Bono should connect.
+          </div></div>
+          <div class="tut-step"><span class="tut-n">6</span><div>
+            <b>Point Bono at your setups.</b><br>
+            Once connected, use the <b>Open setups folder</b> button above the chat to load your setups (ACC: your <code>Setups</code> folder · AC Evo: your <code>Car Setups</code> folder). Then pick a car, track and setup from the dropdowns to ask Bono about a specific one.
+          </div></div>
+        </div>
+        <p class="tut-foot">Stuck? See the <a href="https://docs.claude.com/en/docs/claude-code/overview" target="_blank" rel="noopener">official Claude Code guide</a>. Everything else in Setup Ripple — Parameters, Diagnose and the Engineer tab — works fully without any of this.</p>
+        <button class="btn primary" id="aiRetry">Retry connection</button>
+      </div>`;
+    const rb=document.getElementById('aiRetry');
+    if(rb) rb.onclick=()=>{ aiStatus=null; renderAI(); };
+    return;
+  }
+  // State 4 — ready: the chat surface
+  main.innerHTML=`
+    <div class="crumb">Bono AI · connected</div>
+    <div class="title-row"><h2>Bono AI</h2></div>
+    <div class="chat-wrap">
+      <div class="chat-log" id="chatLog">${
+        aiMessages.length? aiMessages.map(m=>msgHTML(m)).join('') :
+        `<div class="chat-empty">Ask Bono anything about your setups — it can read the files in your setups folder and reason about them.
+          <span class="ex">${AI_EXAMPLES.map(x=>`<button data-ex="${esc(x)}">${esc(x)}</button>`).join('')}</span>
+        </div>`
+      }</div>
+      <div class="setup-picker" id="setupPicker">${
+        aiSetups.length ? `
+        <span class="sp-label">Setup</span>
+        <select id="spCar"><option value="">Car…</option>${spCars().map(c=>`<option value="${esc(c)}" ${c===spCar?'selected':''}>${esc(c)}</option>`).join('')}</select>
+        <select id="spTrack" ${spCar?'':'disabled'}><option value="">Track…</option>${(spCar?spTracks(spCar):[]).map(t=>`<option value="${esc(t)}" ${t===spTrack?'selected':''}>${esc(t)}</option>`).join('')}</select>
+        <select id="spSetup" ${spCar&&spTrack?'':'disabled'}><option value="">Setup…</option>${(spCar&&spTrack?spSetups(spCar,spTrack):[]).map(s=>`<option value="${esc(s)}" ${s===spSetup?'selected':''}>${esc(s)}</option>`).join('')}</select>
+        <button id="spInsert" ${spSetup?'':'disabled'}>Insert →</button>
+        <button id="spReload" title="Load a different folder">↻</button>`
+        : `<button class="btn" id="spOpen">Open setups folder</button>
+           <span class="sp-hint">Open your top-level setups folder (ACC: <b>Setups</b> · AC Evo: <b>Car Setups</b>) to pick a setup by car, track and name below. This is just a naming aid — Bono can already read your files; it makes clear which one you mean.</span>`
+      }</div>
+      <div class="chat-tools">
+        <label title="When off (default), Bono can read and advise but never changes files without you ticking this first."><input type="checkbox" id="aiWrite" ${aiAllowWrite?'checked':''}> Allow Bono to edit setup files</label>
+      </div>
+      <div class="chat-input">
+        <textarea id="aiInput" rows="2" placeholder="Ask your race engineer…" ${aiBusy?'disabled':''}></textarea>
+        <button class="btn primary" id="aiSend" ${aiBusy?'disabled':''}>${aiBusy?'…':'Send'}</button>
+      </div>
+    </div>`;
+
+  const log=document.getElementById('chatLog');
+  if(log) log.scrollTop=log.scrollHeight;
+  const wc=document.getElementById('aiWrite'); if(wc) wc.onchange=()=>{aiAllowWrite=wc.checked;};
+  const input=document.getElementById('aiInput');
+  const send=document.getElementById('aiSend');
+  const doSend=()=>{ if(input && input.value.trim()) aiSendMsg(input.value.trim()); };
+  if(send) send.onclick=doSend;
+  if(input){
+    input.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); doSend(); } };
+    input.oninput=()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; };
+    if(!aiBusy) input.focus();
+  }
+  main.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>aiSendMsg(b.dataset.ex));
+  // setup picker wiring (Bono-independent)
+  const spOpen=document.getElementById('spOpen'); if(spOpen) spOpen.onclick=aiPickFolder;
+  const spReload=document.getElementById('spReload'); if(spReload) spReload.onclick=aiPickFolder;
+  const cSel=document.getElementById('spCar');
+  const tSel=document.getElementById('spTrack');
+  const sSel=document.getElementById('spSetup');
+  if(cSel) cSel.onchange=()=>{ spCar=cSel.value; spTrack=''; spSetup=''; renderAI(); };
+  if(tSel) tSel.onchange=()=>{ spTrack=tSel.value; spSetup=''; renderAI(); };
+  if(sSel) sSel.onchange=()=>{ spSetup=sSel.value; renderAI(); };
+  const ins=document.getElementById('spInsert');
+  if(ins) ins.onclick=()=>{
+    const ref=spReference();
+    if(!ref) return;
+    const inp=document.getElementById('aiInput');
+    if(inp){
+      const prefix=`Regarding my setup "${ref}": `;
+      inp.value = inp.value ? (prefix+inp.value) : prefix;
+      inp.focus();
+      inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,140)+'px';
+      inp.setSelectionRange(inp.value.length, inp.value.length);
+    }
+  };
+}
+
+function msgHTML(m){
+  if(m.role==='user') return `<div class="msg user">${esc(m.text)}</div>`;
+  if(m.role==='err') return `<div class="msg err">${esc(m.text)}</div>`;
+  return `<div class="msg ai"><div class="who">Bono</div>${m.streaming&&!m.text?`<span class="typing"><span></span><span></span><span></span></span>`:esc(m.text)}</div>`;
+}
+
+function aiSendMsg(text){
+  const bridge=AI();
+  if(!bridge||aiBusy) return;
+  aiMessages.push({role:'user',text});
+  const aiMsg={role:'ai',text:'',streaming:true};
+  aiMessages.push(aiMsg);
+  aiBusy=true;
+  renderAI();
+
+  const finish=()=>{ aiMsg.streaming=false; aiBusy=false; renderAI(); };
+  let settled=false;
+
+  try{
+    const ret=bridge.send(text,{
+      allowWrite:aiAllowWrite,
+      onChunk:(t)=>{ aiMsg.text+=t; if(mode==='ai'){ const l=document.getElementById('chatLog'); renderAI(); } },
+      onDone:(full)=>{ if(settled) return; settled=true; if(typeof full==='string'&&full) aiMsg.text=full; finish(); },
+      onError:(msg)=>{ if(settled) return; settled=true; aiMessages.pop(); aiMessages.push({role:'err',text:msg||'Something went wrong talking to Claude Code.'}); aiBusy=false; aiMsg.streaming=false; renderAI(); }
+    });
+    // Fallback: send() returned a Promise of the full reply instead of streaming
+    if(ret && typeof ret.then==='function'){
+      ret.then(full=>{ if(settled) return; settled=true; if(typeof full==='string') aiMsg.text=full; finish(); })
+         .catch(e=>{ if(settled) return; settled=true; aiMessages.pop(); aiMessages.push({role:'err',text:(e&&e.message)||'Request failed.'}); aiBusy=false; renderAI(); });
+    }
+  }catch(e){
+    settled=true; aiMessages.pop();
+    aiMessages.push({role:'err',text:(e&&e.message)||'Could not start the request.'});
+    aiBusy=false; renderAI();
+  }
+}
+
+function setMode(m){ mode=m; buildNav(); render(); }
+function select(id){
+  cur=id; dir='up'; mode='params';
+  buildNav(); render();
+  main.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function selectSym(id){
+  curS=id;
+  buildNav(); render();
+  main.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+buildNav(); render();
+</script>
+</body>
+</html>
