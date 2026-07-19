@@ -8,6 +8,9 @@
     "start": "electron .",
     "build": "electron-builder --win --x64"
   },
+  "dependencies": {
+    "cross-spawn": "^7.0.6"
+  },
   "devDependencies": {
     "electron": "^32.0.0",
     "electron-builder": "^25.1.0"

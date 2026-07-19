@@ -2031,14 +2031,14 @@ function spParts(label){
   return {car,track,setup};
 }
 function spCars(){
-  return [...new Set(aiSetups.map(s=>spParts(s).car).filter(Boolean))].sort();
+  return [...new Set(aiSetups.map(s=>s.car).filter(Boolean))].sort();
 }
 function spTracks(car){
-  return [...new Set(aiSetups.filter(s=>spParts(s).car===car).map(s=>spParts(s).track).filter(Boolean))].sort();
+  return [...new Set(aiSetups.filter(s=>s.car===car).map(s=>s.track).filter(Boolean))].sort();
 }
 function spSetups(car,track){
-  return aiSetups.filter(s=>{const p=spParts(s);return p.car===car&&p.track===track;})
-    .map(s=>spParts(s).setup).sort();
+  return aiSetups.filter(s=>s.car===car&&s.track===track)
+    .map(s=>s.setup).sort();
 }
 function spReference(){
   const bits=[];
@@ -2053,19 +2053,39 @@ async function aiPickFolder(){
   try{
     if(window.SetupRippleDir){
       const files = await window.SetupRippleDir.pick();
-      aiSetups = files.map(f=>f.relPath).filter(Boolean).sort();
+      aiSetups = files.map(f=>{
+        const segs=String(f.relPath||f.name||'').split(' / ').map(s=>s.trim()).filter(Boolean);
+        const setup=segs.length?segs[segs.length-1]:(f.name||'');
+        const track=segs.length>=2?segs[segs.length-2]:'';
+        let car='';
+        try{
+          if(f.isEvo && f.buffer){ const s=loadEvo(f.name,f.name,f.buffer,null); car=(s&&s.car)?s.car:(f.name||'').replace(/\.[^.]+$/,''); }
+          else if(f.text!=null){ const j=JSON.parse(f.text); car=j.carName||''; }
+        }catch(e){}
+        return { car:car||'Unknown car', track, setup, relPath:f.relPath||f.name };
+      }).filter(s=>s.setup).sort((a,b)=>a.setup.localeCompare(b.setup));
     }else if(window.showDirectoryPicker){
       const root=await window.showDirectoryPicker();
-      const labels=[];
+      const list=[];
       async function walk(dh,prefix,depth){
         if(depth>4) return;
         for await(const [name,h] of dh.entries()){
           if(h.kind==='directory') await walk(h,prefix?prefix+' / '+name:name,depth+1);
-          else if(/\.(carsetup|setup|json)$/i.test(name)) labels.push((prefix?prefix+' / ':'')+name);
+          else if(/\.(carsetup|setup|json)$/i.test(name)){
+            const relPath=(prefix?prefix+' / ':'')+name;
+            const segs=relPath.split(' / ').map(s=>s.trim()).filter(Boolean);
+            const track=segs.length>=2?segs[segs.length-2]:'';
+            let car='';
+            try{ const file=await h.getFile();
+              if(/\.(carsetup|setup)$/i.test(name)){ const buf=await file.arrayBuffer(); const s=loadEvo(name,name,buf,null); car=(s&&s.car)?s.car:name.replace(/\.[^.]+$/,''); }
+              else{ const j=JSON.parse(await file.text()); car=j.carName||''; }
+            }catch(e){}
+            list.push({ car:car||'Unknown car', track, setup:name, relPath });
+          }
         }
       }
       await walk(root,'',0);
-      aiSetups=labels.sort();
+      aiSetups=list.sort((a,b)=>a.setup.localeCompare(b.setup));
     }
     spCar=''; spTrack=''; spSetup='';
     if(mode==='ai') renderAI();

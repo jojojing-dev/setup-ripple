@@ -1095,9 +1095,12 @@ function parseSVM(text){
       else if(/LMP2/i.test(s)) result.className='LMP2';
       else if(/LMP3/i.test(s)) result.className='LMP3';
       else if(/GT3/i.test(s)) result.className='GT3';
-      // car name = last underscore-token chunk, best-effort
-      const parts = s.split(' ');
-      result.car = parts.slice(2).join(' ') || parts[parts.length-1];
+      // car name: strip the class keyword and the season/series token; what's left is the car.
+      // Handles all token orders — "AstonMartin_Valkyrie Hypercar WEC2025", "ELMS2025 GT3 Porsche_...", etc.
+      const tokens = s.trim().split(/\s+/);
+      const isSeason = t => /^(WEC|ELMS|IMSA|WEG|LMDh)\d{2,4}$/i.test(t) || /^\d{4}$/.test(t);
+      const isClass  = t => /^(Hypercar|LMP2(_\w+)?|LMP3(_\w+)?|LMGT3|GT3)$/i.test(t);
+      result.car = tokens.filter(t => !isSeason(t) && !isClass(t)).join(' ') || tokens[tokens.length-1];
       return;
     }
     // KeySetting=intValue//display    (display optional)
@@ -2028,14 +2031,14 @@ function spParts(label){
   return {car,track,setup};
 }
 function spCars(){
-  return [...new Set(aiSetups.map(s=>spParts(s).car).filter(Boolean))].sort();
+  return [...new Set(aiSetups.map(s=>s.car).filter(Boolean))].sort();
 }
 function spTracks(car){
-  return [...new Set(aiSetups.filter(s=>spParts(s).car===car).map(s=>spParts(s).track).filter(Boolean))].sort();
+  return [...new Set(aiSetups.filter(s=>s.car===car).map(s=>s.track).filter(Boolean))].sort();
 }
 function spSetups(car,track){
-  return aiSetups.filter(s=>{const p=spParts(s);return p.car===car&&p.track===track;})
-    .map(s=>spParts(s).setup).sort();
+  return aiSetups.filter(s=>s.car===car&&s.track===track)
+    .map(s=>s.setup).sort();
 }
 function spReference(){
   const bits=[];
@@ -2045,24 +2048,48 @@ function spReference(){
   return bits.join(' / ');
 }
 // Bono loads its own setup name list — independent of the Engineer tab.
-// Reuses the same bridge but only keeps the relPath labels (names, not file data).
+// Reuses the same bridge. Parses each file's car/class from its contents (like the
+// Engineer tab does) rather than guessing from folder depth — LMU folders are usually
+// just <track>/<file>.svm, so path-based car detection found nothing.
 async function aiPickFolder(){
   try{
     if(window.SetupRippleDir){
       const files = await window.SetupRippleDir.pick();
-      aiSetups = files.map(f=>f.relPath).filter(Boolean).sort();
+      aiSetups = files.map(f=>{
+        const segs = String(f.relPath||f.name||'').split(' / ').map(s=>s.trim()).filter(Boolean);
+        const setup = segs.length?segs[segs.length-1]:(f.name||'');
+        const track = segs.length>=2?segs[segs.length-2]:'';
+        let car='';
+        try{
+          if(f.text!=null){
+            const p=parseSVM(f.text);
+            car = (p.car||'') + (p.className?(p.car?' ':'')+'('+p.className+')':'');
+            if(!car) car = p.className||'';
+          }
+        }catch(e){}
+        return { car:car||'Unknown car', track, setup, relPath:f.relPath||f.name };
+      }).filter(s=>s.setup).sort((a,b)=>a.setup.localeCompare(b.setup));
     }else if(window.showDirectoryPicker){
       const root=await window.showDirectoryPicker();
-      const labels=[];
+      const list=[];
       async function walk(dh,prefix,depth){
         if(depth>4) return;
         for await(const [name,h] of dh.entries()){
           if(h.kind==='directory') await walk(h,prefix?prefix+' / '+name:name,depth+1);
-          else if(/\.(carsetup|setup|json)$/i.test(name)) labels.push((prefix?prefix+' / ':'')+name);
+          else if(/\.(carsetup|setup|json|svm)$/i.test(name)){
+            const relPath=(prefix?prefix+' / ':'')+name;
+            const segs=relPath.split(' / ').map(s=>s.trim()).filter(Boolean);
+            const track=segs.length>=2?segs[segs.length-2]:'';
+            let car='';
+            try{ const file=await h.getFile(); const text=await file.text();
+              const p=parseSVM(text); car=(p.car||'')+(p.className?(p.car?' ':'')+'('+p.className+')':''); if(!car) car=p.className||'';
+            }catch(e){}
+            list.push({ car:car||'Unknown car', track, setup:name, relPath });
+          }
         }
       }
       await walk(root,'',0);
-      aiSetups=labels.sort();
+      aiSetups=list.sort((a,b)=>a.setup.localeCompare(b.setup));
     }
     spCar=''; spTrack=''; spSetup='';
     if(mode==='ai') renderAI();

@@ -49,24 +49,33 @@ contextBridge.exposeInMainWorld('SetupRippleDir', {
   }
 });
 
-// ── Bono AI bridge (LMU) — unchanged ──
+// ── Bono AI bridge — uses cross-spawn so Claude Code's `claude.cmd` shim launches
+//    correctly on Windows (Node's built-in spawn can't run a .cmd without shell:true,
+//    which breaks pipes; cross-spawn is what npm/npx/yarn use to solve exactly this). ──
+const crossSpawn = require('cross-spawn');
 contextBridge.exposeInMainWorld('SetupRippleAI', {
   available() {
     return new Promise(resolve => {
-      const { execFile } = require('child_process');
-      execFile('claude', ['--version'], (err) => {
-        if (err) resolve({ ok: false, reason: "Claude Code not found - install it at claude.ai/code and run 'claude' once to sign in." });
-        else resolve({ ok: true });
+      const proc = crossSpawn('claude', ['--version'], { windowsHide: true });
+      let out = '';
+      proc.stdout && proc.stdout.on('data', d => { out += d.toString(); });
+      proc.on('close', code => {
+        if (code === 0) resolve({ ok: true });
+        else resolve({ ok: false, reason: "Claude Code not found - install it at claude.ai/code and run 'claude' once to sign in." });
+      });
+      proc.on('error', () => {
+        resolve({ ok: false, reason: "Claude Code not found - install it at claude.ai/code and run 'claude' once to sign in." });
       });
     });
   },
   send(prompt, opts) {
     const { allowWrite = false, onChunk, onDone, onError } = opts || {};
-    const { spawn } = require('child_process');
     const os = require('os');
     const cwd = lastFolderPath || os.homedir();
     const fullPrompt = allowWrite ? prompt : '[READ ONLY - do not modify any files]\n\n' + prompt;
-    const proc = spawn('claude', ['-p', fullPrompt], { cwd, shell: false });
+    // cross-spawn resolves claude.cmd on Windows while keeping shell:false semantics, so the
+    // prompt stays a single safe argument (no shell parsing / injection) and pipes work.
+    const proc = crossSpawn('claude', ['-p', fullPrompt], { cwd, windowsHide: true });
     let full = '';
     proc.stdout.on('data', chunk => { const text = chunk.toString(); full += text; onChunk && onChunk(text); });
     proc.stderr.on('data', () => {});
