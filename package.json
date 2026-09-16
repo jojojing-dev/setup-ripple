@@ -1,7 +1,7 @@
 {
   "name": "setup-ripple",
-  "version": "1.0.0",
-  "description": "Setup Ripple — sim racing setup tools for ACC / AC Evo and Le Mans Ultimate",
+  "version": "2.0.0",
+  "description": "Setup Ripple \u2014 sim racing setup tools for ACC / AC Evo and Le Mans Ultimate",
   "author": "JojoJing",
   "main": "main.js",
   "scripts": {
@@ -26,14 +26,17 @@
       "preload.js",
       "launcher.html",
       "setup-ripple.html",
-      "setup-ripple-lmu.html"
+      "setup-ripple-lmu.html",
+      "fonts/**"
     ],
     "win": {
       "icon": "icon.ico",
       "target": [
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     }

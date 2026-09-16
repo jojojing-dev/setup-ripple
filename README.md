@@ -80,6 +80,12 @@ Open an [issue](../../issues). Bug reports and feature requests both welcome : t
 
 An independent community tool. Not affiliated with Kunos Simulazioni, 505 Games, Studio 397, Motorsport Games, or Le Mans Ultimate. Setup values and advice are a reference, not gospel : the stopwatch is the final judge.
 
+## Fonts
+
+Setup Ripple bundles three open-source fonts, used under the SIL Open Font License:
+Chakra Petch, Titillium Web, and Share Tech Mono. The full licence text is included
+in the `fonts` folder.
+
 ## Licence
 
 MIT : see [LICENSE](LICENSE).
