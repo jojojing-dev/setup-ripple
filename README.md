@@ -43,6 +43,8 @@ Load your real setup files, read them laid out like the in-game setup screen, un
 
 ACC values are shown as setup-screen clicks, exactly as the game shows them. AC Evo values are decoded to real physical units (psi, degrees, N/m, mm). LMU reads each car's class straight from the file.
 
+For Hypercars, Setup Ripple identifies each car's architecture (LMDh, front-hybrid LMH, or non-hybrid LMH) and tailors the hybrid and braking advice to match, since a front-axle hybrid and a rear-only one want different things.
+
 ---
 
 ## Install
