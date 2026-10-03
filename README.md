@@ -41,7 +41,7 @@ Load your real setup files, read them laid out like the in-game setup screen, un
 | Assetto Corsa Evo | GT3 | `.carsetup` |
 | Le Mans Ultimate | Hypercar, LMP2, LMP3, LMGT3 | `.svm` |
 
-ACC values are shown as setup-screen clicks, exactly as the game shows them. AC Evo values are decoded to real physical units (psi, degrees, N/m, mm). LMU reads each car's class straight from the file.
+ACC tyre pressures are shown in psi and other ACC settings as setup-screen clicks, because their real values depend on the car. AC Evo values are decoded to real physical units (psi, degrees, N/m, mm). On Evo, anti-roll bars, wheel rates and diff preload are shown but adjusted in-game, since one click is a different size on every car. LMU reads each car's class straight from the file.
 
 For Hypercars, Setup Ripple identifies each car's architecture (LMDh, front-hybrid LMH, or non-hybrid LMH) and tailors the hybrid and braking advice to match, since a front-axle hybrid and a rear-only one want different things.
 
@@ -59,6 +59,8 @@ For Hypercars, Setup Ripple identifies each car's architecture (LMDh, front-hybr
 ## About Bono AI
 
 Bono is optional. **Everything else in Setup Ripple works without it.**
+
+On AC Evo, Bono advises only, because Evo setup files are binary. Setup Ripple hands it the decoded values and you make the changes in the Engineer tab or in-game.
 
 Bono runs through **your own [Claude Code](https://claude.ai/code) install and your own Claude account** : it is not included, and there's no API key baked into the app. If you don't have Claude Code, Bono will simply tell you so and the rest of the app carries on as normal.
 
