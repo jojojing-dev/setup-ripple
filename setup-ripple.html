@@ -136,13 +136,6 @@
     flex:1;min-width:200px;background:var(--panel);color:var(--text);
     border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-family:var(--body);font-size:14px;
   }
-  table.diff{width:100%;border-collapse:collapse;margin:14px 0 6px;font-size:14px}
-  table.diff th{
-    text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);
-  }
-  table.diff td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-  table.diff td.num{font-family:var(--mono);font-size:13px;white-space:nowrap}
   .chip{
     display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
     text-transform:uppercase;padding:2px 7px;border-radius:99px;border:1px solid var(--line);
@@ -151,6 +144,11 @@
   .chip.loose{color:var(--loose);border-color:var(--loose)}
   .chip.min{color:var(--amber);border-color:var(--amber)}
   .fix-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:18px}
+  .req-group-h{display:flex;align-items:baseline;gap:10px;margin:16px 0 8px}
+  .req-group-h span{font-family:var(--disp);font-weight:600;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--lbl-hi)}
+  .req-group-h em{font-style:normal;font-family:var(--body);font-size:13px;color:var(--lbl)}
+  .req-group-h::after{content:'';flex:1;height:1px;background:var(--line);align-self:center}
+  .req-group .fix-grid{margin-bottom:6px}
   .fix-card{
     text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;
     padding:14px;cursor:pointer;color:var(--text);font-family:var(--body);
@@ -553,7 +551,6 @@
   .vrow.has-cd{display:block}
   .vrow.has-cd .vlabel{display:block;margin-bottom:6px}
   /* axle glyph in LMU group headings */
-  .axle{width:18px;height:30px;flex:0 0 auto;margin-right:2px}
   @media (max-width:760px){ .cd{gap:12px 20px} }
   @media (prefers-reduced-motion:reduce){ .nbtn,#main .btn,.fix-card{transition:none} }
 
@@ -570,13 +567,6 @@
     box-shadow:inset 0 2px 6px rgba(0,0,0,.7);
   }
   .group button.linked{color:var(--loose)}
-  .hyper-toggle{
-    border-radius:5px;background:linear-gradient(#2b2b2b,#1c1c1c);border:1px solid #3a3a3a;color:var(--lbl-hi);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 2px 0 #000;font-family:var(--disp);font-weight:600;
-    font-size:11.5px;letter-spacing:.08em;padding:5px 11px;transition:transform .06s,box-shadow .06s;
-  }
-  .hyper-toggle:hover{border-color:var(--navy2);color:#fff}
-  .hyper-toggle:active{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 0 0 #000}
   /* sidebar brand */
   .brand h1{font-family:var(--disp);font-weight:700;letter-spacing:.02em}
   .brand p{font-family:var(--body);color:var(--lbl);font-size:12.5px}
@@ -647,6 +637,30 @@
   }
   .warn svg{width:16px;height:16px;flex:0 0 16px;margin-top:2px;stroke:var(--loose);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   @media (prefers-reduced-motion:reduce){ .hyper-toggle,.chat-empty .ex button,.setup-picker button{transition:none} }
+
+  /* Pending changes + Compare tables: shared with the LMU app */
+  .pend-x{background:none;border:1px solid var(--line);color:var(--lbl);border-radius:4px;width:22px;height:22px;line-height:1;cursor:pointer;font-size:14px;padding:0}
+  .pend-x:hover{border-color:var(--amber);color:#fff}
+  .cmp-why{color:var(--lbl);font-size:13px}
+  .eng-staged{font-family:var(--body);font-size:13.5px;color:var(--lbl);margin:-6px 0 12px}
+  .eng-staged b{color:var(--loose)}
+  .linkbtn{background:none;border:0;padding:0;color:var(--navy-txt);font:inherit;cursor:pointer;text-decoration:underline}
+  .eng-note{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5}
+  .fix-sub{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+  .cmp-table{width:100%;border-collapse:collapse;margin:14px 0 6px;font-size:13.5px}
+  .cmp-table th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);}
+  .cmp-table td{padding:7px 8px;border-bottom:1px solid var(--line)}
+  .cmp-a{font-family:var(--mono);color:var(--muted);white-space:nowrap}
+  .cmp-b{font-family:var(--mono);color:var(--text);white-space:nowrap}
+  .cmp-arrow{color:var(--amber);text-align:center}
+  .cmp-table .muted{color:var(--lbl)}
+
+  /* Bono: stop button and stopped marker */
+  #main .btn.stop{background:var(--well);border-color:var(--amber);color:#fff}
+  #main .btn.stop:hover{background:var(--amber);border-color:var(--amber)}
+  .msg .stopped{display:block;margin-top:8px;font-family:var(--disp);font-weight:600;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--lbl)}
+  .chat-tools .tools-note{color:var(--lbl)}
 </style>
 </head>
 <body>
@@ -654,7 +668,7 @@
   <nav id="nav"></nav>
   <div style="flex:1;min-width:0">
     <div class="mobile-nav">
-      <div class="brand"><h1>Setup Ripple <span>ACC/EVO</span></h1><p>GT3 cause &amp; effect. ACC / AC Evo · v2.0</p></div>
+      <div class="brand"><h1>Setup Ripple <span>ACC/EVO</span></h1><p>GT3 cause &amp; effect. ACC / AC Evo · v2.1</p></div>
       <div id="mTabs"></div>
       <select id="mobileSel" aria-label="Choose a setup parameter or symptom"></select>
     </div>
@@ -708,7 +722,7 @@ const P = [
  knock:[
   {id:'pressure',why:'Camber redistributes heat across the tread, which moves hot pressures'},
   {id:'caster',why:'Caster adds dynamic camber when steered. More caster lets you run less static camber'}],
- note:'ACC GT3s usually like a lot of front camber (around −3.5 to −4.0°) and a little less at the rear.'},
+ note:'ACC GT3s usually like a lot of front camber (around −3.5 to −4.0°) and a little less at the rear. AC Evo is different since its 0.9 tyre update: maximum camber is no longer automatically fastest, and camber only pays off once the tyre is properly loaded, so some tracks now want less. On Evo, start from the default and add camber in small steps.'},
 
 {id:'toe',group:'Tyres',name:'Toe',
  upLabel:'More toe',downLabel:'Less toe',
@@ -1076,7 +1090,7 @@ const P = [
   {id:'diffPreload',why:'Diff locking and TC manage the same exit wheelspin from opposite ends'},
   {id:'brakeBias',why:'ABS level changes how aggressive a bias setting you can run'},
   {id:'pressure',why:'Less assist = more sliding = more tyre temperature'}],
- note:'When learning setups, run TC one click lower than comfortable for a session. You\'ll *feel* what every change does instead of having it filtered.'}
+ note:'When learning setups, run TC one click lower than comfortable for a session. You\'ll *feel* what every change does instead of having it filtered. On AC Evo since the 0.9 tyre update, the tyres lose grip more realistically once you go past the limit, so TC earns its place again in races, even if you run it low in qualifying.'}
 ];
 
 /* ──────────────────────── symptoms ──────────────────────── */
@@ -1207,7 +1221,7 @@ const S = [
 /* ──────────────────── engineer: ACC field map ──────────────────── */
 const CN = ['LF','RF','LR','RR'];
 const FIELDS = [
- {p:'basicSetup.tyres.tyrePressure',l:'Tyre pressure',c:CN,pid:'pressure'},
+ {p:'basicSetup.tyres.tyrePressure',l:'Tyre pressure (psi)',c:CN,pid:'pressure'},
  {p:'basicSetup.tyres.tyreCompound',l:'Tyre compound'},
  {p:'basicSetup.alignment.camber',l:'Camber',c:CN,pid:'camber'},
  {p:'basicSetup.alignment.toe',l:'Toe',c:CN,pid:'toe'},
@@ -1360,20 +1374,20 @@ const isEvoName = n => /\.(carsetup|setup)$/i.test(n);
 /* ──────────────────── engineer: driver requests ──────────────────── */
 /* ch = ACC click changes; evo = AC Evo physical-value changes (experimental) */
 const FIXES = [
- {id:'fxEntryUnder',name:'Less understeer on entry',d:'Frees the car to rotate under trail-braking.',ch:[
+ {id:'fxEntryUnder',group:'entry',name:'Less understeer on entry',d:'Frees the car to rotate under trail-braking.',ch:[
   {p:'advancedSetup.mechanicalBalance.brakeBias',d:-2,why:'Bias rearward. The entry rotation tool'},
   {p:'advancedSetup.drivetrain.preload',d:-1,why:'Less diff locking off-throttle'},
   {p:'advancedSetup.mechanicalBalance.aRBFront',d:-1,why:'Softer front bar for mid-corner support'}],
   evo:[
   {p:'1.3.1',d:-0.5,why:'Bias rearward 0.5%. The entry rotation tool'},
   {p:'1.4.3',d:-10,why:'Less diff preload, less locking off-throttle'}]},
- {id:'fxEntrySnap',name:'Calmer rear on entry',d:'Steadies a rear that steps out under trail-braking.',ch:[
+ {id:'fxEntrySnap',group:'entry',name:'Calmer rear on entry',d:'Steadies a rear that steps out under trail-braking.',ch:[
   {p:'advancedSetup.mechanicalBalance.brakeBias',d:2,why:'Bias forward for braking stability'},
   {p:'advancedSetup.drivetrain.preload',d:1,why:'More locking steadies the rear off-throttle'}],
   evo:[
   {p:'1.3.1',d:0.5,why:'Bias forward 0.5% for braking stability'},
   {p:'1.4.3',d:10,why:'More preload steadies the rear off-throttle'}]},
- {id:'fxMidUnder',name:'Less understeer mid-corner',d:'More mechanical front grip at all speeds.',ch:[
+ {id:'fxMidUnder',group:'mid',name:'Less understeer mid-corner',d:'More mechanical front grip at all speeds.',ch:[
   {p:'advancedSetup.mechanicalBalance.aRBFront',d:-1,why:'The cleanest mid-corner balance tool'},
   {p:'advancedSetup.mechanicalBalance.wheelRate',i:0,d:-1,why:'Softer front spring (left)'},
   {p:'advancedSetup.mechanicalBalance.wheelRate',i:1,d:-1,why:'Softer front spring (right)'}],
@@ -1382,7 +1396,7 @@ const FIXES = [
   {p:'2[1].1',d:-20000,why:'Softer front spring (right) for mechanical grip'},
   {p:'4[0].2',d:-0.1,why:'A touch more front camber (left)'},
   {p:'4[1].2',d:-0.1,why:'A touch more front camber (right)'}]},
- {id:'fxMidOver',name:'Less oversteer mid-corner',d:'Calms a rear that edges wide at steady state.',ch:[
+ {id:'fxMidOver',group:'mid',name:'Less oversteer mid-corner',d:'Calms a rear that edges wide at steady state.',ch:[
   {p:'advancedSetup.mechanicalBalance.aRBRear',d:-1,why:'Softer rear bar'},
   {p:'advancedSetup.mechanicalBalance.wheelRate',i:2,d:-1,why:'Softer rear spring (left)'},
   {p:'advancedSetup.mechanicalBalance.wheelRate',i:3,d:-1,why:'Softer rear spring (right)'}],
@@ -1391,19 +1405,23 @@ const FIXES = [
   {p:'2[3].1',d:-20000,why:'Softer rear spring (right)'},
   {p:'4[2].2',d:-0.1,why:'A touch more rear camber (left)'},
   {p:'4[3].2',d:-0.1,why:'A touch more rear camber (right)'}]},
- {id:'fxFastUnder',name:'Less understeer in fast corners',d:'Pulls aero balance forward, speed-dependent fix.',ch:[
+ {id:'fxFastUnder',group:'fast',name:'Less understeer in fast corners',d:'Pulls aero balance forward, speed-dependent fix.',ch:[
   {p:'advancedSetup.aeroBalance.rearWing',d:-1,why:'A step less wing (top speed bonus)'},
   {p:'advancedSetup.aeroBalance.rideHeight',i:0,d:-1,why:'Lower front = more rake = more front aero'}],
   evo:[
   {p:'6.5',d:-1,why:'A step less wing (top speed bonus)'},
   {p:'6.2',d:-2,why:'Front 2 mm lower = more rake = more front aero'}]},
- {id:'fxFastOver',name:'More stability in fast corners',d:'Pushes aero balance rearward for confidence at speed.',ch:[
+ {id:'fxFastOver',group:'fast',name:'More stability in fast corners',d:'Pushes aero balance rearward for confidence at speed.',ch:[
   {p:'advancedSetup.aeroBalance.rearWing',d:1,why:'A step more wing. The biggest single fix'},
   {p:'advancedSetup.aeroBalance.rideHeight',i:2,d:-1,why:'Slightly less rake'}],
   evo:[
   {p:'6.5',d:1,why:'A step more wing. The biggest single fix'},
   {p:'6.3',d:-2,why:'Rear 2 mm lower = slightly less rake'}]},
- {id:'fxTraction',name:'More traction on exit',d:'Helps the rear hook up out of slow corners.',ch:[
+ {id:'fxTopSpeed',group:'fast',name:'More top speed',d:'For long straights like Monza. One click less wing. If the rear goes light at speed, lower the rear a touch to take out some rake.',ch:[
+  {p:'advancedSetup.aeroBalance.rearWing',d:-1,why:'One click less wing: less drag, less rear grip in fast corners'}],
+  evo:[
+  {p:'6.5',d:-1,why:'One click less wing: less drag, less rear grip in fast corners'}]},
+ {id:'fxTraction',group:'exit',name:'More traction on exit',d:'Helps the rear hook up out of slow corners.',ch:[
   {p:'advancedSetup.mechanicalBalance.wheelRate',i:2,d:-1,why:'Softer rear spring (left)'},
   {p:'advancedSetup.mechanicalBalance.wheelRate',i:3,d:-1,why:'Softer rear spring (right)'},
   {p:'advancedSetup.mechanicalBalance.aRBRear',d:-1,why:'Softer rear bar keeps the inside rear planted'},
@@ -1412,7 +1430,7 @@ const FIXES = [
   {p:'2[2].1',d:-20000,why:'Softer rear spring (left) for traction'},
   {p:'2[3].1',d:-20000,why:'Softer rear spring (right) for traction'},
   {p:'1.4.3',d:10,why:'More preload stops single-wheel spin-up'}]},
- {id:'fxPowerPush',name:'Less push on throttle',d:'For a front that gives up the moment you accelerate.',ch:[
+ {id:'fxPowerPush',group:'exit',name:'Less push on throttle',d:'For a front that gives up the moment you accelerate.',ch:[
   {p:'advancedSetup.drivetrain.preload',d:-1,why:'A locked diff wants to drive straight'},
   {p:'advancedSetup.mechanicalBalance.wheelRate',i:2,d:1,why:'Stiffer rear (left) limits squat lifting the nose'},
   {p:'advancedSetup.mechanicalBalance.wheelRate',i:3,d:1,why:'Stiffer rear (right) limits squat lifting the nose'}],
@@ -1431,7 +1449,12 @@ let mode='params', cur='rearWing', dir='up', curS=S[0].id;
 
 /* engineer state */
 let setups=[];
-let selA=-1, selB=-1, curFix=null, preview=null;
+let selA=-1, selB=-1, preview=null;   // selA/selB are Compare only. Everything staged applies to the View setup.
+let selFixes=[];              // driver requests picked for the View setup (they stack)
+let excludedRows=new Set();   // rows removed with ×
+let lastSaveMsg='';           // survives the pending list clearing after a save
+let previewIndex=new Map();   // row key -> pending row, for the View page badges
+const pendingStore=new Map(); // setup label -> staged changes, kept while you look at another setup
 let selView=-1;         // View setup's own setup picker (independent of Compare)
 let pendingNudge={};    // nudge edits: id -> {steps, label, setup-relative locator}
 
@@ -1459,7 +1482,9 @@ function nudgeStepEVO(key, node){
     return STEPS[tmpl];
   }
   // integer fields = clicks: dampers, wheel rate, ARB, ride height, wing, fuel
-  const INT_TMPLS = ['3[C].1','3[C].2','3[C].3','3[C].4','2[C].1','1.1[0]','1.1[1]','6.2','6.3','6.5','7.1','1.4.3'];
+  // ARB, wheel rate and diff preload are left out on purpose: their click size comes from each
+  // car's own table (it even differs front to rear), so the app can't nudge them safely.
+  const INT_TMPLS = ['3[C].1','3[C].2','3[C].3','3[C].4','6.2','6.3','6.5','7.1'];
   if(INT_TMPLS.includes(tmpl) || INT_TMPLS.includes(key)){
     if(Number.isInteger(node.v)) return 1;
   }
@@ -1479,6 +1504,7 @@ let aiMessages=[];      // {role:'user'|'ai'|'err', text}
 let aiSetups=[];        // Bono's own loaded setup list (independent of Engineer tab)
 let spCar='', spTrack='', spSetup='';   // Bono setup-picker selections
 let aiBusy=false;
+let aiDraft='';   // a question put back in the box after Stop, so it can be edited and resent
 let aiAllowWrite=false;
 
 const nav = document.getElementById('nav');
@@ -1522,7 +1548,7 @@ function buildNav(){
       <div class="group"><h2>About</h2>
       <button disabled style="cursor:default;color:var(--muted);white-space:normal;line-height:1.5">Asks questions in plain English about your setups. Runs locally via Claude Code.</button></div>`;
   }
-  nav.innerHTML = `<div class="brand"><h1>Setup Ripple <span>ACC/EVO</span></h1><p>GT3 cause &amp; effect. ACC / AC Evo · v2.0</p></div>` + tabsHTML() + items;
+  nav.innerHTML = `<div class="brand"><h1>Setup Ripple <span>ACC/EVO</span></h1><p>GT3 cause &amp; effect. ACC / AC Evo · v2.1</p></div>` + tabsHTML() + items;
   nav.querySelectorAll('.mode-tabs button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
   nav.querySelectorAll('.group button[data-id]').forEach(b=>b.onclick=()=>mode==='params'?select(b.dataset.id):selectSym(b.dataset.id));
   nav.querySelectorAll('.group button[data-go]').forEach(b=>b.onclick=()=>{
@@ -1727,7 +1753,7 @@ async function refreshFolder(){
   }
   const find = lbl => lbl==null ? -1 : setups.findIndex(s=>s.label===lbl);
   selA=find(keepA); selB=find(keepB); selView=find(keepV);
-  if(selView<0 && setups.length) selView=0;
+  if(selView<0 && setups.length) switchView(0);
   return true;
 }
 
@@ -1735,7 +1761,8 @@ async function pickFolder(){
   try{
     if(window.SetupRippleDir){
       // Electron: bridge returns a plain array of file objects (methods don't survive contextBridge)
-      const files = await window.SetupRippleDir.pick();
+      const files = await window.SetupRippleDir.pick(lastDir());
+      if(window.SetupRippleDir.lastDir) rememberDir(window.SetupRippleDir.lastDir());
       let added=0;
       for(const f of files){
         try{
@@ -1763,7 +1790,7 @@ async function pickFolder(){
       }
       await walk(root,'',0);
     }
-    if(selView<0 && setups.length) selView=0;
+    if(selView<0 && setups.length) switchView(0);
     buildNav(); renderEng();
   }catch(e){
     if(e && e.name!=='AbortError') console.warn('Folder load failed:', e);
@@ -1774,7 +1801,7 @@ function pickFiles(input){
   const files=[...input.files];
   let pending=files.length;
   if(!pending) return;
-  const done=()=>{ if(--pending===0){ if(selView<0 && setups.length) selView=0; buildNav(); renderEng(); } };
+  const done=()=>{ if(--pending===0){ if(selView<0 && setups.length) switchView(0); buildNav(); renderEng(); } };
   files.forEach(f=>{
     const r=new FileReader();
     if(isEvoName(f.name)){
@@ -1805,7 +1832,8 @@ function diffSetups(a,b){
       if(eq) continue;
       const m=EVO_MAP[k];
       const delta=(typeof va==='number'&&typeof vb==='number')?vb-va:null;
-      rows.push({label:m?m.l:k,va:fmt(va),vb:fmt(vb),delta:delta===null?null:fmt(delta),
+      rows.push({page:pageForEvo(k),label:m?m.l:k,va:va===undefined?undefined:fmt(va),vb:vb===undefined?undefined:fmt(vb),
+        delta:delta===null?null:fmt(delta),change:delta===null?null:(delta>0?'+':'')+fmt(delta),
         t:delta!==null&&m?tilt(m.pid,delta):null,known:!!m,conf:m?m.conf:null});
     }
     return rows;
@@ -1826,24 +1854,212 @@ function diffSetups(a,b){
     }else label=k;
     const va=fa[k], vb=fb[k];
     const delta=(typeof va==='number'&&typeof vb==='number')?vb-va:null;
-    rows.push({label,va,vb,delta,t:delta!==null?tilt(pid,delta):null,known:!!f,conf:null});
+    const change=delta===null?null:(path===ACC_PSI?(delta>0?'+':'')+(0.1*delta).toFixed(1)+' psi':clickPhrase(delta));
+    rows.push({page:pageForAcc(path),label,va:accFmt(path,va),vb:accFmt(path,vb),delta,change,t:delta!==null?tilt(pid,delta):null,known:!!f,conf:null});
   }
   return rows;
 }
 
-function diffTable(rows){
+
+/* AC Evo stores some settings as physical values converted through each car's own table
+   (ARB, wheel rate, diff preload), so the size of one click differs by car and can change
+   with patches. We never write those; we tell the driver what to do in-game instead. */
+function isPerCarEvo(k){ return /^2\[\d\]\.1$/.test(k) || k==='1.1[0]' || k==='1.1[1]' || k==='1.4.3'; }
+/* Stack the chosen requests into one combined fix. Changes to the same setting add up;
+   anything that cancels to zero drops out. */
+/* Save names: X_SR, then X_SR2, X_SR3... in the same folder. Never stacks suffixes,
+   never overwrites. Also strips the old 2.0 " - edited" suffix. */
+function dirOfLabel(l){ const i=String(l||'').lastIndexOf(' / '); return i<0?'':String(l).slice(0,i); }
+function nextSRName(s, ext){
+  const base=String(s.name||'setup').replace(/\.[^.]+$/,'').replace(/(_SR\d*| - edited)$/i,'');
+  const here=dirOfLabel(s.label);
+  const taken=new Set(setups.filter(x=>dirOfLabel(x.label)===here).map(x=>String(x.name||'').toLowerCase()));
+  let n=1, name=base+'_SR'+ext;
+  while(taken.has(name.toLowerCase())){ n++; name=base+'_SR'+n+ext; }
+  return {name, here};
+}
+function findSaved(name, here){ return setups.findIndex(x=>String(x.name||'').toLowerCase()===name.toLowerCase() && dirOfLabel(x.label)===here); }
+
+const REQ_GROUPS=[
+  ['entry','Entry','Braking and turn-in'],
+  ['mid','Mid-corner','Holding the line through the middle'],
+  ['exit','Exit','Getting back on the power'],
+  ['fast','High speed','Aero: felt in fast corners and on the straights']];
+function groupedFixes(items, card){
+  const known=new Set(REQ_GROUPS.map(g=>g[0]));
+  const out=REQ_GROUPS.map(([g,t,sub])=>{ const its=items.filter(x=>x.group===g); if(!its.length) return '';
+    return `<div class="req-group"><div class="req-group-h"><span>${t}</span><em>${sub}</em></div><div class="fix-grid">${its.map(card).join('')}</div></div>`; }).join('');
+  const rest=items.filter(x=>!known.has(x.group));
+  return out + (rest.length?`<div class="fix-grid">${rest.map(card).join('')}</div>`:'');
+}
+
+/* ═══ Staged changes (2.1) ═══
+   Everything staged, from the ◄ ► nudges or driver requests, applies to the setup you're viewing
+   and collects in one Pending changes list with one Save. Compare is only for comparing.
+   Staged changes belong to one setup: switch away and they're set aside, switch back and
+   they're still there. */
+function hasStaged(){ return Object.keys(pendingNudge).length>0 || selFixes.length>0 || excludedRows.size>0; }
+function resetStaged(){ pendingNudge={}; selFixes=[]; excludedRows=new Set(); preview=null; previewIndex=new Map(); }
+function switchView(i){
+  const cur=setups[selView];
+  if(cur){ if(hasStaged()) pendingStore.set(cur.label,{pendingNudge,selFixes,excludedRows}); else pendingStore.delete(cur.label); }
+  selView=i;
+  const nxt=setups[selView], st=nxt&&pendingStore.get(nxt.label);
+  pendingNudge=st?st.pendingNudge:{}; selFixes=st?st.selFixes:[]; excludedRows=st?st.excludedRows:new Set();
+  if(nxt) pendingStore.delete(nxt.label);
+  rebuildPreview();
+}
+function locKey(L){ return L.kind==='acc' ? L.path+'|'+((L.idx===null||L.idx===undefined)?'':L.idx) : L.key+'|'; }
+// Manual nudges in the same shape as a driver request, so both merge into one list.
+function manualAsFix(s){
+  const ch=[], evo=[];
+  for(const id in pendingNudge){ const e=pendingNudge[id], L=e.locator;
+    if(L.kind==='acc' && s.kind==='acc') ch.push({p:L.path, i:(L.idx===null||L.idx===undefined)?undefined:L.idx, d:e.steps, why:'Your nudge'});
+    else if(L.kind==='evo' && s.kind==='evo' && L.step) evo.push({p:L.key, d:+(e.steps*L.step).toFixed(6), why:'Your nudge'});
+  }
+  return {name:'', ch, evo};
+}
+/* Stack fixes into one. Changes to the same setting add up; anything that cancels drops out. */
+function mergeFixList(fixes){
+  const merge=(arr,keyOf)=>{ const m=new Map();
+    for(const c of arr){ const k=keyOf(c);
+      if(m.has(k)){ const o=m.get(k); o.d=+(o.d+c.d).toFixed(6); if(c.why && !String(o.why).includes(c.why)) o.why+='; '+c.why; }
+      else m.set(k,{...c}); }
+    return [...m.values()].filter(c=>c.d!==0); };
+  return { id:'staged', name:fixes.map(f=>f.name).filter(Boolean).join(' + '),
+    ch: merge(fixes.flatMap(f=>f.ch||[]), c=>c.p+'|'+(c.i===undefined?'':c.i)),
+    evo: merge(fixes.flatMap(f=>f.evo||[]), c=>c.p) };
+}
+function rowKey(r){ return r.p+'|'+(r.i===undefined?'':r.i); }
+function rebuildPreview(){
+  const s=setups[selView]; previewIndex=new Map();
+  if(!s){ preview=null; return; }
+  const combined=mergeFixList([manualAsFix(s), ...selFixes.map(id=>FIXES.find(f=>f.id===id)).filter(Boolean)]);
+  if(!combined.ch.length && !combined.evo.length){ preview=null; return; }
+  preview=buildPreview(combined);
+  preview.rows=preview.rows.filter(r=>!excludedRows.has(rowKey(r)));
+  if(!preview.rows.length){ preview=null; return; }
+  preview.rows.forEach(r=>previewIndex.set(rowKey(r),r));
+}
+// Rows that would actually change the file (not in-game instructions, not already at the limit).
+function pendingCount(){ return preview ? preview.rows.filter(r=>r.on&&!r.instruction&&!r.atMin).length : 0; }
+function pendingFor(L){ return previewIndex.get(locKey(L)); }
+function removeRow(key){
+  lastSaveMsg='';
+  for(const id in pendingNudge) if(locKey(pendingNudge[id].locator)===key) delete pendingNudge[id];
+  excludedRows.add(key); rebuildPreview(); renderEng();
+}
+
+/* ACC stores click positions. Tyre pressure is the one setting with the same conversion on every
+   car (20.3 psi plus 0.1 per click), so show it in psi. Everything else stays a click count,
+   because its real value depends on the car. */
+const ACC_PSI='basicSetup.tyres.tyrePressure';
+function accFmt(path, v){ return (path===ACC_PSI && typeof v==='number') ? (20.3+0.1*v).toFixed(1) : v; }
+function clickPhrase(n){ const a=Math.abs(n); return a+' click'+(a===1?'':'s')+' '+(n>0?'up':'down'); }
+function pageForAcc(path){ for(const pg of ACC_PAGES) for(const g of pg.groups) if((g.paths||[]).includes(path)) return pg.name; return ''; }
+function pageForEvo(key){ const t=key.replace(/\[\d\]/,'[C]'); for(const pg of EVO_PAGES) for(const g of pg.groups) if((g.keys||[]).includes(t)||(g.keys||[]).includes(key)) return pg.name; return ''; }
+
+// Each sim remembers its own last folder, so dialogs don't open in the other game's folder.
+const DIR_KEY='setupRipple.lastDir.kunos';
+function lastDir(){ try{ return localStorage.getItem(DIR_KEY)||undefined; }catch(e){ return undefined; } }
+function rememberDir(d){ try{ if(d) localStorage.setItem(DIR_KEY,d); }catch(e){} }
+async function addFilesNative(){
+  try{
+    const files=await window.SetupRippleDir.addFiles(lastDir(), ['json','carsetup','setup']);
+    if(!files || !files.length) return;
+    let added=0;
+    for(const f of files){
+      try{
+        if(f.isEvo && f.buffer) addSetup(f.name, f.relPath, {buf:f.buffer}, f.fullPath, 'files');
+        else if(f.text!=null) addSetup(f.name, f.relPath, {json:JSON.parse(f.text)}, f.fullPath, 'files');
+        else continue;
+        added++;
+      }catch(e){ console.warn('Skipped', f.name, e); }
+    }
+    rememberDir(files[0].dir);
+    if(selView<0 && setups.length) switchView(setups.length-added);
+    buildNav(); renderEng();
+  }catch(e){ console.warn('Add files failed:', e); }
+}
+
+function copyText(t, btn){
+  const done=()=>{ if(btn){ const w=btn.textContent; btn.textContent='Copied'; setTimeout(()=>{btn.textContent=w;},1200); } };
+  try{ navigator.clipboard.writeText(t).then(done,()=>{}); }catch(e){}
+}
+function changeListText(){
+  const v=setups[selView]; if(!v||!preview) return '';
+  return 'Setup: '+v.name+'\n'+preview.rows.map(r=>'- '+r.label+': '+(r.beforeTxt!==undefined?r.beforeTxt:r.before)+' -> '+(r.afterTxt!==undefined?r.afterTxt:r.after)+' ('+r.why+')').join('\n');
+}
+function compareText(){
+  const a=setups[selA], b=setups[selB]; if(!a||!b||a===b||a.kind!==b.kind) return '';
+  return 'A: '+a.name+'\nB: '+b.name+'\n'+diffSetups(a,b).map(r=>'- '+(r.page?r.page+' > ':'')+r.label+': '+(r.va===undefined?'-':r.va)+' -> '+(r.vb===undefined?'-':r.vb)+(r.change?' ['+r.change+']':'')).join('\n');
+}
+function renderPending(){
+  if(!preview || !preview.rows.length) return '';
+  const v=setups[selView];
+  const val=(r,side)=>{ const t=side==='b'?(r.beforeTxt!==undefined?r.beforeTxt:r.before):(r.afterTxt!==undefined?r.afterTxt:r.after); return esc(String(t)); };
+  const body=preview.rows.map(r=>`<tr><td>${esc(r.label)}${confChip(r.conf)}${r.atMin?' <span class="chip min">at minimum</span>':''}${r.instruction?' <span class="chip min">adjust in-game</span>':''}</td><td class="cmp-a">${val(r,'b')}</td><td class="cmp-b">${val(r,'a')}</td><td class="cmp-why">${esc(r.why)}</td><td><button class="pend-x" data-x="${esc(rowKey(r))}" title="Remove this change">×</button></td></tr>`).join('');
+  const n=pendingCount();
+  const note = v.kind==='evo'
+    ? 'AC Evo values are real units, and anything past the end of a setting\'s range is stopped at the limit by the game.'+(preview.rows.some(r=>r.instruction)?' Rows marked <b>adjust in-game</b> change by a different amount per click on each car, so make those on the in-game setup screen. Everything else is saved into the new file.':'')
+    : 'Moves are in clicks, the same as the in-game buttons, with tyre pressures shown in psi. If a change goes past the end of a setting\'s range, ACC ignores it and keeps the previous value.';
+  return `<table class="cmp-table"><thead><tr><th>Change</th><th>From</th><th>To</th><th>Why</th><th></th></tr></thead><tbody>${body}</tbody></table>
+    <p class="eng-note">${note}</p>
+    <div class="eng-actions">
+      <button class="btn primary" id="btnSaveEdit" ${n?'':'disabled title="Nothing here would change the file: these are already at their limit or need doing in-game."'}>Save edited setup (${n} change${n===1?'':'s'})</button>
+      <button class="btn" id="btnClearEdit">Clear changes</button>
+      <button class="btn" id="btnCopyEdit">Copy change list</button>
+    </div>`;
+}
+function renderCompareK(a,b){
+  const rows=diffSetups(a,b);
   if(!rows.length) return `<p class="eng-empty">No differences. These two setups are identical in every adjustable field.</p>`;
-  return `<table class="diff"><tr><th>Parameter</th><th>A</th><th>B</th><th>Δ</th><th>B vs A</th></tr>` +
-    rows.map(r=>`<tr>
-      <td>${esc(r.label)}${r.known?'':' <span class="chip">raw</span>'}${confChip(r.conf)}</td>
-      <td class="num">${esc(r.va===undefined?', ':r.va)}</td>
-      <td class="num">${esc(r.vb===undefined?', ':r.vb)}</td>
-      <td class="num">${r.delta===null?', ':(r.delta>0?'+':'')+r.delta}</td>
-      <td>${chip(r.t)}</td></tr>`).join('') + `</table>`;
+  const dash='<span class="muted">-</span>';
+  return `<table class="cmp-table"><thead><tr><th>Page</th><th>Setting</th><th>A</th><th>B</th><th>Change</th><th>Effect</th></tr></thead><tbody>`+
+    rows.map(r=>`<tr><td>${esc(r.page||'')}</td><td>${esc(r.label)}${r.known?'':' <span class="chip">raw</span>'}${confChip(r.conf)}</td><td class="cmp-a">${r.va===undefined?dash:esc(String(r.va))}</td><td class="cmp-b">${r.vb===undefined?dash:esc(String(r.vb))}</td><td>${r.change?esc(r.change):dash}</td><td>${chip(r.t)}</td></tr>`).join('')+
+    `</tbody></table>
+  <p class="eng-note">"Tighter/looser" shows the general setup-theory tendency of the change toward stability (tighter) or rotation (looser), where known. Tyres, fuel and track change the feel. Treat it as a pointer, not a promise.</p>
+  <div class="eng-actions"><button class="btn" id="btnCopyCmp">Copy comparison</button></div>`;
+}
+async function saveEdited(){
+  rebuildPreview();
+  const s=setups[selView];
+  if(!s || !preview || !pendingCount()) return;
+  const out=applyPreview();
+  const isEvo=s.kind==='evo';
+  const ext=isEvo?((s.name.match(/\.[^.]+$/)||['.carsetup'])[0]):'.json';
+  const nm=nextSRName(s, ext), newName=nm.name;
+  const payload=isEvo?out:JSON.stringify(out,null,2);
+  const finish=async(savedPath,savedName)=>{
+    const fin=savedName||newName;
+    pendingStore.delete(s.label); resetStaged();
+    await refreshFolder();
+    // Carry on working on the file just saved. Files added individually aren't part of the opened
+    // folder, so add the saved copy directly.
+    let i=findSaved(fin, nm.here);
+    if(i<0 && savedPath){ addSetup(fin,(nm.here?nm.here+' / ':'')+fin, isEvo?{buf:out.buffer.slice(out.byteOffset,out.byteOffset+out.byteLength)}:{json:out}, savedPath, 'files'); i=setups.length-1; }
+    if(i>=0){ selView=-1; switchView(i); }
+    lastSaveMsg='<b>Saved</b> '+esc(fin)+(i>=0?'. Added to your setup list and selected, so further changes build on it.':'.')+' Your original is untouched.';
+    buildNav(); renderEng();
+  };
+  if(window.SetupRippleDir && window.SetupRippleDir.save){
+    try{ const res=await window.SetupRippleDir.save(typeof s.saveDir==='string'?s.saveDir:null, newName, payload, isEvo, lastDir());
+      if(res && res.ok){ await finish(res.path, res.name); return; } }catch(e){ console.warn('IPC save failed:',e); }
+  }
+  if(s.saveDir && s.saveDir.getFileHandle && hasFS){
+    try{ const fh=await s.saveDir.getFileHandle(newName,{create:true});
+      const w=await fh.createWritable(); await w.write(payload); await w.close(); await finish(null); return;
+    }catch(e){ console.warn('Handle save failed:',e); }
+  }
+  const el=document.createElement('a');
+  el.href=URL.createObjectURL(new Blob([payload],{type:isEvo?'application/octet-stream':'application/json'}));
+  el.download=newName; el.click();
+  pendingStore.delete(s.label); resetStaged();
+  lastSaveMsg='<b>Saved</b> '+esc(newName)+' to your downloads. Drop it into your setups folder.'; renderEng();
 }
 
 function buildPreview(fix){
-  const s=setups[selA];
+  const s=setups[selView];
   const rows=[];
   if(s.kind==='evo'){
     if(!fix.evo) return {fix,rows};
@@ -1854,7 +2070,12 @@ function buildPreview(fix){
       let after=before+c.d;
       if(EVO_FLOOR0.has(c.p)) after=Math.max(0,after);
       const m=EVO_MAP[c.p];
-      rows.push({...c,label:m?m.l:c.p,before:fmt(before),after:fmt(after),rawAfter:after,off:node.off,
+      if(isPerCarEvo(c.p)){
+        rows.push({...c,label:m?m.l:c.p,before:fmt(before),after:'1 click '+(c.d<0?'lower':'higher')+', in-game',
+          instruction:true,on:false,atMin:false,t:tilt(m?m.pid:null,c.d),conf:m?m.conf:null});
+        continue;
+      }
+      rows.push({...c,label:m?m.l:c.p,before:fmt(before),after:fmt(after),beforeRaw:before,rawAfter:after,off:node.off,
         atMin:after===before&&c.d<0,on:true,t:tilt(m?m.pid:null,c.d),conf:m?m.conf:null});
     }
     return {fix,rows};
@@ -1867,19 +2088,19 @@ function buildPreview(fix){
     if(typeof before!=='number') continue;
     const after=Math.max(0,before+c.d);
     rows.push({...c,label:f?f.l+(c.i!==undefined&&f.c?`, ${f.c[c.i]}`:''):c.p,
-      before,after,atMin:after===before&&c.d<0,on:true,conf:null,
+      before,after,beforeTxt:accFmt(c.p,before),afterTxt:accFmt(c.p,after),atMin:after===before&&c.d<0,on:true,conf:null,
       t:tilt(pidFor(f||{},c.i!==undefined?c.i:undefined)||((f||{}).pid),c.d)});
   }
   return {fix,rows};
 }
 
 function applyPreview(){
-  const s=setups[selA];
+  const s=setups[selView];
   if(s.kind==='evo'){
     const bytes=new Uint8Array(s.bytes);
     const dv=new DataView(bytes.buffer);
     for(const r of preview.rows){
-      if(!r.on||r.off===undefined) continue;
+      if(!r.on||r.instruction||r.off===undefined) continue;
       dv.setFloat32(r.off, r.rawAfter, true);
     }
     return bytes;
@@ -1897,54 +2118,7 @@ function applyPreview(){
   return j;
 }
 
-async function saveResult(){
-  const out=applyPreview();
-  const s=setups[selA];
-  const isEvo=s.kind==='evo';
-  const ext=isEvo?(s.name.match(/\.[^.]+$/)||['.carsetup'])[0]:'.json';
-  const base=s.name.replace(/\.[^.]+$/,'');
-  const newName=`${base} - ${preview.fix.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')}${ext}`;
-  const payload=isEvo?out:JSON.stringify(out,null,2);
-  // Electron: saveDir is the source file's absolute path; save the new file alongside it via the bridge
-  if(typeof s.saveDir==='string' && window.SetupRippleDir && window.SetupRippleDir.save){
-    try{
-      const res=await window.SetupRippleDir.save(s.saveDir, newName, payload, isEvo);
-      if(res && res.ok){
-        document.getElementById('saveMsg').innerHTML=`<b>Saved</b> ${esc(newName)} into the same folder. It will appear in the game\'s setup list.`;
-        return;
-      }
-    }catch(e){ console.warn('IPC save failed, falling back to download:', e); }
-  }
-  // Browser File System Access API: saveDir is a directory handle
-  if(s.saveDir && s.saveDir.getFileHandle && hasFS){
-    try{
-      const fh=await s.saveDir.getFileHandle(newName,{create:true});
-      const w=await fh.createWritable();
-      await w.write(payload); await w.close();
-      document.getElementById('saveMsg').innerHTML=`<b>Saved</b> ${esc(newName)} into the same folder. It will appear in the game\'s setup list.`;
-      return;
-    }catch(e){ console.warn('Handle save failed, falling back to download:', e); }
-  }
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([payload],{type:isEvo?'application/octet-stream':'application/json'}));
-  a.download=newName; a.click();
-  document.getElementById('saveMsg').innerHTML=`<b>Downloaded</b> ${esc(newName)}. Drop it into your setups folder.`;
-}
 
-function copyForAI(kind){
-  let txt='';
-  if(kind==='diff'&&selA>=0&&selB>=0){
-    const a=setups[selA], b=setups[selB];
-    const game=a.kind==='evo'?'Assetto Corsa Evo':'Assetto Corsa Competizione';
-    const unit=a.kind==='evo'?'physical units':'setup-screen clicks';
-    const rows=diffSetups(a,b).map(r=>`- ${r.label}: ${r.va} -> ${r.vb}${r.delta!==null?` (${r.delta>0?'+':''}${r.delta})`:''}`).join('\n');
-    txt=`I'm comparing two ${game} setups.\nSetup A: ${a.label}\nSetup B: ${b.label}\nDifferences (values are ${unit}):\n${rows}\n\nPlease explain how setup B will feel different to drive than setup A (entry / mid-corner / exit / high-speed), and which differences matter most.`;
-  }else if(kind==='fix'&&preview){
-    const rows=preview.rows.filter(r=>r.on).map(r=>`- ${r.label}: ${r.before} -> ${r.after} (${r.why})`).join('\n');
-    txt=`I'm applying this change to my setup "${setups[selA].label}" to get: ${preview.fix.name}.\n${rows}\n\nPlease sanity-check these changes and suggest anything I should watch for on track.`;
-  }
-  navigator.clipboard.writeText(txt);
-}
 
 /* ──────────────────── engineer: render ──────────────────── */
 function visibleSetups(){
@@ -1958,7 +2132,7 @@ function setupOptions(sel){
     return `<optgroup label="${label}">`+opts.map(x=>
       `<option value="${x.i}" ${x.i===sel?'selected':''}>${esc(x.s.label)}</option>`).join('')+`</optgroup>`;
   };
-  return `<option value="-1">. Choose a setup, </option>` + grp('acc','ACC') + grp('evo','AC Evo');
+  return `<option value="-1">Choose a setup</option>` + grp('acc','ACC') + grp('evo','AC Evo');
 }
 
 /* ─────────── ACC six-page setup map (mirrors the in-game setup screen) ───────────
@@ -2065,98 +2239,40 @@ function readField(setup, path){
    locator uniquely ids the field within the setup:
      ACC: {kind:'acc', path, idx}   Evo: {kind:'evo', key, off} */
 function nudgeCtl(locator, label){
-  const id = nudgeId(locator);
-  const pend = pendingNudge[id] ? pendingNudge[id].steps : 0;
-  const badge = `<span class="eng-pend">${pend!==0?(pend>0?'+':'')+pend:''}</span>`;
-  const enc = encodeURIComponent(JSON.stringify(locator));
+  // Badge and value show everything staged on this setting: your nudges plus any requests.
+  const r=pendingFor(locator), sv=setups[selView];
+  let pend=0, cur=null;
+  if(locator.kind==='acc'){
+    const node=sv&&sv.json?get(sv.json,locator.path):undefined;
+    const raw=(locator.idx===null||locator.idx===undefined)?node:(Array.isArray(node)?node[locator.idx]:undefined);
+    if(r && !r.instruction){ pend=r.after-r.before; cur=r.after; } else cur=raw;
+  }else if(r && !r.instruction && locator.step){ pend=Math.round((r.rawAfter-r.beforeRaw)/locator.step); }
+  const atFloor = locator.kind==='acc' && typeof cur==='number' && cur<=0;   // ACC clicks start at 0
+  const badge=`<span class="eng-pend">${pend!==0?(pend>0?'+':'')+pend:''}</span>`;
+  const enc=encodeURIComponent(JSON.stringify(locator));
   return `<span class="eng-nudge">${badge}`+
-    `<button class="nbtn" data-loc="${enc}" data-lbl="${esc(label)}" data-d="-1" title="One click down">◄</button>`+
+    `<button class="nbtn" data-loc="${enc}" data-lbl="${esc(label)}" data-d="-1" ${atFloor?'disabled title="Already at the first position"':'title="One click down"'}>◄</button>`+
     `<button class="nbtn" data-loc="${enc}" data-lbl="${esc(label)}" data-d="1" title="One click up">►</button></span>`;
 }
 function nudgeId(loc){
   return loc.kind==='acc' ? `acc:${loc.path}:${loc.idx==null?'':loc.idx}` : `evo:${loc.key}`;
 }
 function nudge(locator, label, delta){
-  const id = nudgeId(locator);
-  const cur = pendingNudge[id] ? pendingNudge[id].steps : 0;
-  const steps = cur + delta;
-  if(steps===0) delete pendingNudge[id];
-  else pendingNudge[id] = { steps, label, locator };
+  lastSaveMsg='';
+  const id=nudgeId(locator);
+  const cur=pendingNudge[id]?pendingNudge[id].steps:0, steps=cur+delta;
+  if(steps===0) delete pendingNudge[id]; else pendingNudge[id]={steps,label,locator};
+  excludedRows.delete(locKey(locator));
   renderEng();
 }
-function nudgeCount(){ return Object.keys(pendingNudge).length; }
-function clearNudges(){ pendingNudge={}; renderEng(); }
 
 /* Build an edited file from pending nudges. ACC → edited json; Evo → edited bytes.
    Only the nudged fields change; everything else stays identical (lossless for Evo). */
-function applyNudges(setup){
-  if(setup.kind==='evo'){
-    const bytes=new Uint8Array(setup.bytes);
-    const dv=new DataView(bytes.buffer);
-    for(const id in pendingNudge){
-      const e=pendingNudge[id]; const loc=e.locator;
-      if(loc.kind!=='evo' || loc.step==null || loc.off==null) continue;
-      const node=setup.flat[loc.key]; if(!node) continue;
-      const newVal=node.v + e.steps*loc.step;
-      dv.setFloat32(loc.off, newVal, true);
-    }
-    return bytes;
-  }else{
-    const j=JSON.parse(JSON.stringify(setup.json));
-    for(const id in pendingNudge){
-      const e=pendingNudge[id]; const loc=e.locator;
-      if(loc.kind!=='acc') continue;
-      const cur=get(j, loc.path);
-      if(loc.idx!=null && Array.isArray(cur)){ cur[loc.idx]=cur[loc.idx]+e.steps; }
-      else{
-        const parts=loc.path.split('.'), last=parts.pop();
-        const obj=get(j,parts.join('.')); if(obj) obj[last]=obj[last]+e.steps;
-      }
-    }
-    return j;
-  }
-}
 
-async function saveNudged(){
-  const s=setups[selView];
-  if(!s || !nudgeCount()) return;
-  const out=applyNudges(s);
-  const isEvo=s.kind==='evo';
-  const ext=isEvo?(s.name.match(/\.[^.]+$/)||['.carsetup'])[0]:'.json';
-  const base=s.name.replace(/\.[^.]+$/,'');
-  const newName=`${base} - edited${ext}`;
-  const payload=isEvo?out:JSON.stringify(out,null,2);
-  const msg=document.getElementById('nudgeMsg');
-  const ok=async(name)=>{
-    if(msg) msg.innerHTML=`<b>Saved</b> ${esc(name)}. Your original is untouched. The game shows the final values when you load it.`;
-    // Pick the new file up straight away so it appears in the dropdowns (issue #1).
-    const pend=pendingNudge; pendingNudge={};
-    const refreshed=await refreshFolder();
-    if(refreshed){ renderEng(); const m2=document.getElementById('nudgeMsg');
-      if(m2) m2.innerHTML=`<b>Saved</b> ${esc(name)}. Added to your setup list. Your original is untouched.`; }
-    else { pendingNudge=pend; }
-  };
-  // Electron bridge (in-place beside original)
-  if(typeof s.saveDir==='string' && window.SetupRippleDir && window.SetupRippleDir.save){
-    try{ const res=await window.SetupRippleDir.save(s.saveDir, newName, payload, isEvo);
-      if(res&&res.ok){ await ok(newName); return; } }catch(e){ console.warn('IPC save failed:',e); }
-  }
-  // Browser FS Access API
-  if(s.saveDir && s.saveDir.getFileHandle && hasFS){
-    try{ const fh=await s.saveDir.getFileHandle(newName,{create:true});
-      const w=await fh.createWritable(); await w.write(payload); await w.close(); await ok(newName); return;
-    }catch(e){ console.warn('Handle save failed:',e); }
-  }
-  // Download fallback
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([payload],{type:isEvo?'application/octet-stream':'application/json'}));
-  a.download=newName; a.click();
-  if(msg) msg.innerHTML=`<b>Downloaded</b> ${esc(newName)}. Drop it into your setups folder.`;
-}
 
 
 function renderViewSetup(setup){
-  if(!setup) return `<p class="eng-empty">Choose Setup A above to view it page by page.</p>`;
+  if(!setup) return `<p class="eng-empty">Load a setup above to view it page by page.</p>`;
   const PAGES = setup.kind==='evo' ? EVO_PAGES : ACC_PAGES;
   const tabs = PAGES.map(pg=>
     `<button class="vpage ${engPage===pg.id?'on':''}" data-vp="${pg.id}">${pg.name}</button>`).join('');
@@ -2173,9 +2289,8 @@ function renderViewSetup(setup){
             const node=setup.flat[key]; if(!node) return null;
             const step=nudgeStepEVO(key, node);
             const loc={kind:'evo', key, off:node.off, step};
-            const id=nudgeId(loc);
-            const steps=pendingNudge[id]?pendingNudge[id].steps:0;
-            const shownVal=node.v + (step?steps*step:0);
+            const pr=pendingFor(loc);
+            const shownVal=(pr&&!pr.instruction)?pr.rawAfter:node.v;
             const ctl = step!=null ? nudgeCtl(loc, cn) : '';
             return `<span class="vcell"><span class="vcl">${cn}</span><span class="vcv">${esc(String(fmt(shownVal)))}</span>${ctl}</span>`;
           }).filter(Boolean).join('');
@@ -2191,9 +2306,8 @@ function renderViewSetup(setup){
           const lbl=m?m.l:key;
           const step=nudgeStepEVO(key, node);
           const loc={kind:'evo', key, off:node.off, step};
-          const id=nudgeId(loc);
-          const steps=pendingNudge[id]?pendingNudge[id].steps:0;
-          const shownVal=node.v + (step?steps*step:0);
+          const pr=pendingFor(loc);
+          const shownVal=(pr&&!pr.instruction)?pr.rawAfter:node.v;
           const ctl = step!=null ? nudgeCtl(loc, lbl) : '';
           return `<div class="vrow"><span class="vlabel">${esc(lbl)}</span><span class="vcells"><span class="vcell"><span class="vcv">${esc(String(fmt(shownVal)))}</span>${ctl}</span></span></div>`;
         }).join('');
@@ -2207,11 +2321,9 @@ function renderViewSetup(setup){
         if(!r) return '';
         const cells=r.cells.map(c=>{
           const loc={kind:'acc', path:c.path, idx:c.idx, step:1};
-          const id=nudgeId(loc);
-          const steps=pendingNudge[id]?pendingNudge[id].steps:0;
-          // ACC values are integer clicks; show stepped preview
+          const pr=pendingFor(loc);
           const rawNum = typeof c.rawValue==='number'?c.rawValue:Number(c.value);
-          const shown = (steps!==0 && !Number.isNaN(rawNum)) ? fmt(rawNum+steps) : c.value;
+          const shown = (pr&&!pr.instruction) ? accFmt(c.path, pr.after) : (Number.isNaN(rawNum)?c.value:accFmt(c.path, rawNum));
           const ctl = nudgeCtl(loc, c.label||r.field.l);
           return `<span class="vcell">${c.label?`<span class="vcl">${esc(c.label)}</span>`:''}<span class="vcv">${esc(String(shown))}</span>${ctl}</span>`;
         }).join('');
@@ -2221,16 +2333,11 @@ function renderViewSetup(setup){
     }).filter(Boolean).join('');
   }
   const note = setup.kind==='evo'
-    ? `<p class="eng-status">AC Evo values are decoded to real physical units (psi, °, N/m, mm). Some fields are inferred from the file format. Cross-check against the in-game screen. Fields without ◄ ► are view-only (step not yet verified).</p>`
-    : `<p class="eng-status">ACC values are setup-screen positions (clicks), exactly as the game shows them.</p>`;
-  const saveBar = nudgeCount()
-    ? `<div class="eng-actions" style="margin-top:14px">
-         <button class="btn primary" id="btnSaveNudge">Save edited setup (${nudgeCount()} change${nudgeCount()>1?'s':''})</button>
-         <button class="btn" id="btnClearNudge">Clear changes</button>
-         <span id="nudgeMsg" class="eng-status"></span>
-       </div>`
-    : '';
-  return `<div class="vpages" role="tablist">${tabs}</div>${note}<div class="vbody">${body||'<p class="eng-empty">No fields on this page for this setup.</p>'}</div>${saveBar}`;
+    ? `<p class="eng-status">AC Evo values are decoded to real physical units (psi, °, N/m, mm). Some fields are inferred from the file format. Cross-check against the in-game screen. Fields without ◄ ► are view-only. Anti-roll bars, wheel rates and diff preload change by a different amount per click on each car, so adjust those on the in-game setup screen.</p>`
+    : `<p class="eng-status">Tyre pressures are shown in psi. Other ACC settings are shown as setup-screen clicks: the real value depends on the car, and the game shows it on the setup screen.</p>`;
+  const n=pendingCount();
+  const staged = n?`<p class="eng-staged"><b>${n}</b> change${n===1?'':'s'} staged · <button class="linkbtn" id="goPending">see Pending changes</button></p>`:'';
+  return `<div class="vpages" role="tablist">${tabs}</div>${staged}${note}<div class="vbody">${body||'<p class="eng-empty">No fields on this page for this setup.</p>'}</div>`;
 }
 
 
@@ -2265,29 +2372,31 @@ function applyCornerDiagrams(root){
 }
 
 function renderEng(){
+  rebuildPreview();
   const nAcc=setups.filter(s=>s.kind==='acc').length;
   const nEvo=setups.filter(s=>s.kind==='evo').length;
-  const a=setups[selA], b=setups[selB];
+  const v=setups[selView];                  // the setup being viewed and edited
+  const a=setups[selA], b=setups[selB];     // Compare only
   const kindMismatch=a&&b&&a.kind!==b.kind;
-  const carA=a?(a.kind==='evo'?a.car:a.json.carName):null;
-  const carB=b?(b.kind==='evo'?b.car:b.json.carName):null;
+  const carOf=x=>x?(x.kind==='evo'?x.car:(x.json&&x.json.carName)):null;
+  const carA=carOf(a), carB=carOf(b);
   const sameCar=!a||!b||kindMismatch||!carA||!carB||carA===carB;
   main.innerHTML = `
     <div class="crumb">Engineer</div>
     <div class="title-row"><h2>Race engineer</h2></div>
-    <p class="does">Load your real setup files, ACC .json or AC Evo .carsetup. Compare any two, and apply driver requests: the same rules as the Diagnose tab, executed for you. ACC values are setup-screen clicks; Evo files are decoded to real physical values (psi, degrees, N/m, mm). Edited copies are always saved as new files; your originals are never touched.</p>
+    <p class="does">Load your real setup files, ACC .json or AC Evo .carsetup. Compare any two, and apply driver requests: the same rules as the Diagnose tab, executed for you. ACC values are setup-screen clicks, with tyre pressures shown in psi; Evo files are decoded to real physical values (psi, degrees, N/m, mm). Edited copies are always saved as new files; your originals are never touched.</p>
 
     <section id="engSource">
       <h3>1 · Load setups</h3>
-      <p class="does" style="margin-bottom:12px">Select a single <strong>track folder</strong> (the one inside a car folder that contains the setup files). Not the top-level Setups folder or a car folder. Same for both ACC and AC Evo.</p>
+      <p class="does" style="margin-bottom:12px">Select a single <strong>track folder</strong> (the one inside a car folder that contains the setup files), not the top-level Setups folder or a car folder. ACC keeps setups in Documents → Assetto Corsa Competizione → Setups, and AC Evo in C:\\Users\\[username]\\Saved Games\\ACE\\Car Setups.</p>
       <div class="eng-actions">
         <button class="btn primary" id="btnFolder" ${hasFS?'':'disabled'}>Open setups folder</button>
         <button class="btn" id="btnFiles">Add setup files…</button>
-        ${(window.SetupRippleDir&&window.SetupRippleDir.canRescan&&window.SetupRippleDir.canRescan())?`<button class="btn" id="btnRefresh" title="Re-read the setups folder to pick up new or changed files">Refresh</button>`:''}
+        ${(window.SetupRippleDir&&window.SetupRippleDir.canRescan)?(window.SetupRippleDir.canRescan()?`<button class="btn" id="btnRefresh" title="Re-read the setups folder to pick up new or changed files">Refresh</button>`:`<button class="btn" id="btnRefresh" disabled title="Open a setups folder first. Refresh re-reads that folder.">Refresh</button>`):''}
         ${setups.length?`<button class="btn" id="btnClear">Clear all</button>`:''}
         <input type="file" id="fileInput" accept=".json,.carsetup,.setup" multiple style="display:none">
       </div>
-      <p class="eng-status">${setups.length?`<b>${setups.length}</b> setup file${setups.length===1?'':'s'} loaded${nAcc&&nEvo?` (${nAcc} ACC, ${nEvo} Evo)`:''}`:'Nothing loaded yet'} · ACC: Documents → Assetto Corsa Competizione → Setups · AC Evo: C:\\Users\\[username]\\Saved Games\\ACE\\Car Setups. Or wherever your setups are stored${hasFS?'':' · folder picker needs Chrome or Edge. Use "Add setup files" instead'}</p>
+      <p class="eng-status">${setups.length?`<b>${setups.length}</b> setup${setups.length===1?'':'s'} loaded${nAcc&&nEvo?` (${nAcc} ACC, ${nEvo} Evo)`:''}`:'Nothing loaded yet'}${hasFS?'':' · folder picker needs Chrome or Edge. Use "Add setup files" instead'}</p>
       ${nAcc&&nEvo?`<div class="toggle" role="tablist" aria-label="Filter by game" style="margin-top:4px;margin-bottom:0">
         <button class="${gameFilter==='all'?'on':''}" data-gf="all">Both</button>
         <button class="${gameFilter==='acc'?'on':''}" data-gf="acc">ACC</button>
@@ -2299,7 +2408,8 @@ function renderEng(){
       <h3>2 · View setup</h3>
       ${setups.length===0?`<p class="eng-empty">Load a setup above to view it page by page.</p>`:`
       <div class="selrow"><label>Setup</label><select id="selView">${setupOptions(selView)}</select></div>
-      ${renderViewSetup(setups[selView])}`}
+      ${v?`<p class="eng-meta">${v.kind==='evo'?'AC Evo':'ACC'}${carOf(v)?' · '+esc(carOf(v)):''}</p>`:''}
+      ${renderViewSetup(v)}`}
     </section>
 
     <section id="engCompare">
@@ -2308,31 +2418,19 @@ function renderEng(){
       <div class="selrow"><label>A</label><select id="selA">${setupOptions(selA)}</select></div>
       <div class="selrow"><label>B</label><select id="selB">${setupOptions(selB)}</select></div>
       ${kindMismatch?`<p class="warn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 9v5M12 17.5v.5"/></svg><span>One of these is ACC and one is AC Evo. They store different things, so a direct comparison isn\'t meaningful. Pick two from the same game.</span></p>`:''}
-      ${!sameCar?`<p class="warn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 9v5M12 17.5v.5"/></svg><span>Different cars. Values aren\'t directly comparable between cars, so read this as direction only.</span></p>`:''}
-      ${a&&b&&!kindMismatch?diffTable(diffSetups(a,b)):''}
-      ${a&&b&&!kindMismatch?`<div class="eng-actions"><button class="btn" id="btnCopyDiff">Copy diff for AI</button></div>`:''}`}
+      ${!sameCar?`<p class="warn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 9v5M12 17.5v.5"/></svg><span>Different cars. Values aren't directly comparable between cars, so read this as direction only.</span></p>`:''}
+      ${a&&b&&!kindMismatch?renderCompareK(a,b):''}`}
     </section>
 
     <section id="engFix">
       <h3>4 · Driver requests</h3>
-      ${selA<0?`<p class="eng-empty">Choose Setup A in Compare. Requests are applied to it.</p>`:`
-      ${a.kind==='evo'?`<p class="warn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 9v5M12 17.5v.5"/></svg><span>Evo support is experimental: field meanings are inferred from the file format, not official docs. Verify the result on the in-game setup screen before racing it.</span></p>`:''}
-      <div class="fix-grid">${FIXES.map(f=>`
-        <button class="fix-card ${curFix===f.id?'on':''}" data-fx="${f.id}"><h4>${f.name}</h4><p>${f.d}</p></button>`).join('')}
-      </div>
-      ${preview?(preview.rows.length?`
-        <table class="diff"><tr><th></th><th>Change</th><th>Before</th><th>After</th><th>Why</th></tr>
-        ${preview.rows.map((r,i)=>`<tr>
-          <td><input type="checkbox" data-row="${i}" ${r.on?'checked':''}></td>
-          <td>${esc(r.label)} ${chip(r.t)}${confChip(r.conf)}${r.atMin?' <span class="chip min">at minimum</span>':''}</td>
-          <td class="num">${r.before}</td><td class="num">${r.after}</td>
-          <td style="color:var(--muted);font-size:13px">${r.why}</td></tr>`).join('')}
-        </table>
-        <div class="eng-actions">
-          <button class="btn primary" id="btnSave">Save as new setup</button>
-          <button class="btn" id="btnCopyFix">Copy for AI</button>
-        </div>
-        <p class="eng-status" id="saveMsg"></p>`:`<p class="eng-empty">This request has no applicable fields in the selected setup.</p>`):''}`}
+      ${v?`
+      <p class="does" style="margin-bottom:12px">Nudge any setting with the ◄ ► buttons above, or pick handling problems below, grouped by where in the corner they happen. Pick as many as you like and click one again to drop it. Everything collects in Pending changes until you save, and applies to the setup you're viewing. Most requests move a setting one click.</p>
+      ${v.kind==='evo'?`<p class="warn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 9v5M12 17.5v.5"/></svg><span>Evo support is experimental: field meanings are inferred from the file format, not official docs. Verify the result on the in-game setup screen before racing it.</span></p>`:''}
+      ${groupedFixes(FIXES, f=>`<button class="fix-card ${selFixes.includes(f.id)?'on':''}" data-fx="${f.id}"><h4>${f.name}</h4><p>${f.d}</p></button>`)}
+      <h4 class="fix-sub" id="pendingHead">Pending changes</h4>
+      ${lastSaveMsg?`<p class="eng-status">${lastSaveMsg}</p>`:''}
+      ${preview&&preview.rows.length?renderPending():'<p class="eng-empty">No changes staged yet. Nudge a setting or pick a problem above.</p>'}`:`<p class="eng-empty">Load a setup above. Requests apply to the setup you're viewing.</p>`}
     </section>
 
     <section id="engFuel">
@@ -2353,7 +2451,7 @@ function renderEng(){
       </div>
     </section>
 
-    <p class="footnote">One request at a time, then drive it. The game clamps any out-of-range value safely on load. Evo labels marked "likely" or "guess" reflect decoding confidence. Cross-check a few against the in-game setup screen and they can be promoted to confirmed.</p>
+    <p class="footnote">Evo labels marked "likely" or "guess" reflect decoding confidence. Cross-check a few against the in-game setup screen and they can be promoted to confirmed.</p>
   `;
 
   const bf=document.getElementById('btnFolder'); if(bf) bf.onclick=pickFolder;
@@ -2364,41 +2462,36 @@ function renderEng(){
     if(ok) renderEng();
   };
   const fi=document.getElementById('fileInput');
-  const bfi=document.getElementById('btnFiles'); if(bfi) bfi.onclick=()=>fi.click();
+  const bfi=document.getElementById('btnFiles'); if(bfi) bfi.onclick=()=>{ if(window.SetupRippleDir && window.SetupRippleDir.addFiles) addFilesNative(); else fi.click(); };
   if(fi) fi.onchange=()=>pickFiles(fi);
   const bc=document.getElementById('btnClear'); if(bc) bc.onclick=()=>{
-    setups=[]; selA=-1; selB=-1; curFix=null; preview=null; gameFilter='all';
+    setups=[]; selA=-1; selB=-1; selView=-1; pendingStore.clear(); resetStaged(); lastSaveMsg=''; gameFilter='all';
     buildNav(); renderEng();
   };
   main.querySelectorAll('[data-gf]').forEach(b=>b.onclick=()=>{
-    gameFilter=b.dataset.gf; selA=-1; selB=-1; curFix=null; preview=null; renderEng();
+    gameFilter=b.dataset.gf; selA=-1; selB=-1;
+    const vis=visibleSetups(); if(selView>=0 && !vis.some(x=>x.i===selView)) switchView(vis.length?vis[0].i:-1);
+    renderEng();
   });
-  main.querySelectorAll('[data-vp]').forEach(b=>b.onclick=()=>{
-    engPage=b.dataset.vp; renderEng();
-  });
+  main.querySelectorAll('[data-vp]').forEach(b=>b.onclick=()=>{ engPage=b.dataset.vp; renderEng(); });
   main.querySelectorAll('.nbtn[data-loc]').forEach(b=>b.onclick=()=>{
-    try{ const loc=JSON.parse(decodeURIComponent(b.dataset.loc));
-      nudge(loc, b.dataset.lbl, +b.dataset.d);
-    }catch(e){ console.warn('nudge parse failed', e); }
+    try{ const loc=JSON.parse(decodeURIComponent(b.dataset.loc)); nudge(loc, b.dataset.lbl, +b.dataset.d); }
+    catch(e){ console.warn('nudge parse failed', e); }
   });
-  { const bs=document.getElementById('btnSaveNudge'); if(bs) bs.onclick=saveNudged;
-    const bc=document.getElementById('btnClearNudge'); if(bc) bc.onclick=clearNudges; }
-  const sV=document.getElementById('selView'); if(sV) sV.onchange=e=>{selView=+e.target.value;engPage=engPage||'tyres';renderEng();};
-  const sA=document.getElementById('selA'); if(sA) sA.onchange=e=>{selA=+e.target.value;curFix=null;preview=null;renderEng();};
-  const sB=document.getElementById('selB'); if(sB) sB.onchange=e=>{selB=+e.target.value;renderEng();};
-  const cd=document.getElementById('btnCopyDiff'); if(cd) cd.onclick=()=>{copyForAI('diff');cd.textContent='Copied ✓';};
+  const sV=document.getElementById('selView'); if(sV) sV.onchange=e=>{ lastSaveMsg=''; switchView(+e.target.value); engPage=engPage||'tyres'; renderEng(); };
+  const sA=document.getElementById('selA'); if(sA) sA.onchange=e=>{ selA=+e.target.value; renderEng(); };
+  const sB=document.getElementById('selB'); if(sB) sB.onchange=e=>{ selB=+e.target.value; renderEng(); };
+  { const c=document.getElementById('btnCopyCmp'); if(c) c.onclick=()=>copyText(compareText(),c); }
   main.querySelectorAll('.fix-card').forEach(c=>c.onclick=()=>{
-    curFix=c.dataset.fx;
-    preview=buildPreview(FIXES.find(f=>f.id===curFix));
-    renderEng();
-    document.getElementById('engFix').scrollIntoView({behavior:'smooth'});
+    const id=c.dataset.fx, i=selFixes.indexOf(id);
+    if(i>=0) selFixes.splice(i,1); else selFixes.push(id);
+    lastSaveMsg=''; renderEng();
   });
-  main.querySelectorAll('input[data-row]').forEach(cb=>cb.onchange=()=>{
-    preview.rows[+cb.dataset.row].on=cb.checked;
-    renderEng();
-  });
-  const bs=document.getElementById('btnSave'); if(bs) bs.onclick=saveResult;
-  const cf=document.getElementById('btnCopyFix'); if(cf) cf.onclick=()=>{copyForAI('fix');cf.textContent='Copied ✓';};
+  main.querySelectorAll('.pend-x').forEach(b=>b.onclick=()=>removeRow(b.dataset.x));
+  { const s1=document.getElementById('btnSaveEdit'); if(s1) s1.onclick=saveEdited;
+    const s2=document.getElementById('btnClearEdit'); if(s2) s2.onclick=()=>{ resetStaged(); lastSaveMsg=''; renderEng(); };
+    const s3=document.getElementById('btnCopyEdit'); if(s3) s3.onclick=()=>copyText(changeListText(),s3);
+    const g=document.getElementById('goPending'); if(g) g.onclick=()=>{ const h=document.getElementById('pendingHead'); if(h) h.scrollIntoView({behavior:'smooth'}); }; }
 
   // fuel calculator
   function readFuel(){
@@ -2414,8 +2507,10 @@ function renderEng(){
     const el=document.getElementById(id); if(el){ el.oninput=readFuel; el.onchange=readFuel; }
   });
   renderFuelOut();
+
   try{ applyCornerDiagrams(main); }catch(e){ console.warn('decorate failed',e); }
 }
+
 
 function parseLapTime(s){
   if(!s) return null;
@@ -2513,20 +2608,60 @@ function spReference(){
 }
 // Bono loads its own setup name list. Independent of the Engineer tab.
 // Reuses the same bridge but only keeps the relPath labels (names, not file data).
+/* AC Evo setups are binary, so Bono can't read them. Setup Ripple decodes them, so hand Bono the
+   decoded values as text. Laid out by the in-game tab names, with decoding confidence marked. */
+function evoDecodedText(s){
+  if(!s||!s.flat) return '';
+  const out=[];
+  for(const pg of EVO_PAGES){
+    const lines=[];
+    for(const g of pg.groups){
+      const keys=g.corner ? g.keys.flatMap(t=>EVO_CORNERS.map((c,i)=>t.replace('[C]','['+i+']'))) : g.keys;
+      for(const k of keys){
+        const n=s.flat[k]; if(!n||typeof n.v!=='number') continue;
+        const m=EVO_MAP[k];
+        lines.push('- '+(m?m.l:k)+': '+fmt(n.v)+(m&&(m.conf==='likely'||m.conf==='guess')?' ('+m.conf+')':'')+(isPerCarEvo(k)?' (the size of one click differs per car)':''));
+      }
+    }
+    if(lines.length) out.push(pg.name+':\n'+lines.join('\n'));
+  }
+  return out.join('\n');
+}
+/* Background for a question about an Evo setup: the one picked in the setup picker, plus any Evo
+   setup whose name the question mentions. At most two, to keep it short. */
+function aiEvoContext(text){
+  const t=String(text||'').toLowerCase();
+  const picked=[];
+  const sel=spSetup?aiSetups.find(x=>x.car===spCar&&x.track===spTrack&&x.setup===spSetup):null;
+  if(sel&&sel.decoded) picked.push(sel);
+  for(const s of aiSetups){
+    if(!s.decoded||picked.includes(s)) continue;
+    const base=s.setup.replace(/\.[^.]+$/,'').toLowerCase();
+    if(base.length>=3 && t.includes(base)) picked.push(s);
+  }
+  const shown=picked.slice(0,2);
+  const note='AC Evo setup files (.carsetup) are binary, so do not try to open, decode or edit them. Setup Ripple has already decoded the values for you. You can advise only: give the changes you recommend as a short list (setting, direction, rough amount) that the driver can stage in the Engineer tab or make in-game. Caster and bumpstop values are recalculated by the game, so do not recommend changing them directly.';
+  if(!shown.length){
+    return (/\.carsetup|\.setup\b/.test(t) && aiSetups.some(x=>x.decoded))
+      ? note+' This question mentions an Evo file but none of the decoded setups matched it. Ask the driver to pick the setup in the setup picker above the chat.' : '';
+  }
+  return note+'\n\n'+shown.map(x=>'Decoded values for "'+x.relPath+'" ('+x.car+'):\n'+x.decoded).join('\n\n');
+}
+
 async function aiPickFolder(){
   try{
     if(window.SetupRippleDir){
-      const files = await window.SetupRippleDir.pick();
+      const files = await window.SetupRippleDir.pick(lastDir());
       aiSetups = files.map(f=>{
         const segs=String(f.relPath||f.name||'').split(' / ').map(s=>s.trim()).filter(Boolean);
         const setup=segs.length?segs[segs.length-1]:(f.name||'');
         const track=segs.length>=2?segs[segs.length-2]:'';
-        let car='';
+        let car='', decoded='';
         try{
-          if(f.isEvo && f.buffer){ const s=loadEvo(f.name,f.name,f.buffer,null); car=(s&&s.car)?s.car:(f.name||'').replace(/\.[^.]+$/,''); }
+          if(f.isEvo && f.buffer){ const s=loadEvo(f.name,f.name,f.buffer,null); car=(s&&s.car)?s.car:(f.name||'').replace(/\.[^.]+$/,''); decoded=evoDecodedText(s); }
           else if(f.text!=null){ const j=JSON.parse(f.text); car=j.carName||''; }
         }catch(e){}
-        return { car:car||'Unknown car', track, setup, relPath:f.relPath||f.name };
+        return { car:car||'Unknown car', track, setup, relPath:f.relPath||f.name, decoded };
       }).filter(s=>s.setup).sort((a,b)=>a.setup.localeCompare(b.setup));
     }else if(window.showDirectoryPicker){
       const root=await window.showDirectoryPicker();
@@ -2539,12 +2674,12 @@ async function aiPickFolder(){
             const relPath=(prefix?prefix+' / ':'')+name;
             const segs=relPath.split(' / ').map(s=>s.trim()).filter(Boolean);
             const track=segs.length>=2?segs[segs.length-2]:'';
-            let car='';
+            let car='', decoded='';
             try{ const file=await h.getFile();
-              if(/\.(carsetup|setup)$/i.test(name)){ const buf=await file.arrayBuffer(); const s=loadEvo(name,name,buf,null); car=(s&&s.car)?s.car:name.replace(/\.[^.]+$/,''); }
+              if(/\.(carsetup|setup)$/i.test(name)){ const buf=await file.arrayBuffer(); const s=loadEvo(name,name,buf,null); car=(s&&s.car)?s.car:name.replace(/\.[^.]+$/,''); decoded=evoDecodedText(s); }
               else{ const j=JSON.parse(await file.text()); car=j.carName||''; }
             }catch(e){}
-            list.push({ car:car||'Unknown car', track, setup:name, relPath });
+            list.push({ car:car||'Unknown car', track, setup:name, relPath, decoded });
           }
         }
       }
@@ -2642,6 +2777,7 @@ function renderAI(){
     return;
   }
   // State 4. Ready: the chat surface
+  const draftText=aiDraft; aiDraft='';
   main.innerHTML=`
     <div class="crumb">Bono AI · connected</div>
     <div class="title-row"><h2>Bono AI</h2></div>
@@ -2664,11 +2800,11 @@ function renderAI(){
            <span class="sp-hint">Open your top-level setups folder (ACC: <b>Setups</b> · AC Evo: <b>Car Setups</b>) to pick a setup by car, track and name below. This is just a naming aid. Bono can already read your files; it makes clear which one you mean.</span>`
       }</div>
       <div class="chat-tools">
-        <label title="When off (default), Bono can read and advise but never changes files without you ticking this first."><input type="checkbox" id="aiWrite" ${aiAllowWrite?'checked':''}> Allow Bono to edit setup files</label>
+        <label title="When off (default), Bono can read and advise but never changes files without you ticking this first. Bono can only edit ACC files (.json). AC Evo files are binary, so for those Bono advises and you make the changes in the Engineer tab or in-game."><input type="checkbox" id="aiWrite" ${aiAllowWrite?'checked':''}> Allow Bono to edit setup files <span class="tools-note">(ACC only. Evo files are protected.)</span></label>
       </div>
       <div class="chat-input">
-        <textarea id="aiInput" rows="2" placeholder="Ask your race engineer…" ${aiBusy?'disabled':''}></textarea>
-        <button class="btn primary" id="aiSend" ${aiBusy?'disabled':''}>${aiBusy?'…':'Send'}</button>
+        <textarea id="aiInput" rows="2" placeholder="Ask your race engineer…" ${aiBusy?'disabled':''}>${esc(draftText)}</textarea>
+        ${aiBusy?`<button class="btn stop" id="aiStop" title="Stop the reply. Your question goes back in the box so you can edit it.">Stop</button>`:`<button class="btn primary" id="aiSend">Send</button>`}
       </div>
     </div>`;
 
@@ -2679,10 +2815,11 @@ function renderAI(){
   const send=document.getElementById('aiSend');
   const doSend=()=>{ if(input && input.value.trim()) aiSendMsg(input.value.trim()); };
   if(send) send.onclick=doSend;
+  const stopBtn=document.getElementById('aiStop'); if(stopBtn) stopBtn.onclick=aiStop;
   if(input){
     input.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); doSend(); } };
     input.oninput=()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; };
-    if(!aiBusy) input.focus();
+    if(!aiBusy){ input.focus(); if(draftText){ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; input.select(); } }
   }
   main.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>aiSendMsg(b.dataset.ex));
   // setup picker wiring (Bono-independent)
@@ -2712,8 +2849,10 @@ function renderAI(){
 function msgHTML(m){
   if(m.role==='user') return `<div class="msg user">${esc(m.text)}</div>`;
   if(m.role==='err') return `<div class="msg err">${esc(m.text)}</div>`;
-  return `<div class="msg ai"><div class="who">Bono</div>${m.streaming&&!m.text?`<span class="typing"><span></span><span></span><span></span></span>`:esc(m.text)}</div>`;
+  return `<div class="msg ai"><div class="who">Bono</div>${m.streaming&&!m.text?`<span class="typing"><span></span><span></span><span></span></span>`:esc(m.text)}${m.stopped?'<span class="stopped">Stopped</span>':''}</div>`;
 }
+
+function aiStop(){ const b=AI(); if(b && typeof b.stop==='function') b.stop(); }
 
 function aiSendMsg(text){
   const bridge=AI();
@@ -2726,12 +2865,23 @@ function aiSendMsg(text){
 
   const finish=()=>{ aiMsg.streaming=false; aiBusy=false; renderAI(); };
   let settled=false;
+  // Extra background for Bono (decoded AC Evo values). It rides along with the question but is
+  // never shown in the chat.
+  const context=(typeof aiEvoContext==='function')?aiEvoContext(text):'';
 
   try{
     const ret=bridge.send(text,{
       allowWrite:aiAllowWrite,
+      context,
       onChunk:(t)=>{ aiMsg.text+=t; if(mode==='ai'){ const l=document.getElementById('chatLog'); renderAI(); } },
       onDone:(full)=>{ if(settled) return; settled=true; if(typeof full==='string'&&full) aiMsg.text=full; finish(); },
+      onStopped:(full)=>{ if(settled) return; settled=true;
+        if(typeof full==='string'&&full) aiMsg.text=full;
+        aiMsg.streaming=false; aiBusy=false;
+        if(aiMsg.text.trim()) aiMsg.stopped=true;                       // keep what Bono had said so far
+        else{ const i=aiMessages.indexOf(aiMsg); if(i>0) aiMessages.splice(i-1,2); }   // nothing came back: drop the exchange
+        aiDraft=text;                                                    // question back in the box, selected, ready to edit
+        if(mode==='ai') renderAI(); },
       onError:(msg)=>{ if(settled) return; settled=true; aiMessages.pop(); aiMessages.push({role:'err',text:msg||'Something went wrong talking to Claude Code.'}); aiBusy=false; aiMsg.streaming=false; renderAI(); }
     });
     // Fallback: send() returned a Promise of the full reply instead of streaming

@@ -161,6 +161,18 @@
   .chip.loose{color:var(--loose);border-color:var(--loose)}
   .chip.min{color:var(--amber);border-color:var(--amber)}
   .fix-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:18px}
+  .req-group-h{display:flex;align-items:baseline;gap:10px;margin:16px 0 8px}
+  .req-group-h span{font-family:var(--disp);font-weight:600;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--lbl-hi)}
+  .req-group-h em{font-style:normal;font-family:var(--body);font-size:13px;color:var(--lbl)}
+  .req-group-h::after{content:'';flex:1;height:1px;background:var(--line);align-self:center}
+  .req-group .fix-grid{margin-bottom:6px}
+  .fix-card.on{border-color:var(--amber);background:var(--well);box-shadow:inset 0 2px 6px rgba(0,0,0,.8),inset 0 -2px 0 var(--amber)}
+  .pend-x{background:none;border:1px solid var(--line);color:var(--lbl);border-radius:4px;width:22px;height:22px;line-height:1;cursor:pointer;font-size:14px;padding:0}
+  .pend-x:hover{border-color:var(--amber);color:#fff}
+  .cmp-why{color:var(--lbl);font-size:13px}
+  .eng-staged{font-family:var(--body);font-size:13.5px;color:var(--lbl);margin:-6px 0 12px}
+  .eng-staged b{color:var(--loose)}
+  .linkbtn{background:none;border:0;padding:0;color:var(--navy-txt);font:inherit;cursor:pointer;text-decoration:underline}
   .fix-card{
     text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;
     padding:14px;cursor:pointer;color:var(--text);font-family:var(--body);
@@ -208,7 +220,6 @@
     font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px;
   }
-  .eng-lr{font-size:9px;letter-spacing:.08em;color:var(--amber);border:1px solid var(--amber);border-radius:99px;padding:1px 6px}
   /* row: label flexes, everything else sits in a no-shrink control cluster that wraps as a unit */
   .eng-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
   .eng-row:last-child{border-bottom:none}
@@ -533,7 +544,7 @@
     color:var(--lbl-hi);display:flex;align-items:center;gap:10px;margin:18px 0 6px;
   }
   .eng-group h4::after,.vgroup h4::after{content:'';flex:1;height:1px;background:var(--line)}
-  .eng-lr{font-size:11px;letter-spacing:.1em;color:var(--lbl);font-weight:600}
+  .eng-lr{font-size:11px;letter-spacing:.1em;color:var(--lbl);font-weight:600;border:0;padding:0}
 
   /* rows */
   .eng-row,.vrow{border-bottom:1px solid #262626;padding:9px 0;align-items:center}
@@ -582,18 +593,6 @@
   .fix-card h4{font-family:var(--disp);font-weight:700;font-size:14px;text-transform:uppercase;color:var(--text);margin:0 0 4px}
   .fix-card p{font-family:var(--body);font-size:13.5px;color:var(--prose);line-height:1.5;margin:0}
 
-  /* ── corner diagram (Kunos: four independent corners) ── */
-  .cd{display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:auto auto;gap:10px 16px;align-items:center;justify-items:center;max-width:640px;margin:6px auto 4px}
-  .cd .vcell{flex-direction:column;align-items:flex-start;gap:5px}
-  .cd .vcell.fl,.cd .vcell.rl{justify-self:end;align-items:flex-end}
-  .cd .vcell.fr,.cd .vcell.rr{justify-self:start}
-  .cd .vcell .cd-val{display:inline-flex;align-items:center;gap:6px}
-  .vrow.has-cd{display:block}
-  .vrow.has-cd .vlabel{display:block;margin-bottom:6px}
-  @media (max-width:760px){
-    .cd{grid-template-columns:1fr 1fr;gap:10px}
-    .cd .vcell.fl,.cd .vcell.rl{justify-self:stretch;align-items:flex-start}
-  }
   @media (prefers-reduced-motion:reduce){ .nbtn,#main .btn,.fix-card{transition:none} }
 
   /* ═══════════ Design system v2 : sidebar, Bono, misc ═══════════ */
@@ -686,6 +685,12 @@
   }
   .warn svg{width:16px;height:16px;flex:0 0 16px;margin-top:2px;stroke:var(--loose);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   @media (prefers-reduced-motion:reduce){ .hyper-toggle,.chat-empty .ex button,.setup-picker button{transition:none} }
+
+  /* Bono: stop button and stopped marker */
+  #main .btn.stop{background:var(--well);border-color:var(--amber);color:#fff}
+  #main .btn.stop:hover{background:var(--amber);border-color:var(--amber)}
+  .msg .stopped{display:block;margin-top:8px;font-family:var(--disp);font-weight:600;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--lbl)}
+  .chat-tools .tools-note{color:var(--lbl)}
 </style>
 </head>
 <body>
@@ -693,7 +698,7 @@
   <nav id="nav"></nav>
   <div style="flex:1;min-width:0">
     <div class="mobile-nav">
-      <div class="brand"><h1>Setup Ripple <span>LMU</span></h1><p>Hypercar · LMP · GT3 cause &amp; effect. Le Mans Ultimate · v2.0</p></div>
+      <div class="brand"><h1>Setup Ripple <span>LMU</span></h1><p>Hypercar · LMP · GT3 cause &amp; effect. Le Mans Ultimate · v2.1</p></div>
       <div id="mTabs"></div>
       <select id="mobileSel" aria-label="Choose a setup parameter or symptom"></select>
     </div>
@@ -1117,6 +1122,53 @@ const P = [
   {id:'arbR',why:'Rear roll stiffness changes how loaded each rear wheel is, which changes what the diff sees'}],
  note:'Test preload in the slowest corner on the track. That\'s where its character is loudest.'},
 
+{id:'diffPower',group:'Drivetrain & electronics',name:'Differential power',
+ upLabel:'More lock',downLabel:'Less lock',
+ does:'How hard the rear diff locks under throttle. Preload sets the baseline; power lock adds to it the harder you accelerate. Locked, the diff drives the loaded outside rear harder than the inside one, and that difference swings the car round, most noticeably in first to third gear corners. Some cars show it as a ramp angle, where a lower angle locks more.',
+ up:{bal:1,fx:[
+  'Car rotates more on throttle: the outside rear drives it round',
+  'Inside rear stops spinning up on its own',
+  'Rear can step out as the power goes down, especially in slow corners',
+  'Strong, connected drive once the car is straight'],
+  comp:[
+   {id:'electronics',a:'A click more TC catches the rear if it now steps out on exit'},
+   {id:'springR',a:'Slightly softer rear springs help the rear hook up again'}]},
+ down:{bal:-1,fx:[
+  'Calmer, more stable exits: the rear stays behind you',
+  'Car rotates less on throttle and can push wide on tight exits',
+  'Inside rear can spin up on its own out of slow corners'],
+  comp:[
+   {id:'diffPreload',a:'A touch more preload stops the inside wheel spinning alone'},
+   {id:'arbF',a:'A softer front bar helps the nose keep turning on power'}]},
+ knock:[
+  {id:'diffPreload',why:'Preload is the baseline lock and power adds to it under throttle, so read them together'},
+  {id:'electronics',why:'TC and the diff are both managing wheelspin, so set them as a pair'},
+  {id:'diffCoast',why:'Coast shapes the entry, power the exit. Change one and re-check the other'}],
+ note:'Judge it on the exit of the slowest corner on the track. If the car swings round as you open the throttle, take lock away; if it won\'t turn on power and the inside wheel spins alone, add some.'},
+
+{id:'diffCoast',group:'Drivetrain & electronics',name:'Differential coast',
+ upLabel:'More lock',downLabel:'Less lock',
+ does:'How hard the rear diff locks off the throttle: braking, trail-braking and turn-in. More lock ties the rear wheels together and keeps the rear planted; less lets the car rotate into the corner. Some cars show it as a ramp angle, where a lower angle locks more.',
+ up:{bal:-1,fx:[
+  'Stable, planted rear under braking and turn-in',
+  'Resists rotation on entry and can bring entry understeer',
+  'Calmer over kerbs and bumps off the throttle'],
+  comp:[
+   {id:'brakeBias',a:'A touch of rearward bias gives back some entry rotation'},
+   {id:'arbF',a:'A softer front bar helps the nose turn in'}]},
+ down:{bal:1,fx:[
+  'Car rotates more freely into the corner',
+  'Rear can get nervous or snap under trail-braking',
+  'Rewards a smooth release of the brake'],
+  comp:[
+   {id:'brakeBias',a:'Move bias forward a touch if the rear gets nervous under braking'},
+   {id:'brakeMigration',a:'On Hypercars, migration can steady the rear as you trail off the brake'}]},
+ knock:[
+  {id:'brakeBias',why:'Both shape how the car rotates on entry, so set them as a pair'},
+  {id:'diffPreload',why:'Preload is the baseline and coast lock adds to it off the throttle'},
+  {id:'diffPower',why:'Coast shapes the entry, power the exit'}],
+ note:'Test it in a slow corner with a long braking zone. That is where coast lock shows most.'},
+
 {id:'electronics',group:'Drivetrain & electronics',name:'TC & ABS',
  upLabel:'More assist',downLabel:'Less assist',
  does:'Traction control limits wheelspin; ABS limits lockup. Crucial honesty check: they mask balance problems rather than fix them. If you need lots of TC, the setup (or your right foot) has an exit problem.',
@@ -1245,7 +1297,7 @@ const P = [
  knock:[
   {id:'diffPreload',why:'Front and rear diff behaviour combine into the overall on/off-throttle balance'},
   {id:'motorMap',why:'On front-deploy cars, the diff decides how that power axle behaves'}],
- note:'Only the front-hybrid LMH cars (Ferrari 499P, Toyota GR010/TR010, Peugeot 9X8) drive through the front axle. On LMDh and non-hybrid LMH cars these read as Non-adjustable and the Engineer tab greys them out. The Engineer badge tells you which you have.'},
+ note:'Only the front-hybrid LMH cars (Ferrari 499P, Toyota GR010/TR010, Peugeot 9X8) drive through the front axle. On every other car the front diff does nothing, so the Engineer shows it as Non-adjustable. The Engineer badge tells you which you have.'},
 
 {id:'brakeMigration',group:'Brakes',name:'Brake migration',
  upLabel:'More migration',downLabel:'Less migration',
@@ -1498,12 +1550,14 @@ function parseSVM(text){
 }
 
 // Write back: step a setting's integer by delta, return new text (lossless except changed line)
-function setSettingValue(parsed, section, key, newInt){
+function setSettingValue(parsed, section, key, newInt, newLabel){
   const idx = parsed.settingIndex[section+'.'+key];
   if(idx===undefined) throw new Error('No such setting: '+section+'.'+key);
   const line = parsed.lineMap[idx];
-  // replace only the integer, keep the //comment as-is (game recomputes display on load)
-  const newLine = line.replace(/^([A-Za-z0-9_]+Setting=)([-0-9]+)/, '$1'+newInt);
+  // replace the integer; the game recomputes the label on load, but until then we write an
+  // honest marker so the app (and anyone diffing the file) can see what changed
+  let newLine = line.replace(/^([A-Za-z0-9_]+Setting=)([-0-9]+)/, '$1'+newInt);
+  if(newLabel!==undefined && newLine.indexOf('//')>=0) newLine = newLine.replace(/\/\/.*$/, '//'+newLabel);
   const out = parsed.lineMap.slice();
   out[idx] = newLine;
   return out.join(parsed.eol);
@@ -1648,7 +1702,8 @@ let hideHyper=false;   // Parameters/Diagnose: hide Hypercar-only content when t
 
 /* engineer state */
 let setups=[];
-let selA=-1, selB=-1;
+let selA=-1, selB=-1;   // Compare A/B
+let selView=-1;          // the setup being viewed and edited (independent of Compare)
 
 /* fuel calculator state */
 let fuel={perLap:2.9, lapTime:'1:45', length:20, unit:'laps', formation:true, margin:1};
@@ -1659,6 +1714,7 @@ let aiMessages=[];      // {role:'user'|'ai'|'err', text}
 let aiSetups=[];        // Bono's own loaded setup list (independent of Engineer tab)
 let spCar='', spTrack='', spSetup='';   // Bono setup-picker selections
 let aiBusy=false;
+let aiDraft='';   // a question put back in the box after Stop, so it can be edited and resent
 let aiAllowWrite=false;
 
 const nav = document.getElementById('nav');
@@ -1708,7 +1764,7 @@ function buildNav(){
       <div class="group"><h2>About</h2>
       <button disabled style="cursor:default;color:var(--muted);white-space:normal;line-height:1.5">Asks questions in plain English about your setups. Runs locally via Claude Code.</button></div>`;
   }
-  nav.innerHTML = `<div class="brand"><h1>Setup Ripple <span>LMU</span></h1><p>Hypercar · LMP · GT3 cause &amp; effect. Le Mans Ultimate · v2.0</p></div>` + tabsHTML() + items;
+  nav.innerHTML = `<div class="brand"><h1>Setup Ripple <span>LMU</span></h1><p>Hypercar · LMP · GT3 cause &amp; effect. Le Mans Ultimate · v2.1</p></div>` + tabsHTML() + items;
   nav.querySelectorAll('.mode-tabs button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
   nav.querySelectorAll('.group button[data-id]').forEach(b=>b.onclick=()=>mode==='params'?select(b.dataset.id):selectSym(b.dataset.id));
   const ht=nav.querySelector('.hyper-toggle'); if(ht) ht.onclick=()=>{
@@ -1821,7 +1877,7 @@ function renderParam(){
 
 /* Session-strip context: car + class + architecture from the selected setup, if any. */
 function stripContext(){
-  const a = (typeof selA==='number' && selA>=0) ? setups[selA] : null;
+  const a = (typeof selView==='number' && selView>=0) ? setups[selView] : null;
   if(!a) return '';
   const h = (typeof hyperArch==='function') ? hyperArch(a.car, a.className) : null;
   return (a.car?`<span class="car">${esc(a.car)}</span>`:'') +
@@ -1910,6 +1966,22 @@ function addSetup(name,label,text,saveDir,origin){
 /* Re-read the already-chosen folder with no dialog, so newly saved setups appear.
    Replaces only folder-sourced setups, files added via "Add setup files…" are kept.
    Selections are preserved by name where the setup still exists. */
+/* Each sim remembers its own last folder, so LMU never opens in your Evo folder and vice versa. */
+const DIR_KEY='setupRipple.lastDir.lmu';
+function lastDir(){ try{ return localStorage.getItem(DIR_KEY)||undefined; }catch(e){ return undefined; } }
+function rememberDir(d){ try{ if(d) localStorage.setItem(DIR_KEY,d); }catch(e){} }
+async function addFilesNative(){
+  try{
+    const files=await window.SetupRippleDir.addFiles(lastDir(), ['svm']);
+    if(!files || !files.length) return;
+    let added=0;
+    for(const f of files){ if(isSvmName(f.name) && f.text!=null){ addSetup(f.name, f.relPath, f.text, f.fullPath, 'files'); added++; } }
+    rememberDir(files[0].dir);
+    if(selView<0 && setups.length) switchView(setups.length-added);
+    buildNav(); renderEng();
+  }catch(e){ console.warn('Add files failed:', e); }
+}
+
 async function refreshFolder(){
   if(!(window.SetupRippleDir && window.SetupRippleDir.rescan)) return false;
   let files;
@@ -1917,7 +1989,7 @@ async function refreshFolder(){
   catch(e){ console.warn('Rescan failed:', e); return false; }
   if(!files) return false;
   const nameOf = i => (i>=0 && setups[i]) ? setups[i].label : null;
-  const keepA=nameOf(selA), keepB=nameOf(selB);
+  const keepA=nameOf(selA), keepB=nameOf(selB), keepV=nameOf(selView);
   setups = setups.filter(s=>s.origin!=='folder');
   for(const f of files){
     try{
@@ -1928,8 +2000,8 @@ async function refreshFolder(){
     }catch(e){ console.warn('Skipped', f.relPath, e); }
   }
   const find = lbl => lbl==null ? -1 : setups.findIndex(s=>s.label===lbl);
-  selA=find(keepA); selB=find(keepB);
-  if(selA<0 && setups.length) selA=0;
+  selA=find(keepA); selB=find(keepB); selView=find(keepV);
+  if(selView<0 && setups.length) switchView(0);
   return true;
 }
 
@@ -1938,7 +2010,8 @@ const isSvmName = n => /\.svm$/i.test(n);
 async function pickFolder(){
   try{
     if(window.SetupRippleDir){
-      const files = await window.SetupRippleDir.pick();
+      const files = await window.SetupRippleDir.pick(lastDir());
+      if(window.SetupRippleDir.lastDir) rememberDir(window.SetupRippleDir.lastDir());
       let added=0;
       for(const f of files){
         try{
@@ -1964,7 +2037,7 @@ async function pickFolder(){
       }
       await walk(root,'',0);
     }
-    selA = setups.length>0 ? (selA<0?0:selA) : -1;
+    if(selView<0 && setups.length) switchView(0);
     buildNav(); renderEng();
   }catch(e){ if(e && e.name!=='AbortError') console.warn('Folder load failed:', e); }
 }
@@ -1982,19 +2055,49 @@ function svmField(parsed, section, key){
   const d = (line.match(/\/\/(.*)$/)||[])[1];
   const display = d!==undefined ? d.trim() : '';
   const NON_ADJ = /^(Non-adjustable|Fixed|N\/A|Detached|Standard)$/i;
-  return { value:+v[1], display, adjustable: !NON_ADJ.test(display) && display!=='' };
+  let adjustable = !NON_ADJ.test(display) && display!=='';
+  // "Detached" is click 0 on an anti-roll bar: a real position you can move back up from.
+  if(!adjustable && /AntiSwaySetting$/.test(key) && /^Detached$/i.test(display)) adjustable=true;
+  // Cars store settings they don't have as "0//0%", which reads as adjustable. Front diff only
+  // exists on front-hybrid LMH cars; regen and deploy only on hybrids.
+  if(adjustable && /^FrontDiff/.test(key) && !hasFrontDrive(parsed)) adjustable=false;
+  if(adjustable && /^(RegenerationMapSetting|ElectricMotorMapSetting)$/.test(key) && !isHybridCar(parsed)) adjustable=false;
+  return { value:+v[1], display, adjustable };
+}
+function hasFrontDrive(parsed){
+  if(parsed.className!=='Hypercar') return false;
+  const h = (typeof hyperArch==='function') ? hyperArch(parsed.car, parsed.className) : null;
+  return h ? /front/i.test(h.tag) : true;   // unrecognised Hypercar: trust the file
+}
+
+/* ── Edited-label marker ──
+   .svm lines are "Key=N//label". The game reads N and rewrites the label itself on load,
+   so after we change N the old label is stale. We rewrite edited labels as
+   "D22 S-H (edited, 1 click up)" using only characters the game's own labels already use.
+   A later edit reads the marker and combines, so markers never stack; a net of zero
+   restores the original label. */
+const EDIT_MARK = /^(.*?) \(edited, (\d+) clicks? (up|down)\)$/;
+function parseMarkedLabel(display){
+  const m = String(display||'').match(EDIT_MARK);
+  if(!m) return {base:String(display||''), delta:0};
+  return {base:m[1], delta:(m[3]==='up'?1:-1)*parseInt(m[2],10)};
+}
+function clickPhrase(n){ const a=Math.abs(n); return a+' click'+(a===1?'':'s')+' '+(n>0?'up':'down'); }
+function makeMarkedLabel(base, delta){
+  return delta===0 ? base : base+' (edited, '+clickPhrase(delta)+')';
 }
 
 // Render one field row (label + value), greyed if non-adjustable / missing
 // Render nudge controls (◄ ►) + pending-step badge for an adjustable field.
 // linked=true mirrors L/R. Buttons carry data attrs wired in renderEng.
 function nudgeCtl(section, key, label, linked){
-  const id = section+'.'+key;
-  const pend = pendingEdits[id] ? pendingEdits[id].steps : 0;
+  const e = editFor(section,key), pend = e ? e.steps : 0;
+  const f = selView>=0 ? svmField(setups[selView],section,key) : null;
+  const atFloor = (e ? e.final : (f?f.value:1)) <= 0;
   const badge = `<span class="eng-pend">${pend!==0?(pend>0?'+':'')+pend:''}</span>`;
   const lk = linked?'1':'0';
   return `<span class="eng-nudge">${badge}`+
-    `<button class="nbtn" data-sec="${section}" data-key="${key}" data-lbl="${esc(label)}" data-d="-1" data-lk="${lk}" title="One click down">◄</button>`+
+    `<button class="nbtn" data-sec="${section}" data-key="${key}" data-lbl="${esc(label)}" data-d="-1" data-lk="${lk}" ${atFloor?'disabled title="Already at the first position"':'title="One click down"'}>◄</button>`+
     `<button class="nbtn" data-sec="${section}" data-key="${key}" data-lbl="${esc(label)}" data-d="1" data-lk="${lk}" title="One click up">►</button></span>`;
 }
 
@@ -2061,25 +2164,88 @@ function renderEngPage(parsed, pageId){
 // We never predict the displayed value (per-car step sizes make it unpredictable), we step
 // the integer and let the game show the exact value on load. The UI shows direction + click count.
 
-let pendingEdits = {};   // "SECTION.Key" -> { steps:int, label, section, key }
+let pendingEdits = {};          // manual nudges only: "SECTION.Key" -> { steps, label, section, key, mirror }
+let selPresets = [];            // driver requests picked (click again to drop)
+let excludedEdits = new Set();  // settings removed from the pending list with the x button
+let lastSaveMsg='';   // survives the pending list clearing after a save
+const pendingStore = new Map(); // setup label -> staged changes, kept while you look at another setup
+let curEdits = [];              // computed changes for the setup on screen (rebuilt every render)
 
-function pendingCount(){ return Object.keys(pendingEdits).length; }
+function isArbKey(k){ return /AntiSwaySetting$/.test(k); }
+// Setting names for lists: L/R fields and labels shared by two different settings (front and rear
+// anti-roll bar, toe-in) carry their group, e.g. "Front Chassis: Anti-roll bar".
+const FIELD_LABELS = (()=>{ const m={}, owners={};
+  LMU_PAGES.forEach(pg=>pg.groups.forEach(g=>g.fields.forEach(([sec,key,lbl])=>{ (owners[lbl]=owners[lbl]||new Set()).add(sec+'.'+key); })));
+  LMU_PAGES.forEach(pg=>pg.groups.forEach(g=>g.fields.forEach(([sec,key,lbl])=>{
+    const id=sec+'.'+key; if(m[id]) return;
+    const nm = (g.lr || owners[lbl].size>1) ? (g.title+': '+lbl) : lbl;
+    m[id]=nm; if(/LEFT$/.test(sec)) m[sec.replace(/LEFT$/,'RIGHT')+'.'+key]=nm; })));
+  return m; })();
+function fieldName(section,key){ return FIELD_LABELS[section+'.'+key] || key.replace(/Setting$/,''); }
 
-// Step a field by delta clicks. For L/R linked fields, the caller passes the LEFT section;
-// we also mirror to the matching RIGHT section so the saved file changes both (as in-game link).
-function nudge(section, key, label, delta, linked){
-  const id = section+'.'+key;
-  const cur = pendingEdits[id] ? pendingEdits[id].steps : 0;
-  const steps = cur + delta;
-  if(steps===0){ delete pendingEdits[id]; }
-  else { pendingEdits[id] = { steps, label, section, key }; }
-  // mirror L/R: if this is a LEFT corner field, mirror to RIGHT
-  if(linked && /LEFT$/.test(section)){
-    const rightSec = section.replace(/LEFT$/,'RIGHT');
-    const rid = rightSec+'.'+key;
-    if(steps===0) delete pendingEdits[rid];
-    else pendingEdits[rid] = { steps, label, section:rightSec, key, mirror:true };
+/* Everything staged for one setup, worked out fresh each time: your nudges plus the requests you've
+   picked, per setting. Requests that touch a left corner also change the right, the same way the
+   in-game link and the manual nudges do. Nothing goes below click 0, and a request never takes an
+   anti-roll bar all the way to Detached on its own. */
+function computeEdits(parsed){
+  if(!parsed) return [];
+  const m=new Map();
+  const add=(section,key,delta,src,why,mirror)=>{
+    const id=section+'.'+key; if(excludedEdits.has(id)) return;
+    const f=svmField(parsed,section,key); if(!f||!f.adjustable) return;
+    let e=m.get(id);
+    if(!e){ e={id,section,key,name:fieldName(section,key),manual:0,preset:0,why:[],base:f.value,display:f.display,mirror:!!mirror}; m.set(id,e); }
+    e[src]+=delta; if(why && !e.why.includes(why)) e.why.push(why);
+  };
+  for(const e of Object.values(pendingEdits)) add(e.section,e.key,e.steps,'manual','Your nudge',e.mirror);
+  for(const pid of selPresets){
+    const fix=PRESET_FIXES.find(x=>x.id===pid); if(!fix) continue;
+    fix.nudges.forEach(n=>{
+      const d = typeof n.deltaFn==='function' ? n.deltaFn(parsed) : n.delta; if(!d) return;
+      add(n.section,n.key,d,'preset',n.label,false);
+      if(/LEFT$/.test(n.section)) add(n.section.replace(/LEFT$/,'RIGHT'),n.key,d,'preset',n.label,true);
+    });
   }
+  const out=[];
+  for(const e of m.values()){
+    let fin=e.base+e.manual+e.preset;
+    if(isArbKey(e.key) && e.preset<0 && e.base+e.manual>=1 && fin<1){ fin=1; e.held=true; }
+    if(fin<0){ fin=0; e.atMin=true; }
+    e.final=fin; e.steps=fin-e.base;
+    if(e.steps!==0 || e.atMin || e.held) out.push(e);
+  }
+  return out;
+}
+function editFor(section,key){ return curEdits.find(e=>e.section===section && e.key===key); }
+function pendingCount(){ return curEdits.filter(e=>!e.mirror && e.steps!==0).length; }
+function hasStaged(){ return Object.keys(pendingEdits).length>0 || selPresets.length>0 || excludedEdits.size>0; }
+
+// Staged changes belong to one setup. Switching away sets them aside; switching back brings them back.
+function switchView(i){
+  const cur=setups[selView];
+  if(cur){ if(hasStaged()) pendingStore.set(cur.label,{pendingEdits,selPresets,excludedEdits}); else pendingStore.delete(cur.label); }
+  selView=i;
+  const nxt=setups[selView], st=nxt&&pendingStore.get(nxt.label);
+  pendingEdits=st?st.pendingEdits:{}; selPresets=st?st.selPresets:[]; excludedEdits=st?st.excludedEdits:new Set();
+  if(nxt) pendingStore.delete(nxt.label);
+}
+function resetStaged(){ pendingEdits={}; selPresets=[]; excludedEdits=new Set(); }
+
+// Manual nudge by one click. Left corner fields also move the right, as the game links them.
+function nudge(section, key, label, delta, linked){
+  lastSaveMsg='';
+  const bump=(sec,mirror)=>{ const id=sec+'.'+key; excludedEdits.delete(id);
+    const cur = pendingEdits[id] ? pendingEdits[id].steps : 0, steps=cur+delta;
+    if(steps===0) delete pendingEdits[id]; else pendingEdits[id]={steps,label,section:sec,key,mirror}; };
+  bump(section,false);
+  if(linked && /LEFT$/.test(section)) bump(section.replace(/LEFT$/,'RIGHT'),true);
+  renderEng();
+}
+function togglePreset(id){ lastSaveMsg=''; const i=selPresets.indexOf(id); if(i>=0) selPresets.splice(i,1); else selPresets.push(id); renderEng(); }
+function removeEdit(id){
+  lastSaveMsg='';
+  const ids=[id]; if(/LEFT\./.test(id)) ids.push(id.replace('LEFT.','RIGHT.'));
+  ids.forEach(x=>{ delete pendingEdits[x]; excludedEdits.add(x); });
   renderEng();
 }
 
@@ -2087,16 +2253,18 @@ function nudge(section, key, label, delta, linked){
 function buildEditedSVM(parsed){
   let text = parsed.raw;
   let p = parseSVM(text);
-  for(const id in pendingEdits){
-    const e = pendingEdits[id];
-    const idx = p.settingIndex[id];
+  for(const e of computeEdits(parsed)){
+    if(e.steps===0) continue;
+    const id=e.section+'.'+e.key, idx=p.settingIndex[id];
     if(idx===undefined) continue;
-    const line = p.lineMap[idx];
-    const m = line.match(/=([-0-9]+)/);
-    if(!m) continue;
-    const newInt = parseInt(m[1],10) + e.steps;
-    text = setSettingValue(p, e.section, e.key, newInt);
-    p = parseSVM(text); // re-parse so indices stay valid for next edit
+    const line=p.lineMap[idx];
+    const cur=parseMarkedLabel((line.match(/\/\/(.*)$/)||[])[1]);
+    // click 0 on a bar is the one label we know for certain; otherwise say what changed. A bar coming
+    // back up from Detached has no known label, so call it Connected rather than repeat "Detached".
+    const base = /^Detached$/i.test(cur.base.trim()) ? 'Connected' : cur.base.trim();
+    const label = (isArbKey(e.key) && e.final===0) ? 'Detached' : makeMarkedLabel(base, cur.delta + e.steps);
+    text = setSettingValue(p, e.section, e.key, e.final, label);
+    p = parseSVM(text);
   }
   return text;
 }
@@ -2111,133 +2279,189 @@ function downloadSVM(text, filename){
 }
 
 function saveEdited(){
-  const a = selA>=0 ? setups[selA] : null;
+  const a = selView>=0 ? setups[selView] : null;
   if(!a || !pendingCount()) return;
   const text = buildEditedSVM(a);
-  const base = (a.name||'setup').replace(/\.svm$/i,'');
-  const fileName = base+'_SR.svm';
+  // Never stack suffixes (X_SR_SR) and never overwrite: X_SR, then X_SR2, X_SR3...
+  const base = (a.name||'setup').replace(/\.svm$/i,'').replace(/_SR\d*$/i,'');
+  const dirOf = l => { const i=String(l||'').lastIndexOf(' / '); return i<0?'':String(l).slice(0,i); };
+  const here = dirOf(a.label);
+  const taken = new Set(setups.filter(x=>dirOf(x.label)===here).map(x=>String(x.name||'').toLowerCase()));
+  let n=1, fileName=base+'_SR.svm';
+  while(taken.has(fileName.toLowerCase())){ n++; fileName=base+'_SR'+n+'.svm'; }
   const msg = document.getElementById('saveMsg');
   // Desktop app: save in place beside the original via the bridge. Browser: download.
   if(window.SetupRippleDir && window.SetupRippleDir.save){
-    window.SetupRippleDir.save(a.saveDir||a.fullPath||null, fileName, text).then(res=>{
+    window.SetupRippleDir.save(a.saveDir||a.fullPath||null, fileName, text, false, lastDir()).then(res=>{
       if(res && res.ok){
+        const savedName = res.name || fileName;
         if(msg) msg.textContent = 'Saved to '+res.path+'. It appears in-game when you load it (the game shows the final values).';
         // Pick the new file up straight away so it shows in the dropdowns (issue #1).
-        pendingEdits = {};
-        refreshFolder().then(ok=>{ if(ok){ buildNav(); renderEng();
-          const m2=document.getElementById('saveMsg');
-          if(m2) m2.textContent='Saved to '+res.path+'. Added to your setup list.'; } });
+        resetStaged();
+        refreshFolder().then(()=>{
+          // Carry on working on the file just saved (so further edits build on it). Files added
+          // individually aren't part of the opened folder, so add the saved copy directly.
+          let i = setups.findIndex(x=>String(x.name||'').toLowerCase()===savedName.toLowerCase() && dirOf(x.label)===here);
+          if(i<0){ addSetup(savedName, (here?here+' / ':'')+savedName, text, res.path, a.origin==='folder'?'folder':'files'); i=setups.length-1; }
+          selView=-1; switchView(i);
+          lastSaveMsg='<b>Saved</b> '+esc(savedName)+'. Added to your setup list and selected, so further changes build on it. Your original is untouched.';
+          buildNav(); renderEng(); });
       }else{
         // bridge failed. Fall back to download
         downloadSVM(text, fileName);
-        if(msg) msg.textContent = 'Saved '+fileName+' to your downloads. Drop it into your track\'s setup folder.';
+        lastSaveMsg='<b>Saved</b> '+esc(fileName)+' to your downloads. Drop it into your track\'s setup folder.'; renderEng();
       }
     }).catch(()=>{
       downloadSVM(text, fileName);
-      if(msg) msg.textContent = 'Saved '+fileName+' to your downloads. Drop it into your track\'s setup folder.';
+      lastSaveMsg='<b>Saved</b> '+esc(fileName)+' to your downloads. Drop it into your track\'s setup folder.'; renderEng();
     });
   }else{
     downloadSVM(text, fileName);
-    if(msg) msg.textContent = 'Saved '+fileName+'. Drop it into your track\'s setup folder. The game shows the final values when you load it.';
+    lastSaveMsg='<b>Saved</b> '+esc(fileName)+'. Drop it into your track\'s setup folder. The game shows the final values when you load it.'; renderEng();
   }
 }
 
-function clearEdits(){ pendingEdits = {}; renderEng(); }
+function clearEdits(){ resetStaged(); renderEng(); }
 
 // ── Preset problems: handling complaint -> setting nudges ──
 // Each fix nudges integer steps. Direction respects front/rear axle effect.
 // Only applies fixes whose target fields are ADJUSTABLE in the loaded car (checked at render).
+/* One click of brake pressure is worth a different amount on each car (about 1% on a Hypercar,
+   nearly 7% on an LMP3). The label carries the percentage and pressure runs linearly from zero on
+   every car checked, so work out how many clicks make roughly 5% here. On a file we've already
+   edited the label still holds the original percentage, so use the original click position. */
+function brakePressureClicks5(parsed){
+  const f=svmField(parsed,'CONTROLS','BrakePressureSetting');
+  if(!f || !f.adjustable || f.value<=0) return 0;
+  const L=parseMarkedLabel(f.display), m=L.base.match(/\((\d+(?:\.\d+)?)%\)/);
+  const origIdx=f.value-L.delta;
+  if(!m || origIdx<=0) return -1;
+  const pctPerClick=parseFloat(m[1])/origIdx;
+  return -Math.min(f.value, Math.max(1, Math.round(5/pctPerClick)));
+}
+const REQ_GROUPS=[
+  ['entry','Entry','Braking and turn-in'],
+  ['mid','Mid-corner','Holding the line through the middle'],
+  ['exit','Exit','Getting back on the power'],
+  ['fast','High speed','Aero: felt in fast corners and on the straights'],
+  ['hybrid','Hybrid','Hypercar energy systems']];
+function groupedFixes(items, card){
+  const known=new Set(REQ_GROUPS.map(g=>g[0]));
+  const out=REQ_GROUPS.map(([g,t,sub])=>{ const its=items.filter(x=>x.group===g); if(!its.length) return '';
+    return `<div class="req-group"><div class="req-group-h"><span>${t}</span><em>${sub}</em></div><div class="fix-grid">${its.map(card).join('')}</div></div>`; }).join('');
+  const rest=items.filter(x=>!known.has(x.group));
+  return out + (rest.length?`<div class="fix-grid">${rest.map(card).join('')}</div>`:'');
+}
 const PRESET_FIXES = [
-  { id:'entry_under', name:'Less understeer on entry', desc:'Frees the car to rotate under trail-braking.',
+  { id:'entry_under', group:'entry', name:'Less understeer on entry', desc:'Frees the car to rotate under trail-braking.',
     nudges:[
       {section:'CONTROLS', key:'RearBrakeSetting', label:'Shift brake bias rearward. The entry rotation tool', delta:1},
       {section:'DRIVELINE', key:'DiffCoastSetting', label:'Less coast diff lock off-throttle', delta:-1},
       {section:'SUSPENSION', key:'FrontAntiSwaySetting', label:'Softer front bar for mid-corner support', delta:-1},
     ]},
-  { id:'entry_snap', name:'Calmer rear on entry', desc:'Steadies a rear that steps out under trail-braking.',
+  { id:'entry_snap', group:'entry', name:'Calmer rear on entry', desc:'Steadies a rear that steps out under trail-braking.',
     nudges:[
       {section:'CONTROLS', key:'RearBrakeSetting', label:'Shift brake bias forward for braking stability', delta:-1},
       {section:'DRIVELINE', key:'DiffCoastSetting', label:'More coast lock steadies the rear off-throttle', delta:1},
     ]},
-  { id:'mid_under', name:'Less understeer mid-corner', desc:'More mechanical front grip at all speeds.',
+  { id:'brake_lock', group:'entry', noAbs:true, name:'Locking the fronts under braking', desc:'For cars without ABS. Lowers brake pressure by about 5%, worked out for this car.',
+    nudges:[
+      {section:'CONTROLS', key:'BrakePressureSetting', label:'About 5% less brake pressure keeps the fronts under the lock point', deltaFn:brakePressureClicks5},
+    ]},
+  { id:'mid_under', group:'mid', name:'Less understeer mid-corner', desc:'More mechanical front grip at all speeds.',
     nudges:[
       {section:'SUSPENSION', key:'FrontAntiSwaySetting', label:'The cleanest mid-corner balance tool', delta:-1},
       {section:'FRONTLEFT', key:'SpringSetting', label:'Softer front spring (L/R linked)', delta:-1},
     ]},
-  { id:'mid_over', name:'Less oversteer mid-corner', desc:'Calms a rear that edges wide at steady state.',
+  { id:'mid_over', group:'mid', name:'Less oversteer mid-corner', desc:'Calms a rear that edges wide at steady state.',
     nudges:[
       {section:'SUSPENSION', key:'RearAntiSwaySetting', label:'Softer rear bar', delta:-1},
       {section:'REARLEFT', key:'SpringSetting', label:'Softer rear spring (L/R linked)', delta:-1},
     ]},
-  { id:'fast_under', name:'Less understeer in fast corners', desc:'Pulls aero balance forward, speed-dependent fix.',
+  { id:'fast_under', group:'fast', name:'Less understeer in fast corners', desc:'Pulls aero balance forward, speed-dependent fix.',
     nudges:[
       {section:'REARWING', key:'RWSetting', label:'A step less wing (top speed bonus)', delta:-1},
       {section:'FRONTLEFT', key:'RideHeightSetting', label:'Lower front = more rake = more front aero', delta:-1},
     ]},
-  { id:'fast_over', name:'More stability in fast corners', desc:'Pushes aero balance rearward for confidence at speed.',
+  { id:'fast_over', group:'fast', name:'More stability in fast corners', desc:'Pushes aero balance rearward for confidence at speed.',
     nudges:[
       {section:'REARWING', key:'RWSetting', label:'A step more wing. The biggest single fix', delta:1},
       {section:'REARLEFT', key:'RideHeightSetting', label:'Slightly less rake', delta:-1},
     ]},
-  { id:'traction', name:'More traction on exit', desc:'Helps the rear hook up out of slow corners.',
+  { id:'top_speed', group:'fast', name:'More top speed', desc:'For long straights like Monza. One click less wing. If the rear goes light at speed, lower the rear a touch to take out some rake.',
+    nudges:[
+      {section:'REARWING', key:'RWSetting', label:'One click less rear wing: less drag, less rear grip in fast corners', delta:-1},
+    ]},
+  { id:'traction', group:'exit', name:'More traction on exit', desc:'Helps the rear hook up out of slow corners.',
     nudges:[
       {section:'REARLEFT', key:'SpringSetting', label:'Softer rear spring (L/R linked)', delta:-1},
       {section:'SUSPENSION', key:'RearAntiSwaySetting', label:'Softer rear bar keeps the inside rear planted', delta:-1},
-      {section:'DRIVELINE', key:'DiffPowerSetting', label:'Less power lock stops single-wheel spin-up', delta:-1},
+      {section:'DRIVELINE', key:'DiffPowerSetting', label:'Less power lock calms the rear stepping out as the power goes down', delta:-1},
     ]},
-  { id:'power_push', name:'Less push on throttle', desc:'For a front that gives up the moment you accelerate.',
+  { id:'power_push', group:'exit', name:'Less push on throttle', desc:'For a front that gives up the moment you accelerate.',
     nudges:[
-      {section:'DRIVELINE', key:'DiffPowerSetting', label:'More power lock. A locked diff drives straight', delta:1},
+      {section:'DRIVELINE', key:'DiffPowerSetting', label:'More power lock drives the outside rear harder and helps the car rotate on throttle', delta:1},
       {section:'REARLEFT', key:'SpringSetting', label:'Stiffer rear spring limits squat lifting the nose', delta:1},
     ]},
   /* ── LMU-specific extras (Hypercar/hybrid. Auto-hidden on cars without these fields) ── */
-  { id:'hybrid_brake', name:'Unsettled braking on a hybrid', desc:'Regen tugs the car as you trail off the brake.',
+  { id:'hybrid_brake', group:'hybrid', name:'Unsettled braking on a hybrid', desc:'Regen tugs the car as you trail off the brake.',
     nudges:[
       {section:'ENGINE', key:'RegenerationMapSetting', label:'Lower regen for a cleaner brake feel', delta:-1},
     ]},
-  { id:'energy_short', name:'Running out of energy', desc:'Not reaching the next stop on the current plan.',
+  { id:'energy_short', group:'hybrid', name:'Running out of energy', desc:'Not reaching the next stop on the current plan.',
     nudges:[
       {section:'ENGINE', key:'ElectricMotorMapSetting', label:'Gentler deploy map makes the energy last', delta:-1},
       {section:'ENGINE', key:'RegenerationMapSetting', label:'More harvest refills the system', delta:1},
     ]},
 ];
 
-function applyPreset(fix, parsed){
-  fix.nudges.forEach(n=>{
-    const f = svmField(parsed, n.section, n.key);
-    if(f && f.adjustable){
-      const linked = false; // preset targets are central/axle settings, not L/R corner pairs
-      const id=n.section+'.'+n.key;
-      const cur=pendingEdits[id]?pendingEdits[id].steps:0;
-      const steps=cur+n.delta;
-      if(steps===0) delete pendingEdits[id];
-      else pendingEdits[id]={steps, label:n.label, section:n.section, key:n.key};
-    }
-  });
-  renderEng();
-}
 
 // Which preset fixes are applicable (have at least one adjustable target) for this car
+/* Hybrid-only presets. The file alone can't tell us: non-hybrid cars store regen as "0//0%",
+   which reads as adjustable. So gate on class + architecture instead. An unrecognised
+   Hypercar still gets them, since almost every Hypercar is a hybrid. */
+const HYBRID_PRESETS = new Set(['hybrid_brake','energy_short']);
+function isHybridCar(parsed){
+  if(parsed.className!=='Hypercar') return false;
+  const h = (typeof hyperArch==='function') ? hyperArch(parsed.car, parsed.className) : null;
+  return !(h && /non-hybrid/i.test(h.tag));
+}
 function applicablePresets(parsed){
-  return PRESET_FIXES.filter(fix=> fix.nudges.some(n=>{ const f=svmField(parsed,n.section,n.key); return f && f.adjustable; }));
+  return PRESET_FIXES.filter(fix=>{
+    if(HYBRID_PRESETS.has(fix.id) && !isHybridCar(parsed)) return false;
+    if(fix.noAbs && parsed.className==='GT3') return false;   // LMGT3 has ABS
+    return fix.nudges.some(n=>{ const f=svmField(parsed,n.section,n.key); return f && f.adjustable; });
+  });
 }
 
 // Render the pending-edits preview list
+function editTo(e){
+  if(e.held && e.steps===0) return 'held at click 1: requests won\'t detach a bar';
+  if(e.atMin && e.steps===0) return 'at minimum';
+  if(isArbKey(e.key) && e.final===0) return 'Detached';
+  return clickPhrase(e.steps)+(e.atMin?' (at minimum)':'');
+}
 function renderPending(parsed){
-  if(!pendingCount()) return '';
-  const rows = Object.values(pendingEdits).filter(e=>!e.mirror).map(e=>{
-    const dir = e.steps>0 ? '+'+e.steps : ''+e.steps;
-    const f = svmField(parsed, e.section, e.key);
-    const from = f ? f.display : '';
-    return `<tr><td>${esc(e.label||e.key)}</td><td class="cmp-a">${esc(from)}</td><td class="cmp-arrow">${dir} click${Math.abs(e.steps)===1?'':'s'}</td></tr>`;
-  }).join('');
-  return `<table class="cmp-table"><thead><tr><th>Change</th><th>From</th><th>Step</th></tr></thead><tbody>${rows}</tbody></table>
-    <p class="eng-note">The game shows the exact new values when you load the setup. Per-car step sizes mean the app steps the setting, the game finalises the number.</p>
+  const rows=curEdits.filter(e=>!e.mirror);
+  if(!rows.length) return '';
+  const body=rows.map(e=>`<tr><td>${esc(e.name)}</td><td class="cmp-a">${esc(parseMarkedLabel(e.display).base)}</td><td class="cmp-b">${esc(editTo(e))}</td><td class="cmp-why">${esc(e.why.join('; '))}</td><td><button class="pend-x" data-x="${esc(e.id)}" title="Remove this change">×</button></td></tr>`).join('');
+  const n=pendingCount();
+  return `<table class="cmp-table"><thead><tr><th>Change</th><th>From</th><th>To</th><th>Why</th><th></th></tr></thead><tbody>${body}</tbody></table>
+    <p class="eng-note">Moves are in clicks, the same as the in-game buttons, and the game shows the exact value when you load the setup. Anything past the end of a setting's range is stopped at the limit by the game.</p>
     <div class="eng-actions">
-      <button class="btn primary" id="btnSaveEdit">Download fixed setup</button>
+      <button class="btn primary" id="btnSaveEdit" ${n?'':'disabled'}>Save edited setup (${n} change${n===1?'':'s'})</button>
       <button class="btn" id="btnClearEdit">Clear changes</button>
+      <button class="btn" id="btnCopyEdit">Copy change list</button>
     </div>
     <p class="eng-status" id="saveMsg"></p>`;
+}
+function changeListText(){
+  const a=setups[selView]; if(!a) return '';
+  return 'Setup: '+a.name+'\n'+curEdits.filter(e=>!e.mirror).map(e=>'- '+e.name+': '+parseMarkedLabel(e.display).base+' -> '+editTo(e)+' ('+e.why.join('; ')+')').join('\n');
+}
+function copyText(t, btn){
+  const done=()=>{ if(btn){ const w=btn.textContent; btn.textContent='Copied'; setTimeout(()=>{btn.textContent=w;},1200); } };
+  try{ navigator.clipboard.writeText(t).then(done,()=>{}); }catch(e){}
 }
 
 let engPage = 'basic';   // current six-page sub-tab
@@ -2277,7 +2501,11 @@ function decorateEngPage(root){
 }
 
 function renderEng(){
-  const a = selA>=0 ? setups[selA] : null;
+  if(selView<0 && setups.length) switchView(0);
+  if(selA<0 && setups.length) selA=0;
+  if(selB<0 && setups.length>1) selB = selA===0 ? 1 : 0;
+  const a = selView>=0 ? setups[selView] : null;
+  curEdits = computeEdits(a);
   const pageTabs = LMU_PAGES.map(p=>
     `<button class="eng-ptab ${p.id===engPage?'on':''}" data-pg="${p.id}">${esc(p.name)}</button>`
   ).join('');
@@ -2293,7 +2521,7 @@ function renderEng(){
       <div class="eng-actions">
         <button class="btn primary" id="btnFolder" ${hasFS?'':'disabled'}>Open setups folder</button>
         <button class="btn" id="btnFiles">Add setup files…</button>
-        ${(window.SetupRippleDir&&window.SetupRippleDir.canRescan&&window.SetupRippleDir.canRescan())?`<button class="btn" id="btnRefresh" title="Re-read the setups folder to pick up new or changed files">Refresh</button>`:''}
+        ${(window.SetupRippleDir&&window.SetupRippleDir.canRescan)?(window.SetupRippleDir.canRescan()?`<button class="btn" id="btnRefresh" title="Re-read the setups folder to pick up new or changed files">Refresh</button>`:`<button class="btn" id="btnRefresh" disabled title="Open a setups folder first. Refresh re-reads that folder.">Refresh</button>`):''}
         ${setups.length?`<button class="btn" id="btnClear">Clear all</button>`:''}
         <input type="file" id="fileInput" accept=".svm" multiple style="display:none">
       </div>
@@ -2303,10 +2531,11 @@ function renderEng(){
     <section id="engView">
       <h3>2 · View setup</h3>
       ${setups.length?`
-      <div class="selrow"><label>Setup</label><select id="selA">${setupOptions(selA)}</select></div>
+      <div class="selrow"><label>Setup</label><select id="selView">${setupOptions(selView)}</select></div>
       ${a?`<p class="eng-meta">${esc(a.className||'Unknown class')}${a.car?' · '+esc(a.car):''}</p>
       ${(()=>{const h=hyperArch(a.car,a.className); return h?`<div class="eng-arch"><span class="eng-arch-tag">${esc(h.tag)}</span><span class="eng-arch-note"><b>${esc(h.label)}.</b> ${esc(h.note)}</span></div>`:'';})()}
       <div class="eng-ptabs">${pageTabs}</div>
+      ${pendingCount()?`<p class="eng-staged"><b>${pendingCount()}</b> change${pendingCount()===1?'':'s'} staged · <button class="linkbtn" id="goPending">see Pending changes</button></p>`:''}
       ${renderEngPage(a, engPage)}`:''}`:`<p class="eng-empty">Load a setup above to view it page by page.</p>`}
     </section>
 
@@ -2321,11 +2550,11 @@ function renderEng(){
     <section id="engFix">
       <h3>4 · Driver requests</h3>
       ${a?`
-      <p class="does" style="margin-bottom:12px">Nudge any adjustable setting with the ◄ ► buttons on the setup above, or pick a handling problem below and the app stages the usual fixes. Changes collect here as a preview, nothing's written until you download. The app steps the setting by one click at a time and lets the game show the exact value on load (per-car step sizes vary, especially hybrid regen).</p>
-      <div class="fix-grid">
-        ${applicablePresets(a).map(fix=>`<button class="fix-card" data-fix="${fix.id}"><h4>${esc(fix.name)}</h4><p>${esc(fix.desc)}</p></button>`).join('')}
-      </div>
-      ${pendingCount()?`<h4 class="fix-sub">Pending changes</h4>${renderPending(a)}`:'<p class="eng-empty">No changes staged yet. Nudge a setting or pick a problem above.</p>'}`:`<p class="eng-empty">Load and select a setup above. Requests are applied to it.</p>`}
+      <p class="does" style="margin-bottom:12px">Nudge any setting with the ◄ ► buttons above, or pick handling problems below, grouped by where in the corner they happen. Pick as many as you like and click one again to drop it. Everything collects in Pending changes until you save, and applies to the setup you're viewing. Most requests move a setting one click; brake pressure works out roughly 5% for your car.</p>
+      ${groupedFixes(applicablePresets(a), fix=>`<button class="fix-card ${selPresets.includes(fix.id)?'on':''}" data-fix="${fix.id}"><h4>${esc(fix.name)}</h4><p>${esc(fix.desc)}</p></button>`)}
+      <h4 class="fix-sub" id="pendingHead">Pending changes</h4>
+      ${lastSaveMsg?`<p class="eng-status">${lastSaveMsg}</p>`:''}
+      ${pendingCount()?renderPending(a):'<p class="eng-empty">No changes staged yet. Nudge a setting or pick a problem above.</p>'}`:`<p class="eng-empty">Load a setup above. Requests apply to the setup you're viewing.</p>`}
     </section>
 
     <section id="fuelCalc">
@@ -2341,10 +2570,10 @@ function renderEng(){
     br.textContent=was; br.disabled=false;
     if(ok){ buildNav(); renderEng(); }
   };
-  const bfiles=document.getElementById('btnFiles'); if(bfiles) bfiles.onclick=()=>document.getElementById('fileInput').click();
+  const bfiles=document.getElementById('btnFiles'); if(bfiles) bfiles.onclick=()=>{ if(window.SetupRippleDir && window.SetupRippleDir.addFiles) addFilesNative(); else document.getElementById('fileInput').click(); };
   const fi=document.getElementById('fileInput'); if(fi) fi.onchange=onFilePick;
-  const bc=document.getElementById('btnClear'); if(bc) bc.onclick=()=>{ setups=[]; selA=-1; selB=-1; buildNav(); renderEng(); };
-  const sa=document.getElementById('selA'); if(sa) sa.onchange=()=>{ selA=+sa.value; renderEng(); };
+  const bc=document.getElementById('btnClear'); if(bc) bc.onclick=()=>{ setups=[]; selA=-1; selB=-1; selView=-1; pendingStore.clear(); resetStaged(); buildNav(); renderEng(); };
+  const sv=document.getElementById('selView'); if(sv) sv.onchange=()=>{ lastSaveMsg=''; switchView(+sv.value); renderEng(); };
   const ca=document.getElementById('selCmpA'); if(ca) ca.onchange=()=>{ selA=+ca.value; renderEng(); };
   const cb=document.getElementById('selCmpB'); if(cb) cb.onchange=()=>{ selB=+cb.value; renderEng(); };
   document.querySelectorAll('.eng-ptab').forEach(b=>b.onclick=()=>{ engPage=b.dataset.pg; renderEng(); });
@@ -2353,10 +2582,11 @@ function renderEng(){
   document.querySelectorAll('.nbtn').forEach(b=>b.onclick=()=>{
     nudge(b.dataset.sec, b.dataset.key, b.dataset.lbl, +b.dataset.d, b.dataset.lk==='1');
   });
-  document.querySelectorAll('.fix-card').forEach(b=>b.onclick=()=>{
-    const fix=PRESET_FIXES.find(f=>f.id===b.dataset.fix);
-    if(fix && selA>=0) applyPreset(fix, setups[selA]);
-  });
+  document.querySelectorAll('.fix-card').forEach(b=>b.onclick=()=>{ if(selView>=0) togglePreset(b.dataset.fix); });
+  document.querySelectorAll('.pend-x').forEach(b=>b.onclick=()=>removeEdit(b.dataset.x));
+  { const g=document.getElementById('goPending'); if(g) g.onclick=()=>{ const h=document.getElementById('pendingHead'); if(h) h.scrollIntoView({behavior:'smooth'}); }; }
+  { const c=document.getElementById('btnCopyEdit'); if(c) c.onclick=()=>copyText(changeListText(),c); }
+  { const c=document.getElementById('btnCopyCmp'); if(c) c.onclick=()=>copyText(compareText(),c); }
   const bse=document.getElementById('btnSaveEdit'); if(bse) bse.onclick=saveEdited;
   const bce=document.getElementById('btnClearEdit'); if(bce) bce.onclick=clearEdits;
 
@@ -2404,7 +2634,7 @@ function onFilePick(e){
   if(!pending) return;
   files.forEach(file=>{
     const r=new FileReader();
-    r.onload=()=>{ if(isSvmName(file.name)) addSetup(file.name, file.name, r.result, null); if(--pending===0){ selA=selA<0?0:selA; buildNav(); renderEng(); } };
+    r.onload=()=>{ if(isSvmName(file.name)) addSetup(file.name, file.name, r.result, null); if(--pending===0){ if(selView<0&&setups.length) switchView(0); buildNav(); renderEng(); } };
     r.onerror=()=>{ if(--pending===0){ buildNav(); renderEng(); } };
     r.readAsText(file);
   });
@@ -2439,23 +2669,42 @@ function effectLabel(key, fromInt, toInt){
   return dir; // 'tight' | 'loose'
 }
 
+function compareText(){
+  const a=setups[selA], b=setups[selB]; if(!a||!b||a===b) return '';
+  const lines=diffSetups(a,b).map(c=>{ let lbl=c.key; for(const pg of LMU_PAGES) for(const g of pg.groups) for(const [s1,k1,l1] of g.fields) if(s1+'.'+k1===c.key && lbl===c.key) lbl=pg.name+' > '+fieldName(s1,k1);
+    const A=parseMarkedLabel(c.fromDisplay).base, B=parseMarkedLabel(c.toDisplay).base;
+    return '- '+lbl+': '+A+' -> '+(A===B?'(shows in-game)':B)+' ['+clickPhrase(c.toInt-c.fromInt)+']'; });
+  return 'A: '+a.name+'\nB: '+b.name+'\n'+lines.join('\n');
+}
 function renderCompare(a,b){
   const labelFor = (sectionKey)=>{
     const [sec,key]=sectionKey.split('.');
     for(const pg of LMU_PAGES) for(const g of pg.groups) for(const [s,k,l] of g.fields)
-      if(s===sec && k===key) return {page:pg.name, label:l};
+      if(s===sec && k===key) return {page:pg.name, label:fieldName(sec,key)};
     return {page:'', label:sectionKey};
   };
   const changes = diffSetups(a,b).map(c=>{ const m=labelFor(c.key); return {...c, ...m}; })
     .filter(c=>c.label);
-  if(!changes.length) return '<p class="eng-empty">These two setups are identical (in mapped fields).</p>';
+  // Same warning as the Kunos app: values from different cars aren't directly comparable.
+  const WARN_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 9v5M12 17.5v.5"/></svg>';
+  const diffCar = a.car && b.car && (a.car!==b.car || a.className!==b.className);
+  const warn = diffCar ? `<p class="warn">${WARN_SVG}<span>Different cars. Values aren't directly comparable between cars, so read this as direction only.</span></p>` : '';
+  if(!changes.length) return warn+'<p class="eng-empty">No differences. These two setups are identical in every adjustable field.</p>';
+  let anyStale = false;
   const rows = changes.map(c=>{
     const eff = effectLabel(c.key, c.fromInt, c.toInt);
     const chip = eff ? `<span class="chip ${eff}">${eff==='tight'?'tighter':'looser'}</span>` : '';
-    return `<tr><td>${esc(c.page)}</td><td>${esc(c.label)}</td><td class="cmp-a">${esc(c.fromDisplay||c.fromInt)}</td><td class="cmp-arrow">→</td><td class="cmp-b">${esc(c.toDisplay||c.toInt)}</td><td>${chip}</td></tr>`;
+    const A = parseMarkedLabel(c.fromDisplay), B = parseMarkedLabel(c.toDisplay);
+    let aTxt = A.base || String(c.fromInt), bTxt = B.base || String(c.toInt);
+    // Same game label on both sides but a different number: the label is stale (edited outside
+    // the game), so the value only shows once the game loads it. The change column is exact.
+    if(A.base && A.base===B.base){ anyStale = true; bTxt = 'shows in-game'; }
+    return `<tr><td>${esc(c.page)}</td><td>${esc(c.label)}</td><td class="cmp-a">${esc(aTxt)}</td><td class="cmp-b">${esc(bTxt)}</td><td>${esc(clickPhrase(c.toInt - c.fromInt))}</td><td>${chip}</td></tr>`;
   }).join('');
-  return `<table class="cmp-table"><thead><tr><th>Page</th><th>Setting</th><th>A</th><th></th><th>B</th><th>Effect of B</th></tr></thead><tbody>${rows}</tbody></table>
-  <p class="eng-note">"Tighter/looser" shows the general setup-theory tendency of the change toward stability (tighter) or rotation (looser), where known. Tyres, fuel and track change the feel. Treat it as a pointer, not a promise.</p>`;
+  return `${warn}<table class="cmp-table"><thead><tr><th>Page</th><th>Setting</th><th>A</th><th>B</th><th>Change</th><th>Effect</th></tr></thead><tbody>${rows}</tbody></table>
+  <p class="eng-note">"Tighter/looser" shows the general setup-theory tendency of the change toward stability (tighter) or rotation (looser), where known. Tyres, fuel and track change the feel. Treat it as a pointer, not a promise.</p>
+  ${anyStale?`<p class="eng-note">"Shows in-game" means that setup was edited outside the game. The change is real; the game shows the exact value when you load it.</p>`:''}
+  <div class="eng-actions"><button class="btn" id="btnCopyCmp">Copy comparison</button></div>`;
 }
 
 function parseLapTime(s){
@@ -2619,7 +2868,7 @@ function renderAI(){
       <div class="fallback">
         <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div>
         <h3>Runs in the desktop app</h3>
-        <p>Bono is your local race engineer. A chat that can read your setup files and reason about them. It only works in the Setup Ripple LMU desktop app, because it needs access to your computer that a browser tab can\'t give.</p>
+        <p>Bono is your local race engineer. A chat that can read your setup files and reason about them. It only works in the Setup Ripple desktop app, because it needs access to your computer that a browser tab can\'t give.</p>
         <p>Everything else. Parameters, Diagnose, and the Engineer tab. Works fine here in the browser.</p>
       </div>`;
     return;
@@ -2687,6 +2936,7 @@ function renderAI(){
     return;
   }
   // State 4. Ready: the chat surface
+  const draftText=aiDraft; aiDraft='';
   main.innerHTML=`
     <div class="crumb">Bono AI · connected</div>
     <div class="title-row"><h2>Bono AI</h2></div>
@@ -2712,8 +2962,8 @@ function renderAI(){
         <label title="When off (default), Bono can read and advise but never changes files without you ticking this first."><input type="checkbox" id="aiWrite" ${aiAllowWrite?'checked':''}> Allow Bono to edit setup files</label>
       </div>
       <div class="chat-input">
-        <textarea id="aiInput" rows="2" placeholder="Ask your race engineer…" ${aiBusy?'disabled':''}></textarea>
-        <button class="btn primary" id="aiSend" ${aiBusy?'disabled':''}>${aiBusy?'…':'Send'}</button>
+        <textarea id="aiInput" rows="2" placeholder="Ask your race engineer…" ${aiBusy?'disabled':''}>${esc(draftText)}</textarea>
+        ${aiBusy?`<button class="btn stop" id="aiStop" title="Stop the reply. Your question goes back in the box so you can edit it.">Stop</button>`:`<button class="btn primary" id="aiSend">Send</button>`}
       </div>
     </div>`;
 
@@ -2724,10 +2974,11 @@ function renderAI(){
   const send=document.getElementById('aiSend');
   const doSend=()=>{ if(input && input.value.trim()) aiSendMsg(input.value.trim()); };
   if(send) send.onclick=doSend;
+  const stopBtn=document.getElementById('aiStop'); if(stopBtn) stopBtn.onclick=aiStop;
   if(input){
     input.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); doSend(); } };
     input.oninput=()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; };
-    if(!aiBusy) input.focus();
+    if(!aiBusy){ input.focus(); if(draftText){ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; input.select(); } }
   }
   main.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>aiSendMsg(b.dataset.ex));
   // setup picker wiring (Bono-independent)
@@ -2757,8 +3008,10 @@ function renderAI(){
 function msgHTML(m){
   if(m.role==='user') return `<div class="msg user">${esc(m.text)}</div>`;
   if(m.role==='err') return `<div class="msg err">${esc(m.text)}</div>`;
-  return `<div class="msg ai"><div class="who">Bono</div>${m.streaming&&!m.text?`<span class="typing"><span></span><span></span><span></span></span>`:esc(m.text)}</div>`;
+  return `<div class="msg ai"><div class="who">Bono</div>${m.streaming&&!m.text?`<span class="typing"><span></span><span></span><span></span></span>`:esc(m.text)}${m.stopped?'<span class="stopped">Stopped</span>':''}</div>`;
 }
+
+function aiStop(){ const b=AI(); if(b && typeof b.stop==='function') b.stop(); }
 
 function aiSendMsg(text){
   const bridge=AI();
@@ -2771,12 +3024,23 @@ function aiSendMsg(text){
 
   const finish=()=>{ aiMsg.streaming=false; aiBusy=false; renderAI(); };
   let settled=false;
+  // Extra background for Bono (decoded AC Evo values). It rides along with the question but is
+  // never shown in the chat.
+  const context=(typeof aiEvoContext==='function')?aiEvoContext(text):'';
 
   try{
     const ret=bridge.send(text,{
       allowWrite:aiAllowWrite,
+      context,
       onChunk:(t)=>{ aiMsg.text+=t; if(mode==='ai'){ const l=document.getElementById('chatLog'); renderAI(); } },
       onDone:(full)=>{ if(settled) return; settled=true; if(typeof full==='string'&&full) aiMsg.text=full; finish(); },
+      onStopped:(full)=>{ if(settled) return; settled=true;
+        if(typeof full==='string'&&full) aiMsg.text=full;
+        aiMsg.streaming=false; aiBusy=false;
+        if(aiMsg.text.trim()) aiMsg.stopped=true;                       // keep what Bono had said so far
+        else{ const i=aiMessages.indexOf(aiMsg); if(i>0) aiMessages.splice(i-1,2); }   // nothing came back: drop the exchange
+        aiDraft=text;                                                    // question back in the box, selected, ready to edit
+        if(mode==='ai') renderAI(); },
       onError:(msg)=>{ if(settled) return; settled=true; aiMessages.pop(); aiMessages.push({role:'err',text:msg||'Something went wrong talking to Claude Code.'}); aiBusy=false; aiMsg.streaming=false; renderAI(); }
     });
     // Fallback: send() returned a Promise of the full reply instead of streaming
